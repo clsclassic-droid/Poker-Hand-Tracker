@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Hand Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+
+        <!-- Header -->
+        <header>
+            <h1>🃏 Poker Hand Tracker</h1>
+            <div id="auth-container">
+                <button id="auth-btn" disabled>เข้าสู่ระบบด้วย Google</button>
+                <div id="user-display">
+                    <span id="user-name"></span>
+                    <button id="signout-btn">ออกจากระบบ</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Setup Overlay -->
+        <div id="setup-overlay">
+            <div class="setup-card">
+                <div class="setup-icon">📊</div>
+                <h2>กำลังเชื่อมต่อ Google Sheet</h2>
+                <p id="setup-msg">กำลังค้นหา spreadsheet ...</p>
+                <div class="setup-spinner"></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main id="main-content">
+
+            <!-- Hand Number + Sheet Link -->
+            <div id="top-bar">
+                <div id="hand-number">Hand #<span id="hand-num-display">1</span></div>
+                <a id="sheet-link" href="#" target="_blank" title="เปิด Google Sheet">
+                    📊 เปิด Sheet
+                </a>
+            </div>
+
+            <!-- Fields Bar -->
+            <div id="fields-bar">
+                <!-- Built by JS -->
+            </div>
+
+            <!-- Card Picker -->
+            <div id="card-picker-section">
+                <div id="picker-header">
+                    <div id="picker-left">
+                        <span id="picker-label">กำลังเลือก:</span>
+                        <span id="picker-field-name">HAND</span>
+                        <span id="picker-count" class="count-badge">0 / 2</span>
+                    </div>
+                    <div id="picker-right">
+                        <button class="icon-btn" id="undo-btn" title="ยกเลิกใบล่าสุด">↩ ยกเลิก</button>
+                        <button class="icon-btn" id="clear-field-btn" title="ล้างฟิลด์นี้">✕ ล้าง</button>
+                    </div>
+                </div>
+                <div id="card-grid-wrap">
+                    <div id="card-grid">
+                        <!-- Built by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div id="actions">
+                <button id="clear-btn" class="btn-secondary">🗑 ล้างทั้งหมด</button>
+                <button id="save-btn" class="btn-primary">💾 บันทึก Hand</button>
+            </div>
+
+            <!-- History Table -->
+            <div id="history-section">
+                <div id="history-header">
+                    <h2>ประวัติล่าสุด</h2>
+                    <span id="history-count"></span>
+                </div>
+                <div id="history-scroll">
+                    <table id="history-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Hand</th>
+                                <th>Flop</th>
+                                <th>Turn</th>
+                                <th>River</th>
+                                <th>SD1</th>
+                                <th>SD2</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"></div>
+
+    <!-- Load app first so callbacks are defined when Google scripts fire -->
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
+</body>
+</html>

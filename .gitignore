@@ -1,0 +1,10 @@
+# Don't commit a real config if you swap out this file with real credentials
+# config.js is intentionally committed as a template — fill in your credentials
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
