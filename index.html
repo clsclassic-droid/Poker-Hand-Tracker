@@ -34,9 +34,11 @@
         <!-- Main Content -->
         <main id="main-content">
 
-            <!-- Hand Number + Sheet Link -->
+            <!-- Hand Number + Date + Sheet Link -->
             <div id="top-bar">
                 <div id="hand-number">Hand #<span id="hand-num-display">1</span></div>
+                <label for="date-input" class="date-lbl">วันที่</label>
+                <input type="date" id="date-input" class="date-input">
                 <button id="hide-hand-btn" class="icon-btn" title="ซ่อน/แสดง Hand">👁 Hand</button>
                 <a id="sheet-link" href="#" target="_blank" title="เปิด Google Sheet">
                     📊 เปิด Sheet
@@ -68,43 +70,19 @@
 
             <!-- Bet Row -->
             <div id="bet-row">
-                <div id="bet-inputs-wrap">
-                    <span class="bet-sec-lbl">ใส่เงิน</span>
-                    <div id="bet-inputs">
-                        <div class="bet-item">
-                            <span class="bet-lbl" style="color:#a78bfa">PF</span>
-                            <input type="number" id="bet-pf" class="bet-input" placeholder="0" step="any">
-                            <span class="bet-cur">฿</span>
-                        </div>
-                        <span class="bet-dot">·</span>
-                        <div class="bet-item">
-                            <span class="bet-lbl" style="color:#67e8f9">FLOP</span>
-                            <input type="number" id="bet-flop" class="bet-input" placeholder="0" step="any">
-                            <span class="bet-cur">฿</span>
-                        </div>
-                        <span class="bet-dot">·</span>
-                        <div class="bet-item">
-                            <span class="bet-lbl" style="color:#fbbf24">TURN</span>
-                            <input type="number" id="bet-turn" class="bet-input" placeholder="0" step="any">
-                            <span class="bet-cur">฿</span>
-                        </div>
-                        <span class="bet-dot">·</span>
-                        <div class="bet-item">
-                            <span class="bet-lbl" style="color:#f87171">RIVER</span>
-                            <input type="number" id="bet-river" class="bet-input" placeholder="0" step="any">
-                            <span class="bet-cur">฿</span>
-                        </div>
-                        <span class="bet-dot">=</span>
-                        <span id="bet-total" class="bet-total">0 ฿</span>
-                        <span id="pot-odds-badge" class="pot-odds-badge pot-odds-empty">—</span>
-                    </div>
-                </div>
-                <div id="won-wrap">
+                <div class="bet-cell"><input type="number" id="bet-pf"    class="bet-input" placeholder="0" step="any"></div>
+                <div class="bet-cell"><input type="number" id="bet-flop"  class="bet-input" placeholder="0" step="any"></div>
+                <div class="bet-cell"><input type="number" id="bet-turn"  class="bet-input" placeholder="0" step="any"></div>
+                <div class="bet-cell"><input type="number" id="bet-river" class="bet-input" placeholder="0" step="any"></div>
+                <div class="bet-summary">
+                    <span class="bet-dot">=</span>
+                    <span id="bet-total" class="bet-total">0 ฿</span>
+                    <span id="pot-odds-badge" class="pot-odds-badge pot-odds-empty">—</span>
                     <span class="bet-sec-lbl">Pot</span>
                     <input type="number" id="pot-input" class="bet-input pot-input" placeholder="0" step="any">
                     <span class="bet-cur">฿</span>
+                    <span id="result-preview" class="result-preview">—</span>
                 </div>
-                <span id="result-preview" class="result-preview">—</span>
             </div>
 
             <!-- Card Picker -->

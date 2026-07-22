@@ -144,8 +144,9 @@ header h1 {
 #top-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 10px;
     margin-bottom: 12px;
+    flex-wrap: wrap;
 }
 
 #hand-number {
@@ -154,6 +155,29 @@ header h1 {
     color: var(--text-dim);
 }
 #hand-num-display { color: var(--text); }
+
+.date-lbl {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: .5px;
+}
+.date-input {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px 10px;
+    font-size: .82rem;
+    font-weight: 600;
+    font-family: inherit;
+    color-scheme: dark;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+.date-input:focus { outline: none; border-color: var(--accent); }
+
+#hide-hand-btn { margin-left: auto; }
 
 #sheet-link {
     display: none;
@@ -187,13 +211,33 @@ header h1 {
 #bet-row {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.bet-cell {
+    flex: 1;
+    min-width: 72px;
+    display: flex;
+    align-items: center;
+}
+.bet-cell .bet-input {
+    width: 100%;
+    text-align: center;
+}
+
+.bet-summary {
+    flex: 5.4 1 220px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex-wrap: wrap;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 8px 12px;
-    margin-bottom: 10px;
+    min-width: 0;
 }
 
 #bet-inputs-wrap {
@@ -892,6 +936,54 @@ header h1 {
 .cv-red   { color: #f87171; }
 .cv-black { color: #cbd5e1; }
 .cv-empty { color: var(--text-muted); }
+
+/* ─── Date Group Rows (history) ──────────────────────────────────────────── */
+.date-group-row {
+    background: #1a2740;
+    cursor: pointer;
+    user-select: none;
+}
+.date-group-row:hover td { background: #213052 !important; }
+.date-group-row td {
+    padding: 9px 12px !important;
+    border-top: 1px solid var(--border);
+}
+.dg-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.dg-left { display: flex; align-items: center; gap: 8px; }
+.dg-caret {
+    display: inline-block;
+    width: 12px;
+    transition: transform .15s;
+    color: var(--text-dim);
+    font-size: .78rem;
+}
+.date-group-row.expanded .dg-caret { transform: rotate(90deg); }
+.dg-title {
+    color: var(--text);
+    font-size: .88rem;
+    font-weight: 700;
+}
+.dg-count {
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: .76rem;
+}
+.dg-right { display: flex; align-items: center; gap: 6px; }
+.dg-total-lbl {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: .72rem;
+    letter-spacing: .5px;
+}
+.dg-total { font-weight: 800; font-size: .9rem; }
+.dg-total.dt-win  { color: #4ade80; }
+.dg-total.dt-loss { color: #f87171; }
+.dg-total.dt-zero { color: var(--text-dim); }
 
 /* ─── Pot Odds Badge ─────────────────────────────────────────────────────── */
 .pot-odds-badge {

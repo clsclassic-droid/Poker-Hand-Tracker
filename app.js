@@ -158,8 +158,22 @@ function getHitTier(text) {
 // H:Position I:Hand Note J:Flop Note K:Turn Note L:River Note M:SD1 Note N:SD2 Note
 // O:HIT P:Fold Q:Result
 const SHEET_TAB    = 'Hands';
-const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result'];
-const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result'];
+const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result','Date'];
+const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result','Date'];
+
+const THAI_MONTHS  = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function todayISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function formatDateThai(iso) {
+    if (!iso) return 'ไม่ระบุวันที่';
+    const parts = iso.split('-');
+    if (parts.length !== 3) return iso;
+    const [y, m, d] = parts;
+    const label = `${parseInt(d,10)} ${THAI_MONTHS[parseInt(m,10)-1]} ${y}`;
+    return iso === todayISO() ? `${label} (วันนี้)` : label;
+}
 const FOLDER_NAME  = 'Poker Hand Tracker';
 const SHEET_NAME   = 'Poker Hand Tracker';
 const LS_SHEET_KEY = 'pht_sheet_id';
@@ -188,6 +202,7 @@ const state = {
     foldStreet:    null,
     sheetId:       0,
     editing:       null,
+    expandedDays:  new Set(),
 };
 
 // ─── GAPI / GIS init ─────────────────────────────────────────────────────────
@@ -291,7 +306,7 @@ async function ensureNewHeaders(id) {
     try {
         await gapi.client.sheets.spreadsheets.values.update({
             spreadsheetId: id,
-            range: `${SHEET_TAB}!H1:V1`,
+            range: `${SHEET_TAB}!H1:W1`,
             valueInputOption: 'RAW',
             resource: { values: [NEW_HEADERS] },
         });
@@ -337,7 +352,7 @@ async function findOrCreate() {
 
     await gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: newId,
-        range: `${SHEET_TAB}!A1:V1`,
+        range: `${SHEET_TAB}!A1:W1`,
         valueInputOption: 'RAW',
         resource: { values: [HEADER_ROW] },
     });
@@ -349,9 +364,10 @@ async function findOrCreate() {
 async function loadHistory() {
     const res = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: state.spreadsheetId,
-        range: `${SHEET_TAB}!A2:V`,
+        range: `${SHEET_TAB}!A2:W`,
     });
     state.history = res.result.values || [];
+    state.expandedDays = new Set([todayISO()]);
     renderHistory();
 }
 
@@ -368,89 +384,138 @@ function calcHandNumber() {
 function renderHistory() {
     const tbody = document.getElementById('history-body');
     tbody.innerHTML = '';
-    const rows = [...state.history].reverse().slice(0, 25);
     const fb = '<span class="f-badge">F</span>';
 
-    for (const r of rows) {
-        const no    = r[0]  || '';
-        const hand  = r[1]  || '';
-        const flop  = r[2]  || '';
-        const turn  = r[3]  || '';
-        const river = r[4]  || '';
-        const sd1   = r[5]  || '';
-        const sd2   = r[6]  || '';
-        const pos   = r[7]  || '';
-        const hit   = r[14] || '';
-        const fold  = r[15] || '';
-        const result= r[21] || '';
+    const groups = new Map();
+    for (const r of state.history) {
+        const key = r[22] || '';
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(r);
+    }
+    const orderedKeys = [...groups.keys()].sort((a, b) => {
+        if (!a && !b) return 0;
+        if (!a) return 1;
+        if (!b) return -1;
+        return b.localeCompare(a);
+    });
 
-        const noteItems = [
-            { label: 'HAND',  text: r[8]  || '' },
-            { label: 'FLOP',  text: r[9]  || '' },
-            { label: 'TURN',  text: r[10] || '' },
-            { label: 'RIVER', text: r[11] || '' },
-            { label: 'SD1',   text: r[12] || '' },
-            { label: 'SD2',   text: r[13] || '' },
-        ].filter(n => n.text);
-        const hasNotes = noteItems.length > 0;
+    for (const key of orderedKeys) {
+        const hands = groups.get(key).slice().sort((a, b) => (parseInt(b[0])||0) - (parseInt(a[0])||0));
+        const totalResult = hands.reduce((s, r) => s + (parseFloat(r[21]) || 0), 0);
+        const isExpanded = state.expandedDays.has(key);
+        const totalCls = totalResult > 0 ? 'dt-win' : totalResult < 0 ? 'dt-loss' : 'dt-zero';
+        const totalPfx = totalResult > 0 ? '+' : totalResult < 0 ? '−' : '';
+        const totalStr = Math.abs(totalResult).toLocaleString();
 
-        const foldField = FOLD_TO_FIELD[fold] || null;
-
-        const handDisplay = (state.hideHand
-            ? '<span style="filter:blur(4px);display:inline-block">●●</span>'
-            : cardHtml(hand)) + (foldField === 'hand' ? ' ' + fb : '');
-        const flopDisplay  = cardHtml(flop)  + (foldField === 'flop'  ? ' ' + fb : '');
-        const turnDisplay  = cardHtml(turn)  + (foldField === 'turn'  ? ' ' + fb : '');
-        const riverDisplay = cardHtml(river) + (foldField === 'river' ? ' ' + fb : '');
-
-        const hitDisplay = state.hideHand
-            ? '<span class="cv-empty">—</span>'
-            : (hit ? `<span class="hit-badge hit-${getHitTier(hit)}">${hit}</span>` : '<span class="cv-empty">—</span>');
-
-        let resultDisplay = '<span class="cv-empty">—</span>';
-        if (result) {
-            const rv = parseFloat(result);
-            if (!isNaN(rv)) {
-                const cls = rv > 0 ? 'result-win' : 'result-loss';
-                const pfx = rv > 0 ? '+' : '';
-                resultDisplay = `<span class="${cls}">${pfx}${rv.toLocaleString()}</span>`;
-            }
-        }
-
-        const holeArr  = hand ? hand.split(' ').filter(Boolean) : [];
-        const boardArr = [flop, turn, river].filter(Boolean).join(' ').split(' ').filter(Boolean);
-        const fcDisplay = state.hideHand
-            ? '<span class="cv-empty">—</span>'
-            : fiveCardHtml(holeArr, boardArr);
-
-        const histIdx = state.history.indexOf(r);
-        const tr = document.createElement('tr');
-        tr.className = 'history-row clickable-row';
-        tr.innerHTML = `
-            <td>${no || '<span class="cv-empty">—</span>'}</td>
-            <td>${pos ? `<span class="pos-badge">${pos}</span>` : '<span class="cv-empty">—</span>'}</td>
-            <td>${handDisplay}</td>
-            <td>${flopDisplay}</td>
-            <td>${turnDisplay}</td>
-            <td>${riverDisplay}</td>
-            <td>${fcDisplay}</td>
-            <td>${hitDisplay}</td>
-            <td>${cardHtml(sd1)}</td>
-            <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
-            <td>${resultDisplay}</td>
-            <td class="row-actions">
-                <button class="row-action-btn edit-btn" title="แก้ไข">✏️</button>
-                <button class="row-action-btn del-btn" title="ลบ">🗑️</button>
+        const hdr = document.createElement('tr');
+        hdr.className = 'date-group-row' + (isExpanded ? ' expanded' : '');
+        hdr.innerHTML = `
+            <td colspan="12">
+                <div class="dg-inner">
+                    <div class="dg-left">
+                        <span class="dg-caret">▶</span>
+                        <span class="dg-title">${formatDateThai(key)}</span>
+                        <span class="dg-count">${hands.length} hands</span>
+                    </div>
+                    <div class="dg-right">
+                        <span class="dg-total-lbl">รวม</span>
+                        <span class="dg-total ${totalCls}">${totalPfx}${totalStr} ฿</span>
+                    </div>
+                </div>
             </td>
         `;
-        tr.addEventListener('click', () => openHandDetail(r));
-        tr.querySelector('.edit-btn').addEventListener('click', e => { e.stopPropagation(); editHand(r, histIdx); });
-        tr.querySelector('.del-btn').addEventListener('click',  e => { e.stopPropagation(); deleteHand(histIdx); });
-        tbody.appendChild(tr);
+        hdr.addEventListener('click', () => toggleDateGroup(key));
+        tbody.appendChild(hdr);
+
+        if (!isExpanded) continue;
+
+        for (const r of hands) {
+            const no    = r[0]  || '';
+            const hand  = r[1]  || '';
+            const flop  = r[2]  || '';
+            const turn  = r[3]  || '';
+            const river = r[4]  || '';
+            const sd1   = r[5]  || '';
+            const sd2   = r[6]  || '';
+            const pos   = r[7]  || '';
+            const hit   = r[14] || '';
+            const fold  = r[15] || '';
+            const result= r[21] || '';
+
+            const noteItems = [
+                { label: 'HAND',  text: r[8]  || '' },
+                { label: 'FLOP',  text: r[9]  || '' },
+                { label: 'TURN',  text: r[10] || '' },
+                { label: 'RIVER', text: r[11] || '' },
+                { label: 'SD1',   text: r[12] || '' },
+                { label: 'SD2',   text: r[13] || '' },
+            ].filter(n => n.text);
+            const hasNotes = noteItems.length > 0;
+
+            const foldField = FOLD_TO_FIELD[fold] || null;
+
+            const handDisplay = (state.hideHand
+                ? '<span style="filter:blur(4px);display:inline-block">●●</span>'
+                : cardHtml(hand)) + (foldField === 'hand' ? ' ' + fb : '');
+            const flopDisplay  = cardHtml(flop)  + (foldField === 'flop'  ? ' ' + fb : '');
+            const turnDisplay  = cardHtml(turn)  + (foldField === 'turn'  ? ' ' + fb : '');
+            const riverDisplay = cardHtml(river) + (foldField === 'river' ? ' ' + fb : '');
+
+            const hitDisplay = state.hideHand
+                ? '<span class="cv-empty">—</span>'
+                : (hit ? `<span class="hit-badge hit-${getHitTier(hit)}">${hit}</span>` : '<span class="cv-empty">—</span>');
+
+            let resultDisplay = '<span class="cv-empty">—</span>';
+            if (result) {
+                const rv = parseFloat(result);
+                if (!isNaN(rv)) {
+                    const cls = rv > 0 ? 'result-win' : 'result-loss';
+                    const pfx = rv > 0 ? '+' : '';
+                    resultDisplay = `<span class="${cls}">${pfx}${rv.toLocaleString()}</span>`;
+                }
+            }
+
+            const holeArr  = hand ? hand.split(' ').filter(Boolean) : [];
+            const boardArr = [flop, turn, river].filter(Boolean).join(' ').split(' ').filter(Boolean);
+            const fcDisplay = state.hideHand
+                ? '<span class="cv-empty">—</span>'
+                : fiveCardHtml(holeArr, boardArr);
+
+            const histIdx = state.history.indexOf(r);
+            const tr = document.createElement('tr');
+            tr.className = 'history-row clickable-row';
+            tr.innerHTML = `
+                <td>${no || '<span class="cv-empty">—</span>'}</td>
+                <td>${pos ? `<span class="pos-badge">${pos}</span>` : '<span class="cv-empty">—</span>'}</td>
+                <td>${handDisplay}</td>
+                <td>${flopDisplay}</td>
+                <td>${turnDisplay}</td>
+                <td>${riverDisplay}</td>
+                <td>${fcDisplay}</td>
+                <td>${hitDisplay}</td>
+                <td>${cardHtml(sd1)}</td>
+                <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
+                <td>${resultDisplay}</td>
+                <td class="row-actions">
+                    <button class="row-action-btn edit-btn" title="แก้ไข">✏️</button>
+                    <button class="row-action-btn del-btn" title="ลบ">🗑️</button>
+                </td>
+            `;
+            tr.addEventListener('click', () => openHandDetail(r));
+            tr.querySelector('.edit-btn').addEventListener('click', e => { e.stopPropagation(); editHand(r, histIdx); });
+            tr.querySelector('.del-btn').addEventListener('click',  e => { e.stopPropagation(); deleteHand(histIdx); });
+            tbody.appendChild(tr);
+        }
     }
 
     const cnt = document.getElementById('history-count');
-    cnt.textContent = state.history.length ? `(${state.history.length} hands)` : '';
+    cnt.textContent = state.history.length ? `(${orderedKeys.length} วัน · ${state.history.length} hands)` : '';
+}
+
+function toggleDateGroup(key) {
+    if (state.expandedDays.has(key)) state.expandedDays.delete(key);
+    else state.expandedDays.add(key);
+    renderHistory();
 }
 
 function cardHtml(str) {
@@ -515,6 +580,7 @@ async function saveHand() {
     }
 
     const handNum = state.editing ? state.editing.handNum : state.handNumber;
+    const dateVal = document.getElementById('date-input')?.value || todayISO();
     const row = [
         handNum,
         hand.join(' '),
@@ -538,6 +604,7 @@ async function saveHand() {
         betRIVER || '',
         potAmt   || '',
         resultVal,
+        dateVal,
     ];
 
     const btn = document.getElementById('save-btn');
@@ -548,26 +615,28 @@ async function saveHand() {
             const sheetRow = histIdx + 2;
             await gapi.client.sheets.spreadsheets.values.update({
                 spreadsheetId: state.spreadsheetId,
-                range: `${SHEET_TAB}!A${sheetRow}:V${sheetRow}`,
+                range: `${SHEET_TAB}!A${sheetRow}:W${sheetRow}`,
                 valueInputOption: 'RAW',
                 resource: { values: [row] },
             });
             state.history[histIdx] = row;
             state.editing = null;
             btn.textContent = '💾 บันทึก Hand';
+            state.expandedDays.add(dateVal);
             showToast(`✓ อัปเดต Hand #${handNum} สำเร็จ!`, 'success');
             renderHistory();
             clearAll();
         } else {
             await gapi.client.sheets.spreadsheets.values.append({
                 spreadsheetId: state.spreadsheetId,
-                range: `${SHEET_TAB}!A:V`,
+                range: `${SHEET_TAB}!A:W`,
                 valueInputOption: 'RAW',
                 insertDataOption: 'INSERT_ROWS',
                 resource: { values: [row] },
             });
             showToast(`✓ บันทึก Hand #${state.handNumber} สำเร็จ!`, 'success');
             state.history.push(row);
+            state.expandedDays.add(dateVal);
             renderHistory();
             state.handNumber++;
             document.getElementById('hand-num-display').textContent = state.handNumber;
@@ -653,6 +722,8 @@ function clearAll() {
         const el = document.getElementById(id);
         if (el) { el.value = ''; el.disabled = false; }
     });
+    const dateEl = document.getElementById('date-input');
+    if (dateEl) dateEl.value = todayISO();
     if (state.editing) {
         state.editing = null;
         document.getElementById('save-btn').textContent = '💾 บันทึก Hand';
@@ -1014,6 +1085,8 @@ function editHand(r, histIdx) {
     const potEl = document.getElementById('pot-input');
     potEl.value    = r[20] || '';
     potEl.disabled = !!state.foldStreet;
+    const dateEl = document.getElementById('date-input');
+    if (dateEl) dateEl.value = r[22] || todayISO();
     refreshResultDisplay();
 
     rebuildUsed();
@@ -1150,6 +1223,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(id).addEventListener('input', refreshResultDisplay);
     });
     refreshResultDisplay();
+
+    const dateEl = document.getElementById('date-input');
+    if (dateEl && !dateEl.value) dateEl.value = todayISO();
 
     document.getElementById('comment-input').addEventListener('input', () => {
         state.comments[state.activeField] = document.getElementById('comment-input').value;
