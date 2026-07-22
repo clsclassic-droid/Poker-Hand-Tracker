@@ -590,9 +590,19 @@ header h1 {
 .hand-hidden { filter: blur(4px); user-select: none; pointer-events: none; }
 
 /* ─── FiveCard field (fields bar) ───────────────────────────────────────── */
-#fi-fivecard { cursor: default !important; border-color: #0d9488; }
+#fi-fivecard {
+    cursor: default !important;
+    border-color: #0d9488;
+    flex: 2.4 1 150px;
+}
 #fi-fivecard:hover { filter: none; }
 #fi-fivecard .field-label { color: #2dd4bf; }
+#fi-fivecard .field-cards {
+    white-space: normal;
+    overflow: visible;
+    font-size: .74rem;
+    line-height: 1.6;
+}
 .fi-fivecard-empty .field-cards { color: var(--text-muted); font-weight: 400; font-size: .7rem; }
 
 /* Key hole card box — highlights only cards that make the hand (not kickers) */
@@ -767,6 +777,7 @@ header h1 {
     #fields-bar { gap: 4px; }
     .field-item { min-width: 56px; padding: 6px 4px 5px; }
     .field-cards { font-size: .75rem; }
+    #fi-fivecard { flex-basis: 100%; }
 
     #card-grid { grid-template-columns: 22px repeat(13, 1fr); min-width: 460px; gap: 2px; }
     .card-btn { min-height: 40px; }
