@@ -43,34 +43,67 @@
                 </a>
             </div>
 
-            <!-- Position + Result Row -->
-            <div id="meta-row">
-                <div id="position-row">
-                    <label for="position-select">ตำแหน่ง</label>
-                    <select id="position-select">
-                        <option value="">— เลือก —</option>
-                        <option>SB</option>
-                        <option>BB</option>
-                        <option>UTG</option>
-                        <option>UTG+1</option>
-                        <option>Mid</option>
-                        <option>Mid+1</option>
-                        <option>HJ</option>
-                        <option>LJ</option>
-                        <option>CO</option>
-                        <option>BT</option>
-                    </select>
-                </div>
-                <div id="result-row">
-                    <label for="result-input">RESULT</label>
-                    <input type="number" id="result-input" placeholder="0" step="any">
-                    <span class="result-unit">BB</span>
-                </div>
+            <!-- Position Row -->
+            <div id="position-row">
+                <label for="position-select">ตำแหน่ง</label>
+                <select id="position-select">
+                    <option value="">— เลือก —</option>
+                    <option>SB</option>
+                    <option>BB</option>
+                    <option>UTG</option>
+                    <option>UTG+1</option>
+                    <option>Mid</option>
+                    <option>Mid+1</option>
+                    <option>HJ</option>
+                    <option>LJ</option>
+                    <option>CO</option>
+                    <option>BT</option>
+                </select>
             </div>
 
             <!-- Fields Bar -->
             <div id="fields-bar">
                 <!-- Built by JS -->
+            </div>
+
+            <!-- Bet Row -->
+            <div id="bet-row">
+                <div id="bet-inputs-wrap">
+                    <span class="bet-sec-lbl">ใส่เงิน</span>
+                    <div id="bet-inputs">
+                        <div class="bet-item">
+                            <span class="bet-lbl" style="color:#a78bfa">PF</span>
+                            <input type="number" id="bet-pf" class="bet-input" placeholder="0" step="any">
+                            <span class="bet-cur">฿</span>
+                        </div>
+                        <span class="bet-dot">·</span>
+                        <div class="bet-item">
+                            <span class="bet-lbl" style="color:#67e8f9">FLOP</span>
+                            <input type="number" id="bet-flop" class="bet-input" placeholder="0" step="any">
+                            <span class="bet-cur">฿</span>
+                        </div>
+                        <span class="bet-dot">·</span>
+                        <div class="bet-item">
+                            <span class="bet-lbl" style="color:#fbbf24">TURN</span>
+                            <input type="number" id="bet-turn" class="bet-input" placeholder="0" step="any">
+                            <span class="bet-cur">฿</span>
+                        </div>
+                        <span class="bet-dot">·</span>
+                        <div class="bet-item">
+                            <span class="bet-lbl" style="color:#f87171">RIVER</span>
+                            <input type="number" id="bet-river" class="bet-input" placeholder="0" step="any">
+                            <span class="bet-cur">฿</span>
+                        </div>
+                        <span class="bet-dot">=</span>
+                        <span id="bet-total" class="bet-total">0 ฿</span>
+                    </div>
+                </div>
+                <div id="won-wrap">
+                    <span class="bet-sec-lbl">ชนะได้</span>
+                    <input type="number" id="won-input" class="bet-input won-input" placeholder="0" step="any">
+                    <span class="bet-cur">฿</span>
+                </div>
+                <span id="result-preview" class="result-preview">—</span>
             </div>
 
             <!-- Card Picker -->
@@ -124,10 +157,9 @@
                                 <th>River</th>
                                 <th>5-Card</th>
                                 <th>HIT</th>
-                                <th>Fold</th>
-                                <th>Result</th>
                                 <th>SD1</th>
                                 <th>SD2</th>
+                                <th>Result</th>
                             </tr>
                         </thead>
                         <tbody id="history-body"></tbody>

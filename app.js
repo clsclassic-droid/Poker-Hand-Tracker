@@ -20,7 +20,8 @@ const FIELD_CFG = {
 const FIELDS = ['hand', 'flop', 'turn', 'river', 'sd1', 'sd2'];
 const FIELD_COLORS = { hand:'#a78bfa', flop:'#67e8f9', turn:'#fbbf24', river:'#f87171', sd1:'#818cf8', sd2:'#60a5fa' };
 const HIT_COLORS   = { hc:'#4a6580', pair:'#94a3b8', '2p':'#94a3b8', trips:'#60a5fa', st:'#34d399', fl:'#34d399', fh:'#fb923c', '4k':'#fbbf24', sf:'#f59e0b' };
-const FOLD_LABEL   = { hand: 'PF', flop: 'FLOP', turn: 'TURN', river: 'RIVER' };
+const FOLD_LABEL    = { hand: 'PF', flop: 'FLOP', turn: 'TURN', river: 'RIVER' };
+const FOLD_TO_FIELD = { PF: 'hand', FLOP: 'flop', TURN: 'turn', RIVER: 'river' };
 
 // ─── Poker Hand Evaluator ─────────────────────────────────────────────────────
 const _RV = {A:14,K:13,Q:12,J:11,T:10,'9':9,'8':8,'7':7,'6':6,'5':5,'4':4,'3':3,'2':2};
@@ -119,7 +120,7 @@ function evaluatePokerHand(hole, board) {
         rank: c.r, suit: c.s, origin: c.origin, isKey: best.keyValues.has(c.v),
     }));
 
-    return { name: t[1](best.score[1], best.score[2]), tier: t[2], fiveCards };
+    return { name: t[1](best.score[1], best.score[2]), tier: t[2], fiveCards, score: best.score };
 }
 
 function fiveCardHtml(hole, board) {
@@ -157,8 +158,8 @@ function getHitTier(text) {
 // H:Position I:Hand Note J:Flop Note K:Turn Note L:River Note M:SD1 Note N:SD2 Note
 // O:HIT P:Fold Q:Result
 const SHEET_TAB    = 'Hands';
-const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Result'];
-const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Result'];
+const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Won','Result'];
+const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Won','Result'];
 const FOLDER_NAME  = 'Poker Hand Tracker';
 const SHEET_NAME   = 'Poker Hand Tracker';
 const LS_SHEET_KEY = 'pht_sheet_id';
@@ -283,7 +284,7 @@ async function ensureNewHeaders(id) {
     try {
         await gapi.client.sheets.spreadsheets.values.update({
             spreadsheetId: id,
-            range: `${SHEET_TAB}!H1:Q1`,
+            range: `${SHEET_TAB}!H1:V1`,
             valueInputOption: 'RAW',
             resource: { values: [NEW_HEADERS] },
         });
@@ -329,7 +330,7 @@ async function findOrCreate() {
 
     await gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: newId,
-        range: `${SHEET_TAB}!A1:Q1`,
+        range: `${SHEET_TAB}!A1:V1`,
         valueInputOption: 'RAW',
         resource: { values: [HEADER_ROW] },
     });
@@ -341,7 +342,7 @@ async function findOrCreate() {
 async function loadHistory() {
     const res = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: state.spreadsheetId,
-        range: `${SHEET_TAB}!A2:Q`,
+        range: `${SHEET_TAB}!A2:V`,
     });
     state.history = res.result.values || [];
     renderHistory();
@@ -361,19 +362,20 @@ function renderHistory() {
     const tbody = document.getElementById('history-body');
     tbody.innerHTML = '';
     const rows = [...state.history].reverse().slice(0, 25);
+    const fb = '<span class="f-badge">F</span>';
 
     for (const r of rows) {
-        const no     = r[0]  || '';
-        const hand   = r[1]  || '';
-        const flop   = r[2]  || '';
-        const turn   = r[3]  || '';
-        const river  = r[4]  || '';
-        const sd1    = r[5]  || '';
-        const sd2    = r[6]  || '';
-        const pos    = r[7]  || '';
-        const hit    = r[14] || '';
-        const fold   = r[15] || '';
-        const result = r[16] || '';
+        const no    = r[0]  || '';
+        const hand  = r[1]  || '';
+        const flop  = r[2]  || '';
+        const turn  = r[3]  || '';
+        const river = r[4]  || '';
+        const sd1   = r[5]  || '';
+        const sd2   = r[6]  || '';
+        const pos   = r[7]  || '';
+        const hit   = r[14] || '';
+        const fold  = r[15] || '';
+        const result= r[21] || '';
 
         const noteItems = [
             { label: 'HAND',  text: r[8]  || '' },
@@ -385,25 +387,26 @@ function renderHistory() {
         ].filter(n => n.text);
         const hasNotes = noteItems.length > 0;
 
-        const handDisplay = state.hideHand
-            ? '<span class="hand-hidden" style="filter:blur(4px)">●●</span>'
-            : cardHtml(hand);
+        const foldField = FOLD_TO_FIELD[fold] || null;
+
+        const handDisplay = (state.hideHand
+            ? '<span style="filter:blur(4px);display:inline-block">●●</span>'
+            : cardHtml(hand)) + (foldField === 'hand' ? ' ' + fb : '');
+        const flopDisplay  = cardHtml(flop)  + (foldField === 'flop'  ? ' ' + fb : '');
+        const turnDisplay  = cardHtml(turn)  + (foldField === 'turn'  ? ' ' + fb : '');
+        const riverDisplay = cardHtml(river) + (foldField === 'river' ? ' ' + fb : '');
 
         const hitDisplay = state.hideHand
             ? '<span class="cv-empty">—</span>'
             : (hit ? `<span class="hit-badge hit-${getHitTier(hit)}">${hit}</span>` : '<span class="cv-empty">—</span>');
 
-        const foldDisplay = fold
-            ? `<span class="fold-badge">${fold}</span>`
-            : '<span class="cv-empty">—</span>';
-
         let resultDisplay = '<span class="cv-empty">—</span>';
         if (result) {
             const rv = parseFloat(result);
             if (!isNaN(rv)) {
-                const rcls = rv > 0 ? 'result-win' : rv < 0 ? 'result-loss' : 'cv-empty';
-                const rpfx = rv > 0 ? '+' : '';
-                resultDisplay = `<span class="${rcls}">${rpfx}${result} BB</span>`;
+                const cls = rv > 0 ? 'result-win' : 'result-loss';
+                const pfx = rv > 0 ? '+' : '';
+                resultDisplay = `<span class="${cls}">${pfx}${Math.abs(rv).toLocaleString()} ฿</span>`;
             }
         }
 
@@ -419,15 +422,14 @@ function renderHistory() {
             <td>${no || '<span class="cv-empty">—</span>'}</td>
             <td>${pos ? `<span class="pos-badge">${pos}</span>` : '<span class="cv-empty">—</span>'}</td>
             <td>${handDisplay}</td>
-            <td>${cardHtml(flop)}</td>
-            <td>${cardHtml(turn)}</td>
-            <td>${cardHtml(river)}</td>
+            <td>${flopDisplay}</td>
+            <td>${turnDisplay}</td>
+            <td>${riverDisplay}</td>
             <td>${fcDisplay}</td>
             <td>${hitDisplay}</td>
-            <td>${foldDisplay}</td>
-            <td>${resultDisplay}</td>
             <td>${cardHtml(sd1)}</td>
             <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
+            <td>${resultDisplay}</td>
         `;
         tr.addEventListener('click', () => openHandDetail(r));
         tbody.appendChild(tr);
@@ -462,10 +464,35 @@ async function saveHand() {
     const position = document.getElementById('position-select').value;
     const { comments } = state;
 
-    const hitResult  = evaluatePokerHand(hand, [...flop, ...turn, ...river]);
-    const hitText    = hitResult ? hitResult.name : '';
-    const foldText   = state.foldStreet ? FOLD_LABEL[state.foldStreet] : '';
-    const resultText = (document.getElementById('result-input')?.value || '').trim();
+    const board     = [...flop, ...turn, ...river];
+    const hitResult = evaluatePokerHand(hand, board);
+    const hitText   = hitResult ? hitResult.name : '';
+    const foldText  = state.foldStreet ? FOLD_LABEL[state.foldStreet] : '';
+
+    const betPF    = parseFloat(document.getElementById('bet-pf')?.value)   || 0;
+    const betFLOP  = parseFloat(document.getElementById('bet-flop')?.value)  || 0;
+    const betTURN  = parseFloat(document.getElementById('bet-turn')?.value)  || 0;
+    const betRIVER = parseFloat(document.getElementById('bet-river')?.value) || 0;
+    const wonAmt   = parseFloat(document.getElementById('won-input')?.value) || 0;
+    const totalBet = betPF + betFLOP + betTURN + betRIVER;
+
+    let resultVal = '';
+    if (!state.foldStreet && wonAmt > 0) {
+        resultVal = String(wonAmt);
+    } else if (totalBet > 0) {
+        if (state.foldStreet) {
+            resultVal = String(-totalBet);
+        } else {
+            let weLose = false;
+            for (const oppHole of [sd1, sd2].filter(h => h.length >= 2)) {
+                const oppResult = evaluatePokerHand(oppHole, board);
+                if (oppResult && hitResult && _cmpScore(oppResult.score, hitResult.score) >= 0) {
+                    weLose = true; break;
+                }
+            }
+            if (weLose) resultVal = String(-totalBet);
+        }
+    }
 
     const row = [
         state.handNumber,
@@ -484,7 +511,12 @@ async function saveHand() {
         comments.sd2,
         hitText,
         foldText,
-        resultText,
+        betPF    || '',
+        betFLOP  || '',
+        betTURN  || '',
+        betRIVER || '',
+        wonAmt   || '',
+        resultVal,
     ];
 
     const btn = document.getElementById('save-btn');
@@ -492,7 +524,7 @@ async function saveHand() {
     try {
         await gapi.client.sheets.spreadsheets.values.append({
             spreadsheetId: state.spreadsheetId,
-            range: `${SHEET_TAB}!A:Q`,
+            range: `${SHEET_TAB}!A:V`,
             valueInputOption: 'RAW',
             insertDataOption: 'INSERT_ROWS',
             resource: { values: [row] },
@@ -580,9 +612,11 @@ function clearAll() {
     rebuildUsed();
     document.getElementById('position-select').value = '';
     state.foldStreet = null;
-    refreshFoldBtn();
-    const ri = document.getElementById('result-input');
-    if (ri) { ri.value = ''; ri.classList.remove('win', 'loss'); }
+    ['bet-pf','bet-flop','bet-turn','bet-river','won-input'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.value = ''; el.disabled = false; }
+    });
+    refreshFoldBtn(); // also calls refreshResultDisplay
     setActive('hand');
 }
 
@@ -798,17 +832,19 @@ function openHandDetail(r) {
     const titleEl = document.getElementById('hand-modal-title');
     titleEl.innerHTML = `Hand #${no}${pos ? ` <span class="hm-pos-badge">${pos}</span>` : ''}`;
 
+    const foldField = FOLD_TO_FIELD[r[15]] || null;
+    const fb = '<span class="f-badge">F</span>';
+
     const fields = [
-        { key:'hand',  label:'HAND',  cards: r[1]||'', note: r[8] ||'', hideCards: state.hideHand },
-        { key:'flop',  label:'FLOP',  cards: r[2]||'', note: r[9] ||'' },
-        { key:'turn',  label:'TURN',  cards: r[3]||'', note: r[10]||'' },
-        { key:'river', label:'RIVER', cards: r[4]||'', note: r[11]||'' },
+        { key:'hand',    label:'HAND',  cards: r[1]||'', note: r[8] ||'', hideCards: state.hideHand, hasFold: foldField === 'hand' },
+        { key:'flop',    label:'FLOP',  cards: r[2]||'', note: r[9] ||'', hasFold: foldField === 'flop' },
+        { key:'turn',    label:'TURN',  cards: r[3]||'', note: r[10]||'', hasFold: foldField === 'turn' },
+        { key:'river',   label:'RIVER', cards: r[4]||'', note: r[11]||'', hasFold: foldField === 'river' },
         { key:'fivecard', label:'5-CARD', isFiveCard: true },
-        { key:'hit',    label:'HIT',    isHit: true,    hitText:    r[14]||'' },
-        { key:'fold',   label:'FOLD',   isFold: true,   foldText:   r[15]||'' },
-        { key:'result', label:'RESULT', isResult: true, resultText: r[16]||'' },
-        { key:'sd1',    label:'SD1',    cards: r[5]||'', note: r[12]||'' },
-        { key:'sd2',    label:'SD2',    cards: r[6]||'', note: r[13]||'' },
+        { key:'hit',     label:'HIT',   isHit: true, hitText: r[14]||'' },
+        { key:'result',  label:'RESULT', isResult: true, resultText: r[21]||'' },
+        { key:'sd1',     label:'SD1',   cards: r[5]||'', note: r[12]||'' },
+        { key:'sd2',     label:'SD2',   cards: r[6]||'', note: r[13]||'' },
     ];
 
     const body = document.getElementById('hand-modal-body');
@@ -836,26 +872,15 @@ function openHandDetail(r) {
                 <div class="hm-field-content"><div class="hm-cards">${cardsHtml}</div></div>
             </div>`;
         }
-        if (f.isFold) {
-            const ft = f.foldText;
-            const foldHtml = ft
-                ? `<span class="fold-badge">${ft}</span>`
-                : '<span class="cv-empty">—</span>';
-            return `
-            <div class="hm-field-row">
-                <span class="hm-field-label" style="color:#f87171">${f.label}</span>
-                <div class="hm-field-content"><div class="hm-cards">${foldHtml}</div></div>
-            </div>`;
-        }
         if (f.isResult) {
             const rt = f.resultText;
             let resultHtml = '<span class="cv-empty">—</span>';
             if (rt) {
                 const rv = parseFloat(rt);
                 if (!isNaN(rv)) {
-                    const rcls = rv > 0 ? 'result-win' : rv < 0 ? 'result-loss' : 'cv-empty';
-                    const rpfx = rv > 0 ? '+' : '';
-                    resultHtml = `<span class="${rcls}">${rpfx}${rt} BB</span>`;
+                    const cls = rv > 0 ? 'result-win' : 'result-loss';
+                    const pfx = rv > 0 ? '+' : '';
+                    resultHtml = `<span class="${cls}">${pfx}${Math.abs(rv).toLocaleString()} ฿</span>`;
                 }
             }
             return `
@@ -870,6 +895,7 @@ function openHandDetail(r) {
         } else {
             cardsHtml = f.cards ? cardHtml(f.cards) : '<span class="cv-empty">—</span>';
         }
+        if (f.hasFold) cardsHtml += ' ' + fb;
         const noteHtml = f.note ? `<div class="hm-note">${f.note}</div>` : '';
         const color = FIELD_COLORS[f.key] || 'var(--text-muted)';
         return `
@@ -923,6 +949,36 @@ function refreshFoldBtn() {
         btn.textContent = '🏳 Fold';
         btn.classList.remove('fold-active');
     }
+    refreshResultDisplay();
+}
+
+function refreshResultDisplay() {
+    const betPF    = parseFloat(document.getElementById('bet-pf')?.value)    || 0;
+    const betFLOP  = parseFloat(document.getElementById('bet-flop')?.value)   || 0;
+    const betTURN  = parseFloat(document.getElementById('bet-turn')?.value)   || 0;
+    const betRIVER = parseFloat(document.getElementById('bet-river')?.value)  || 0;
+    const wonAmt   = parseFloat(document.getElementById('won-input')?.value)  || 0;
+    const total    = betPF + betFLOP + betTURN + betRIVER;
+
+    const totalEl = document.getElementById('bet-total');
+    if (totalEl) totalEl.textContent = total > 0 ? total.toLocaleString() + ' ฿' : '0 ฿';
+
+    const wonEl = document.getElementById('won-input');
+    if (wonEl) wonEl.disabled = !!state.foldStreet;
+
+    const rp = document.getElementById('result-preview');
+    if (!rp) return;
+
+    if (!state.foldStreet && wonAmt > 0) {
+        rp.textContent = '+' + wonAmt.toLocaleString() + ' ฿';
+        rp.className = 'result-preview rp-win';
+    } else if (total > 0) {
+        rp.textContent = '−' + total.toLocaleString() + ' ฿';
+        rp.className = 'result-preview rp-loss';
+    } else {
+        rp.textContent = '—';
+        rp.className = 'result-preview';
+    }
 }
 
 // ─── Comment area toggle ──────────────────────────────────────────────────────
@@ -952,11 +1008,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('hide-hand-btn').addEventListener('click', toggleHideHand);
     document.getElementById('comment-toggle-btn').addEventListener('click', toggleCommentArea);
 
-    document.getElementById('result-input').addEventListener('input', function() {
-        const v = parseFloat(this.value);
-        this.classList.toggle('win',  !isNaN(v) && v > 0);
-        this.classList.toggle('loss', !isNaN(v) && v < 0);
+    ['bet-pf','bet-flop','bet-turn','bet-river','won-input'].forEach(id => {
+        document.getElementById(id).addEventListener('input', refreshResultDisplay);
     });
+    refreshResultDisplay();
 
     document.getElementById('comment-input').addEventListener('input', () => {
         state.comments[state.activeField] = document.getElementById('comment-input').value;
