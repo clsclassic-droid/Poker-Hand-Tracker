@@ -35,7 +35,16 @@ function _combos(arr, k) {
     return res;
 }
 
-function _scoreHand(hand) {
+function _cmpScore(a, b) {
+    const len = Math.max(a.length, b.length);
+    for (let i = 0; i < len; i++) {
+        const av = a[i] || 0, bv = b[i] || 0;
+        if (av !== bv) return av - bv;
+    }
+    return 0;
+}
+
+function _analyzeHand(hand) {
     const vals  = hand.map(c => c.v).sort((a,b) => b-a);
     const suits = hand.map(c => c.s);
     const n     = hand.length;
@@ -48,25 +57,45 @@ function _scoreHand(hand) {
     const cnt = {};
     vals.forEach(v => cnt[v] = (cnt[v]||0)+1);
     const g = Object.entries(cnt).map(([v,c]) => ({v:+v,c})).sort((a,b) => b.c-a.c||b.v-a.v);
-    if (isFlush&&isStraight) return strHigh===14&&vals[1]===13 ? [9,14] : [8,strHigh];
-    if (g[0].c===4) return [7,g[0].v];
-    if (g[0].c===3&&g[1]?.c===2) return [6,g[0].v,g[1].v];
-    if (isFlush)    return [5,vals[0]];
-    if (isStraight) return [4,strHigh];
-    if (g[0].c===3) return [3,g[0].v];
-    if (g[0].c===2&&g[1]?.c===2) return [2,g[0].v,g[1].v];
-    if (g[0].c===2) return [1,g[0].v];
-    return [0,vals[0]];
+    const kickersExcl = usedValues => vals.filter(v => !usedValues.includes(v)).sort((a,b)=>b-a);
+
+    if (isFlush&&isStraight) {
+        const tier = strHigh===14&&vals[1]===13 ? 9 : 8;
+        return { score:[tier,strHigh], keyValues: new Set(vals) };
+    }
+    if (g[0].c===4) {
+        const k = kickersExcl([g[0].v]);
+        return { score:[7,g[0].v,k[0]||0], keyValues: new Set([g[0].v]) };
+    }
+    if (g[0].c===3&&g[1]?.c===2) return { score:[6,g[0].v,g[1].v], keyValues: new Set([g[0].v,g[1].v]) };
+    if (isFlush)    return { score:[5,...vals], keyValues: new Set(vals) };
+    if (isStraight) return { score:[4,strHigh], keyValues: new Set(vals) };
+    if (g[0].c===3) {
+        const k = kickersExcl([g[0].v]);
+        return { score:[3,g[0].v,k[0]||0,k[1]||0], keyValues: new Set([g[0].v]) };
+    }
+    if (g[0].c===2&&g[1]?.c===2) {
+        const k = kickersExcl([g[0].v,g[1].v]);
+        return { score:[2,g[0].v,g[1].v,k[0]||0], keyValues: new Set([g[0].v,g[1].v]) };
+    }
+    if (g[0].c===2) {
+        const k = kickersExcl([g[0].v]);
+        return { score:[1,g[0].v,k[0]||0,k[1]||0,k[2]||0], keyValues: new Set([g[0].v]) };
+    }
+    return { score:[0,...vals], keyValues: new Set() };
 }
 
 function evaluatePokerHand(hole, board) {
     if (hole.length < 2) return null;
-    const cards  = [...hole,...board].map(c => ({r:c.slice(0,-1), s:c.slice(-1), v:_RV[c.slice(0,-1)]}));
+    const cards  = [...hole,...board].map((c,i) => ({
+        r:c.slice(0,-1), s:c.slice(-1), v:_RV[c.slice(0,-1)],
+        origin: i < hole.length ? 'hole' : 'board',
+    }));
     const combos = cards.length <= 5 ? [cards] : _combos(cards, 5);
-    let best = null;
+    let best = null, bestHand = null;
     for (const hand of combos) {
-        const s = _scoreHand(hand);
-        if (!best || s[0]>best[0] || (s[0]===best[0]&&(s[1]||0)>(best[1]||0))) best = s;
+        const a = _analyzeHand(hand);
+        if (!best || _cmpScore(a.score, best.score) > 0) { best = a; bestHand = hand; }
     }
     if (!best) return null;
     const rn = v => _RN[v]||v;
@@ -82,8 +111,31 @@ function evaluatePokerHand(hole, board) {
         [1, v=>`คู่ ${rn(v)}`,                  'pair'],
         [0, v=>`HC ${rn(v)}`,                   'hc'],
     ];
-    const t = TIERS.find(t => t[0]===best[0]);
-    return t ? { name: t[1](best[1],best[2]), tier: t[2] } : null;
+    const t = TIERS.find(t => t[0]===best.score[0]);
+    if (!t) return null;
+
+    const fiveCards = bestHand.map(c => ({
+        rank: c.r, suit: c.s, origin: c.origin, isKey: best.keyValues.has(c.v),
+    }));
+
+    return { name: t[1](best.score[1], best.score[2]), tier: t[2], fiveCards };
+}
+
+function fiveCardHtml(hole, board) {
+    const result = evaluatePokerHand(hole, board);
+    if (!result || !result.fiveCards.length) return '<span class="cv-empty">—</span>';
+    const parts = [];
+    let lastOrigin = null;
+    result.fiveCards.forEach(c => {
+        if (lastOrigin === 'hole' && c.origin === 'board') parts.push('<span class="fc-sep">|</span>');
+        const cls  = RED_SUITS.has(c.suit) ? 'cv-red' : 'cv-black';
+        const text = `${c.rank}${SUIT_SYM[c.suit] || c.suit}`;
+        parts.push((c.origin === 'hole' && c.isKey)
+            ? `<span class="fc-key ${cls}">${text}</span>`
+            : `<span class="${cls}">${text}</span>`);
+        lastOrigin = c.origin;
+    });
+    return parts.join(' ');
 }
 
 function getHitTier(text) {
@@ -336,6 +388,12 @@ function renderHistory() {
             ? '<span class="cv-empty">—</span>'
             : (hit ? `<span class="hit-badge hit-${getHitTier(hit)}">${hit}</span>` : '<span class="cv-empty">—</span>');
 
+        const holeArr  = hand ? hand.split(' ').filter(Boolean) : [];
+        const boardArr = [flop, turn, river].filter(Boolean).join(' ').split(' ').filter(Boolean);
+        const fcDisplay = state.hideHand
+            ? '<span class="cv-empty">—</span>'
+            : fiveCardHtml(holeArr, boardArr);
+
         const tr = document.createElement('tr');
         tr.className = 'history-row clickable-row';
         tr.innerHTML = `
@@ -345,6 +403,7 @@ function renderHistory() {
             <td>${cardHtml(flop)}</td>
             <td>${cardHtml(turn)}</td>
             <td>${cardHtml(river)}</td>
+            <td>${fcDisplay}</td>
             <td>${hitDisplay}</td>
             <td>${cardHtml(sd1)}</td>
             <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
@@ -561,7 +620,21 @@ function refreshFieldDisplay(field) {
     item.classList.toggle('complete', sel.length === cfg.max);
     item.classList.toggle('active', field === state.activeField);
 
+    refreshFiveCardDisplay();
     refreshHitDisplay();
+}
+
+function refreshFiveCardDisplay() {
+    const el = document.getElementById('fi-fivecard');
+    if (!el) return;
+
+    if (state.hideHand) { el.style.display = 'none'; return; }
+    el.style.display = '';
+
+    const hole  = state.sel.hand;
+    const board = [...state.sel.flop, ...state.sel.turn, ...state.sel.river];
+    const fd    = document.getElementById('fd-fivecard');
+    if (fd) fd.innerHTML = fiveCardHtml(hole, board);
 }
 
 function refreshHitDisplay() {
@@ -635,6 +708,12 @@ function buildFieldsBar() {
         bar.appendChild(div);
 
         if (f === 'river') {
+            const fcDiv = document.createElement('div');
+            fcDiv.className = 'field-item fi-fivecard-empty';
+            fcDiv.id = 'fi-fivecard';
+            fcDiv.innerHTML = `<div class="field-label">5-CARD</div><div class="field-cards" id="fd-fivecard">—</div>`;
+            bar.appendChild(fcDiv);
+
             const hitDiv = document.createElement('div');
             hitDiv.className = 'field-item fi-hit-empty';
             hitDiv.id = 'fi-hit';
@@ -695,6 +774,7 @@ function openHandDetail(r) {
         { key:'flop',  label:'FLOP',  cards: r[2]||'', note: r[9] ||'' },
         { key:'turn',  label:'TURN',  cards: r[3]||'', note: r[10]||'' },
         { key:'river', label:'RIVER', cards: r[4]||'', note: r[11]||'' },
+        { key:'fivecard', label:'5-CARD', isFiveCard: true },
         { key:'hit',   label:'HIT',   isHit: true, hitText: r[14]||'' },
         { key:'sd1',   label:'SD1',   cards: r[5]||'', note: r[12]||'' },
         { key:'sd2',   label:'SD2',   cards: r[6]||'', note: r[13]||'' },
@@ -702,6 +782,17 @@ function openHandDetail(r) {
 
     const body = document.getElementById('hand-modal-body');
     body.innerHTML = fields.map(f => {
+        if (f.isFiveCard) {
+            if (state.hideHand) return '';
+            const holeArr  = r[1] ? r[1].split(' ').filter(Boolean) : [];
+            const boardArr = [r[2], r[3], r[4]].filter(Boolean).join(' ').split(' ').filter(Boolean);
+            const cardsHtml = fiveCardHtml(holeArr, boardArr);
+            return `
+            <div class="hm-field-row">
+                <span class="hm-field-label" style="color:#2dd4bf">${f.label}</span>
+                <div class="hm-field-content"><div class="hm-cards">${cardsHtml}</div></div>
+            </div>`;
+        }
         if (f.isHit) {
             if (state.hideHand) return '';
             const ht = f.hitText;
@@ -746,6 +837,7 @@ function toggleHideHand() {
     btn.textContent  = state.hideHand ? '🙈 Hand' : '👁 Hand';
     btn.classList.toggle('active', state.hideHand);
     refreshFieldDisplay('hand');
+    refreshFiveCardDisplay();
     refreshHitDisplay();
     refreshCardGrid();
     renderHistory();

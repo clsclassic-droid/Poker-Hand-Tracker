@@ -589,6 +589,21 @@ header h1 {
 /* Hidden hand cards */
 .hand-hidden { filter: blur(4px); user-select: none; pointer-events: none; }
 
+/* ─── FiveCard field (fields bar) ───────────────────────────────────────── */
+#fi-fivecard { cursor: default !important; border-color: #0d9488; }
+#fi-fivecard:hover { filter: none; }
+#fi-fivecard .field-label { color: #2dd4bf; }
+.fi-fivecard-empty .field-cards { color: var(--text-muted); font-weight: 400; font-size: .7rem; }
+
+/* Key hole card box — highlights only cards that make the hand (not kickers) */
+.fc-key {
+    border: 1.5px solid #7c3aed;
+    background: rgba(124,58,237,.18);
+    border-radius: 4px;
+    padding: 0 4px;
+}
+.fc-sep { color: var(--border2); margin: 0 1px; font-size: .85em; }
+
 /* ─── HIT field tiers (fields bar) ──────────────────────────────────────── */
 #fi-hit { cursor: default !important; }
 #fi-hit:hover { filter: none; }
