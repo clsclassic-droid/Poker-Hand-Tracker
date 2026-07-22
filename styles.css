@@ -228,7 +228,7 @@ header h1 {
 }
 
 .bet-summary {
-    flex: 5.4 1 220px;
+    flex: 5.4 1 168px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -817,7 +817,7 @@ header h1 {
 .fi-hit-sf    .field-label { color:#f59e0b; } .fi-hit-sf    .field-cards { color:#fcd34d; }
 
 /* HIT badge in history table & modal */
-.hit-badge { display:inline-block; font-size:.72rem; font-weight:700; padding:1px 6px; border-radius:4px; border:1px solid; white-space:nowrap; }
+.hit-badge { display:inline-block; font-size:.68rem; font-weight:700; padding:1px 5px; border-radius:4px; border:1px solid; white-space:nowrap; }
 .hit-badge.hit-hc    { border-color:#2d3347; background:rgba(45,51,71,.4);    color:#4a6580; }
 .hit-badge.hit-pair  { border-color:#475569; background:rgba(71,85,105,.25);  color:#cbd5e1; }
 .hit-badge.hit-2p    { border-color:#475569; background:rgba(71,85,105,.3);   color:#e2e8f0; }
@@ -833,8 +833,8 @@ header h1 {
     background: var(--surface3);
     border: 1px solid var(--border2);
     border-radius: 4px;
-    padding: 1px 6px;
-    font-size: .75rem;
+    padding: 1px 5px;
+    font-size: .68rem;
     font-weight: 700;
     color: var(--text-dim);
 }
@@ -842,14 +842,14 @@ header h1 {
 /* ─── History row action buttons ────────────────────────────────────────── */
 .row-actions {
     white-space: nowrap;
-    padding: 4px 8px !important;
+    padding: 3px 5px !important;
 }
 .row-action-btn {
     background: transparent;
     border: none;
     cursor: pointer;
-    font-size: .82rem;
-    padding: 2px 4px;
+    font-size: .78rem;
+    padding: 1px 3px;
     border-radius: 4px;
     opacity: .45;
     transition: opacity .15s, background .15s;
@@ -911,24 +911,28 @@ header h1 {
 #history-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: .83rem;
+    font-size: .76rem;
     white-space: nowrap;
+    table-layout: auto;
 }
 #history-table th {
     background: var(--surface2);
-    padding: 7px 12px;
+    padding: 5px 6px;
     text-align: left;
     color: var(--text-muted);
-    font-size: .72rem;
+    font-size: .66rem;
     font-weight: 700;
-    letter-spacing: .6px;
+    letter-spacing: .4px;
     border-bottom: 1px solid var(--border);
 }
 #history-table td {
-    padding: 6px 12px;
+    padding: 4px 6px;
     border-top: 1px solid var(--border);
     color: var(--text);
 }
+/* 5-Card column is the longest — shrink it further */
+#history-table td:nth-child(7),
+#history-table th:nth-child(7) { font-size: .68rem; }
 #history-table tbody tr:hover td { background: var(--surface); }
 #history-table td:first-child { color: var(--text-muted); font-weight: 600; }
 
