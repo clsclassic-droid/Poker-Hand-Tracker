@@ -42,6 +42,24 @@
                 </a>
             </div>
 
+            <!-- Position Row -->
+            <div id="position-row">
+                <label for="position-select">ตำแหน่ง</label>
+                <select id="position-select">
+                    <option value="">— เลือก —</option>
+                    <option>SB</option>
+                    <option>BB</option>
+                    <option>UTG</option>
+                    <option>UTG+1</option>
+                    <option>Mid</option>
+                    <option>Mid+1</option>
+                    <option>HJ</option>
+                    <option>LJ</option>
+                    <option>CO</option>
+                    <option>BT</option>
+                </select>
+            </div>
+
             <!-- Fields Bar -->
             <div id="fields-bar">
                 <!-- Built by JS -->
@@ -65,6 +83,11 @@
                         <!-- Built by JS -->
                     </div>
                 </div>
+                <!-- Comment input -->
+                <div id="comment-row">
+                    <div id="comment-label">💬 HAND</div>
+                    <textarea id="comment-input" placeholder="บันทึกเหตุการณ์ที่เกิดขึ้น..."></textarea>
+                </div>
             </div>
 
             <!-- Action Buttons -->
@@ -84,6 +107,7 @@
                         <thead>
                             <tr>
                                 <th>No.</th>
+                                <th>Pos</th>
                                 <th>Hand</th>
                                 <th>Flop</th>
                                 <th>Turn</th>

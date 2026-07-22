@@ -19,11 +19,15 @@ const FIELD_CFG = {
 };
 const FIELDS = ['hand', 'flop', 'turn', 'river', 'sd1', 'sd2'];
 
-const SHEET_TAB      = 'Hands';
-const HEADER_ROW     = ['No.', 'Hand', 'Flop', 'Turn', 'River', 'SD1', 'SD2'];
-const FOLDER_NAME    = 'Poker Hand Tracker';
-const SHEET_NAME     = 'Poker Hand Tracker';
-const LS_SHEET_KEY   = 'pht_sheet_id';
+// Sheet column layout (A-N):
+// A:No. B:Hand C:Flop D:Turn E:River F:SD1 G:SD2
+// H:Position I:Hand Note J:Flop Note K:Turn Note L:River Note M:SD1 Note N:SD2 Note
+const SHEET_TAB    = 'Hands';
+const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note'];
+const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note'];
+const FOLDER_NAME  = 'Poker Hand Tracker';
+const SHEET_NAME   = 'Poker Hand Tracker';
+const LS_SHEET_KEY = 'pht_sheet_id';
 
 const DISCOVERY_DOCS = [
     'https://sheets.googleapis.com/$discovery/rest?version=v4',
@@ -41,18 +45,17 @@ const state = {
     handNumber:    1,
     activeField:   'hand',
     sel:           { hand:[], flop:[], turn:[], river:[], sd1:[], sd2:[] },
+    comments:      { hand:'',  flop:'',  turn:'',  river:'',  sd1:'',  sd2:'' },
     usedCards:     new Set(),
     history:       [],
 };
 
-// ─── GAPI / GIS init (called by <script> onload) ─────────────────────────────
+// ─── GAPI / GIS init ─────────────────────────────────────────────────────────
 function gapiLoaded() {
     gapi.load('client', async () => {
         try {
             await gapi.client.init({ apiKey: CONFIG.API_KEY, discoveryDocs: DISCOVERY_DOCS });
-        } catch (e) {
-            console.error('gapi init error', e);
-        }
+        } catch (e) { console.error('gapi init error', e); }
         state.gapiReady = true;
         checkBothReady();
     });
@@ -76,7 +79,6 @@ function checkBothReady() {
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 document.getElementById('auth-btn').addEventListener('click', () => {
-    // If a token already exists, skip consent prompt; otherwise show it
     const hasToken = gapi.client.getToken() !== null;
     state.tokenClient.requestAccessToken({ prompt: hasToken ? '' : 'consent' });
 });
@@ -99,7 +101,6 @@ async function onTokenResponse(resp) {
     document.getElementById('auth-btn').style.display = 'none';
     document.getElementById('user-display').classList.add('visible');
 
-    // Fetch display name
     try {
         const token = gapi.client.getToken().access_token;
         const info  = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
@@ -116,13 +117,15 @@ async function initSpreadsheet() {
     try {
         let id = localStorage.getItem(LS_SHEET_KEY);
         if (id) {
-            // Verify still accessible
             try { await gapi.client.sheets.spreadsheets.get({ spreadsheetId: id }); }
             catch (_) { id = null; localStorage.removeItem(LS_SHEET_KEY); }
         }
         if (!id) id = await findOrCreate();
         state.spreadsheetId = id;
         localStorage.setItem(LS_SHEET_KEY, id);
+
+        // Ensure new columns H-N have headers (safe to call on existing sheets)
+        await ensureNewHeaders(id);
 
         const link = document.getElementById('sheet-link');
         link.href = `https://docs.google.com/spreadsheets/d/${id}`;
@@ -139,33 +142,39 @@ async function initSpreadsheet() {
     }
 }
 
+async function ensureNewHeaders(id) {
+    try {
+        await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId: id,
+            range: `${SHEET_TAB}!H1:N1`,
+            valueInputOption: 'RAW',
+            resource: { values: [NEW_HEADERS] },
+        });
+    } catch (_) {}
+}
+
 async function findOrCreate() {
-    // 1. Find folder
     setOverlayMsg('ค้นหาโฟลเดอร์ "' + FOLDER_NAME + '" ...');
     let folderId = null;
     try {
         const res = await gapi.client.drive.files.list({
             q: `name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-            fields: 'files(id)',
-            spaces: 'drive',
+            fields: 'files(id)', spaces: 'drive',
         });
         if (res.result.files?.length) folderId = res.result.files[0].id;
     } catch (_) {}
 
-    // 2. Find spreadsheet inside folder
     if (folderId) {
         setOverlayMsg('ค้นหา spreadsheet ในโฟลเดอร์ ...');
         try {
             const res = await gapi.client.drive.files.list({
                 q: `'${folderId}' in parents and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
-                fields: 'files(id,name)',
-                orderBy: 'modifiedTime desc',
+                fields: 'files(id,name)', orderBy: 'modifiedTime desc',
             });
             if (res.result.files?.length) return res.result.files[0].id;
         } catch (_) {}
     }
 
-    // 3. Create new sheet
     setOverlayMsg('สร้าง spreadsheet ใหม่ ...');
     const created = await gapi.client.sheets.spreadsheets.create({
         properties: { title: SHEET_NAME },
@@ -173,22 +182,17 @@ async function findOrCreate() {
     });
     const newId = created.result.spreadsheetId;
 
-    // Move into folder if found
     if (folderId) {
         try {
             await gapi.client.drive.files.update({
-                fileId: newId,
-                addParents: folderId,
-                removeParents: 'root',
-                fields: 'id,parents',
+                fileId: newId, addParents: folderId, removeParents: 'root', fields: 'id,parents',
             });
         } catch (_) {}
     }
 
-    // Write header row
     await gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: newId,
-        range: `${SHEET_TAB}!A1:G1`,
+        range: `${SHEET_TAB}!A1:N1`,
         valueInputOption: 'RAW',
         resource: { values: [HEADER_ROW] },
     });
@@ -200,7 +204,7 @@ async function findOrCreate() {
 async function loadHistory() {
     const res = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: state.spreadsheetId,
-        range: `${SHEET_TAB}!A2:G`,
+        range: `${SHEET_TAB}!A2:N`,
     });
     state.history = res.result.values || [];
     renderHistory();
@@ -221,10 +225,37 @@ function renderHistory() {
     tbody.innerHTML = '';
     const rows = [...state.history].reverse().slice(0, 25);
     for (const r of rows) {
+        const no   = r[0] || '';
+        const hand = r[1] || '';
+        const flop = r[2] || '';
+        const turn = r[3] || '';
+        const river= r[4] || '';
+        const sd1  = r[5] || '';
+        const sd2  = r[6] || '';
+        const pos  = r[7] || '';
+
+        // Build note tooltip for the row
+        const notes = [
+            r[8]  ? `HAND: ${r[8]}`  : '',
+            r[9]  ? `FLOP: ${r[9]}`  : '',
+            r[10] ? `TURN: ${r[10]}` : '',
+            r[11] ? `RIVER: ${r[11]}`: '',
+            r[12] ? `SD1: ${r[12]}`  : '',
+            r[13] ? `SD2: ${r[13]}`  : '',
+        ].filter(Boolean).join('\n');
+
         const tr = document.createElement('tr');
-        tr.innerHTML = [r[0]||'', r[1]||'', r[2]||'', r[3]||'', r[4]||'', r[5]||'', r[6]||'']
-            .map((v, i) => `<td>${i === 0 ? v || '<span class="cv-empty">—</span>' : cardHtml(v)}</td>`)
-            .join('');
+        if (notes) tr.title = notes;
+        tr.innerHTML = `
+            <td>${no || '<span class="cv-empty">—</span>'}</td>
+            <td>${pos ? `<span class="pos-badge">${pos}</span>` : '<span class="cv-empty">—</span>'}</td>
+            <td>${cardHtml(hand)}</td>
+            <td>${cardHtml(flop)}</td>
+            <td>${cardHtml(turn)}</td>
+            <td>${cardHtml(river)}</td>
+            <td>${cardHtml(sd1)}</td>
+            <td>${cardHtml(sd2)}${notes ? ' 💬' : ''}</td>
+        `;
         tbody.appendChild(tr);
     }
     const cnt = document.getElementById('history-count');
@@ -250,6 +281,12 @@ async function saveHand() {
         return;
     }
 
+    // Flush current comment textarea to state before saving
+    syncCommentInput();
+
+    const position = document.getElementById('position-select').value;
+    const { comments } = state;
+
     const row = [
         state.handNumber,
         hand.join(' '),
@@ -258,6 +295,13 @@ async function saveHand() {
         river.join(' '),
         sd1.join(' '),
         sd2.join(' '),
+        position,
+        comments.hand,
+        comments.flop,
+        comments.turn,
+        comments.river,
+        comments.sd1,
+        comments.sd2,
     ];
 
     const btn = document.getElementById('save-btn');
@@ -265,7 +309,7 @@ async function saveHand() {
     try {
         await gapi.client.sheets.spreadsheets.values.append({
             spreadsheetId: state.spreadsheetId,
-            range: `${SHEET_TAB}!A:G`,
+            range: `${SHEET_TAB}!A:N`,
             valueInputOption: 'RAW',
             insertDataOption: 'INSERT_ROWS',
             resource: { values: [row] },
@@ -287,17 +331,16 @@ async function saveHand() {
 
 // ─── Card Selection ────────────────────────────────────────────────────────────
 function onCardClick(cardId) {
-    const f    = state.activeField;
-    const cfg  = FIELD_CFG[f];
-    const sel  = state.sel[f];
-    const idx  = sel.indexOf(cardId);
+    const f   = state.activeField;
+    const cfg = FIELD_CFG[f];
+    const sel = state.sel[f];
+    const idx = sel.indexOf(cardId);
 
     if (idx >= 0) {
-        // Deselect
         sel.splice(idx, 1);
     } else {
-        if (state.usedCards.has(cardId)) return;  // used in another field
-        if (sel.length >= cfg.max) return;          // field full
+        if (state.usedCards.has(cardId)) return;
+        if (sel.length >= cfg.max) return;
         sel.push(cardId);
     }
 
@@ -306,7 +349,6 @@ function onCardClick(cardId) {
     refreshPickerHeader();
     refreshCardGrid();
 
-    // Auto-advance when field reaches max
     if (sel.length === cfg.max) {
         const next = FIELDS[FIELDS.indexOf(f) + 1];
         if (next) setTimeout(() => setActive(next), 160);
@@ -319,12 +361,14 @@ function rebuildUsed() {
 }
 
 function setActive(field) {
+    syncCommentInput();  // save current field's comment before switching
     state.activeField = field;
     document.querySelectorAll('.field-item').forEach(el => {
         el.classList.toggle('active', el.dataset.field === field);
     });
     refreshPickerHeader();
     refreshCardGrid();
+    refreshCommentInput();
 }
 
 function undoLast() {
@@ -349,9 +393,24 @@ function clearField() {
 }
 
 function clearAll() {
-    FIELDS.forEach(f => { state.sel[f] = []; refreshFieldDisplay(f); });
+    FIELDS.forEach(f => { state.sel[f] = []; state.comments[f] = ''; refreshFieldDisplay(f); });
     rebuildUsed();
+    document.getElementById('position-select').value = '';
     setActive('hand');
+}
+
+// ─── Comment helpers ──────────────────────────────────────────────────────────
+function syncCommentInput() {
+    const ta = document.getElementById('comment-input');
+    if (ta) state.comments[state.activeField] = ta.value;
+}
+
+function refreshCommentInput() {
+    const f     = state.activeField;
+    const label = document.getElementById('comment-label');
+    const ta    = document.getElementById('comment-input');
+    if (label) label.textContent = '💬 ' + FIELD_CFG[f].label;
+    if (ta)    ta.value = state.comments[f];
 }
 
 // ─── UI Helpers ───────────────────────────────────────────────────────────────
@@ -386,6 +445,8 @@ function refreshFieldDisplay(field) {
             if (i < cfg.max - 1) html += ' ';
         }
     }
+    // Show comment indicator dot
+    if (state.comments[field]) html += ' <span class="has-note">●</span>';
     el.innerHTML = html;
 
     item.classList.toggle('complete', sel.length === cfg.max);
@@ -393,8 +454,8 @@ function refreshFieldDisplay(field) {
 }
 
 function refreshCardGrid() {
-    const f   = state.activeField;
-    const sel = state.sel[f];
+    const f    = state.activeField;
+    const sel  = state.sel[f];
     const full = sel.length >= FIELD_CFG[f].max;
 
     SUITS.forEach(suit => {
@@ -482,9 +543,18 @@ document.addEventListener('DOMContentLoaded', () => {
     buildFieldsBar();
     buildCardGrid();
     refreshPickerHeader();
+    refreshCommentInput();
 
     document.getElementById('undo-btn').addEventListener('click', undoLast);
     document.getElementById('clear-field-btn').addEventListener('click', clearField);
     document.getElementById('clear-btn').addEventListener('click', clearAll);
     document.getElementById('save-btn').addEventListener('click', saveHand);
+
+    // Save comment to state when user types
+    document.getElementById('comment-input').addEventListener('input', () => {
+        state.comments[state.activeField] = document.getElementById('comment-input').value;
+        // Update dot indicator on field item
+        const el = document.getElementById('fd-' + state.activeField);
+        if (el) refreshFieldDisplay(state.activeField);
+    });
 });

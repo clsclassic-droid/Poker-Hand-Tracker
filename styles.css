@@ -168,6 +168,45 @@ header h1 {
 #sheet-link.visible { display: inline-block; }
 #sheet-link:hover { background: var(--blue-dim); }
 
+/* ─── Position Row ───────────────────────────────────────────────────────── */
+#position-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#position-row label {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: .5px;
+    white-space: nowrap;
+}
+
+#position-select {
+    background: var(--surface);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 28px 6px 12px;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a9ab8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color .15s;
+    min-width: 120px;
+}
+#position-select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+#position-select option { background: var(--surface2); }
+
 /* ─── Fields Bar ─────────────────────────────────────────────────────────── */
 #fields-bar {
     display: flex;
@@ -360,6 +399,64 @@ header h1 {
 .card-btn.field-full:not(.selected):not(.used) {
     opacity: .3;
     cursor: not-allowed;
+}
+
+/* ─── Comment Row ────────────────────────────────────────────────────────── */
+#comment-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+#comment-label {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    white-space: nowrap;
+    padding-top: 6px;
+    min-width: 68px;
+}
+
+#comment-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: .85rem;
+    font-family: inherit;
+    padding: 6px 10px;
+    resize: vertical;
+    min-height: 54px;
+    max-height: 120px;
+    transition: border-color .15s;
+    line-height: 1.4;
+}
+#comment-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+#comment-input::placeholder { color: var(--text-muted); }
+
+/* Note indicator dot on field item */
+.has-note {
+    color: var(--accent);
+    font-size: .55rem;
+    vertical-align: super;
+}
+
+/* Position badge in history table */
+.pos-badge {
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--text-dim);
 }
 
 /* ─── Action Buttons ─────────────────────────────────────────────────────── */
