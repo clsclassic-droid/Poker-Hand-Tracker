@@ -158,8 +158,8 @@ function getHitTier(text) {
 // H:Position I:Hand Note J:Flop Note K:Turn Note L:River Note M:SD1 Note N:SD2 Note
 // O:HIT P:Fold Q:Result
 const SHEET_TAB    = 'Hands';
-const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Won','Result'];
-const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Won','Result'];
+const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result'];
+const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result'];
 const FOLDER_NAME  = 'Poker Hand Tracker';
 const SHEET_NAME   = 'Poker Hand Tracker';
 const LS_SHEET_KEY = 'pht_sheet_id';
@@ -487,24 +487,30 @@ async function saveHand() {
     const betFLOP  = parseFloat(document.getElementById('bet-flop')?.value)  || 0;
     const betTURN  = parseFloat(document.getElementById('bet-turn')?.value)  || 0;
     const betRIVER = parseFloat(document.getElementById('bet-river')?.value) || 0;
-    const wonAmt   = parseFloat(document.getElementById('won-input')?.value) || 0;
+    const potAmt   = parseFloat(document.getElementById('pot-input')?.value) || 0;
     const totalBet = betPF + betFLOP + betTURN + betRIVER;
 
     let resultVal = '';
-    if (!state.foldStreet && wonAmt > 0) {
-        resultVal = String(wonAmt);
+    if (state.foldStreet) {
+        if (totalBet > 0) resultVal = String(-totalBet);
     } else if (totalBet > 0) {
-        if (state.foldStreet) {
-            resultVal = String(-totalBet);
-        } else {
+        const opponents = [sd1, sd2].filter(h => h.length >= 2);
+        let weWin = opponents.length === 0 ? (potAmt > 0 ? true : null) : null;
+        if (opponents.length > 0) {
             let weLose = false;
-            for (const oppHole of [sd1, sd2].filter(h => h.length >= 2)) {
+            for (const oppHole of opponents) {
                 const oppResult = evaluatePokerHand(oppHole, board);
                 if (oppResult && hitResult && _cmpScore(oppResult.score, hitResult.score) >= 0) {
                     weLose = true; break;
                 }
             }
-            if (weLose) resultVal = String(-totalBet);
+            weWin = !weLose;
+        }
+        if (weWin === true) {
+            const potProfit = potAmt - totalBet;
+            resultVal = String(potProfit > 0 ? potProfit : totalBet);
+        } else if (weWin === false) {
+            resultVal = String(-totalBet);
         }
     }
 
@@ -530,7 +536,7 @@ async function saveHand() {
         betFLOP  || '',
         betTURN  || '',
         betRIVER || '',
-        wonAmt   || '',
+        potAmt   || '',
         resultVal,
     ];
 
@@ -643,7 +649,7 @@ function clearAll() {
     rebuildUsed();
     document.getElementById('position-select').value = '';
     state.foldStreet = null;
-    ['bet-pf','bet-flop','bet-turn','bet-river','won-input'].forEach(id => {
+    ['bet-pf','bet-flop','bet-turn','bet-river','pot-input'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.value = ''; el.disabled = false; }
     });
@@ -1005,9 +1011,9 @@ function editHand(r, histIdx) {
     document.getElementById('bet-flop').value  = r[17] || '';
     document.getElementById('bet-turn').value  = r[18] || '';
     document.getElementById('bet-river').value = r[19] || '';
-    const wonEl = document.getElementById('won-input');
-    wonEl.value    = r[20] || '';
-    wonEl.disabled = !!state.foldStreet;
+    const potEl = document.getElementById('pot-input');
+    potEl.value    = r[20] || '';
+    potEl.disabled = !!state.foldStreet;
     refreshResultDisplay();
 
     rebuildUsed();
@@ -1058,28 +1064,35 @@ function refreshFoldBtn() {
 }
 
 function refreshResultDisplay() {
-    const betPF    = parseFloat(document.getElementById('bet-pf')?.value)    || 0;
-    const betFLOP  = parseFloat(document.getElementById('bet-flop')?.value)   || 0;
-    const betTURN  = parseFloat(document.getElementById('bet-turn')?.value)   || 0;
-    const betRIVER = parseFloat(document.getElementById('bet-river')?.value)  || 0;
-    const wonAmt   = parseFloat(document.getElementById('won-input')?.value)  || 0;
+    const betPF    = parseFloat(document.getElementById('bet-pf')?.value)   || 0;
+    const betFLOP  = parseFloat(document.getElementById('bet-flop')?.value)  || 0;
+    const betTURN  = parseFloat(document.getElementById('bet-turn')?.value)  || 0;
+    const betRIVER = parseFloat(document.getElementById('bet-river')?.value) || 0;
+    const potAmt   = parseFloat(document.getElementById('pot-input')?.value) || 0;
     const total    = betPF + betFLOP + betTURN + betRIVER;
 
     const totalEl = document.getElementById('bet-total');
     if (totalEl) totalEl.textContent = total > 0 ? total.toLocaleString() + ' ฿' : '0 ฿';
 
-    const wonEl = document.getElementById('won-input');
-    if (wonEl) wonEl.disabled = !!state.foldStreet;
+    const potEl = document.getElementById('pot-input');
+    if (potEl) potEl.disabled = !!state.foldStreet;
 
     const rp = document.getElementById('result-preview');
     if (!rp) return;
 
-    if (!state.foldStreet && wonAmt > 0) {
-        rp.textContent = '+' + wonAmt.toLocaleString() + ' ฿';
+    if (state.foldStreet) {
+        if (total > 0) {
+            rp.textContent = '−' + total.toLocaleString() + ' ฿';
+            rp.className = 'result-preview rp-loss';
+        } else {
+            rp.textContent = '—';
+            rp.className = 'result-preview';
+        }
+    } else if (potAmt > 0) {
+        const potProfit = potAmt - total;
+        const display = potProfit > 0 ? potProfit : total;
+        rp.textContent = '+' + display.toLocaleString() + ' ฿';
         rp.className = 'result-preview rp-win';
-    } else if (total > 0) {
-        rp.textContent = '−' + total.toLocaleString() + ' ฿';
-        rp.className = 'result-preview rp-loss';
     } else {
         rp.textContent = '—';
         rp.className = 'result-preview';
@@ -1113,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('hide-hand-btn').addEventListener('click', toggleHideHand);
     document.getElementById('comment-toggle-btn').addEventListener('click', toggleCommentArea);
 
-    ['bet-pf','bet-flop','bet-turn','bet-river','won-input'].forEach(id => {
+    ['bet-pf','bet-flop','bet-turn','bet-river','pot-input'].forEach(id => {
         document.getElementById(id).addEventListener('input', refreshResultDisplay);
     });
     refreshResultDisplay();

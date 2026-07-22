@@ -250,8 +250,8 @@ header h1 {
 .bet-input:focus { outline: none; border-color: var(--border2); }
 .bet-input:disabled { opacity: .45; cursor: not-allowed; }
 
-.won-input { width: 72px; border-color: #166534; }
-.won-input:focus { border-color: var(--accent); }
+.pot-input { width: 72px; border-color: #166534; }
+.pot-input:focus { border-color: var(--accent); }
 
 .bet-cur {
     font-size: .72rem;
