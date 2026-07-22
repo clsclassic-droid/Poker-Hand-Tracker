@@ -481,6 +481,19 @@ function renderHistory() {
                 ? '<span class="cv-empty">—</span>'
                 : fiveCardHtml(holeArr, boardArr);
 
+            const playerResult = (!state.hideHand && holeArr.length >= 2 && boardArr.length >= 3)
+                ? evaluatePokerHand(holeArr, boardArr) : null;
+            const sdWins = (sdStr) => {
+                if (!playerResult) return false;
+                const cards = sdStr ? sdStr.split(' ').filter(Boolean) : [];
+                if (cards.length < 2) return false;
+                const opp = evaluatePokerHand(cards, boardArr);
+                return opp && _cmpScore(opp.score, playerResult.score) > 0;
+            };
+            const wb = '<span class="w-badge" title="ผู้ชนะ">W</span>';
+            const sd1WinTag = sdWins(sd1) ? ' ' + wb : '';
+            const sd2WinTag = sdWins(sd2) ? ' ' + wb : '';
+
             const histIdx = state.history.indexOf(r);
             const tr = document.createElement('tr');
             tr.className = 'history-row clickable-row';
@@ -493,8 +506,8 @@ function renderHistory() {
                 <td>${riverDisplay}</td>
                 <td>${fcDisplay}</td>
                 <td>${hitDisplay}</td>
-                <td>${cardHtml(sd1)}</td>
-                <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
+                <td>${cardHtml(sd1)}${sd1WinTag}</td>
+                <td>${cardHtml(sd2)}${sd2WinTag}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
                 <td>${resultDisplay}</td>
                 <td class="row-actions">
                     <button class="row-action-btn edit-btn" title="แก้ไข">✏️</button>

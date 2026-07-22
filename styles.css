@@ -567,13 +567,13 @@ header h1 {
 }
 
 /* F badge inline in card cells */
-.f-badge {
+.f-badge,
+.w-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 16px;
     height: 16px;
-    background: #ef4444;
     color: #fff;
     border-radius: 50%;
     font-size: .62rem;
@@ -583,6 +583,8 @@ header h1 {
     line-height: 1;
     flex-shrink: 0;
 }
+.f-badge { background: #ef4444; }
+.w-badge { background: #22c55e; }
 
 /* Result win/loss/tie in history table & modal */
 .result-win  { color: #4ade80; font-weight: 700; }
