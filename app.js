@@ -20,6 +20,7 @@ const FIELD_CFG = {
 const FIELDS = ['hand', 'flop', 'turn', 'river', 'sd1', 'sd2'];
 const FIELD_COLORS = { hand:'#a78bfa', flop:'#67e8f9', turn:'#fbbf24', river:'#f87171', sd1:'#818cf8', sd2:'#60a5fa' };
 const HIT_COLORS   = { hc:'#4a6580', pair:'#94a3b8', '2p':'#94a3b8', trips:'#60a5fa', st:'#34d399', fl:'#34d399', fh:'#fb923c', '4k':'#fbbf24', sf:'#f59e0b' };
+const FOLD_LABEL   = { hand: 'PF', flop: 'FLOP', turn: 'TURN', river: 'RIVER' };
 
 // ─── Poker Hand Evaluator ─────────────────────────────────────────────────────
 const _RV = {A:14,K:13,Q:12,J:11,T:10,'9':9,'8':8,'7':7,'6':6,'5':5,'4':4,'3':3,'2':2};
@@ -151,12 +152,13 @@ function getHitTier(text) {
     return 'hc';
 }
 
-// Sheet column layout (A-N):
+// Sheet column layout (A-Q):
 // A:No. B:Hand C:Flop D:Turn E:River F:SD1 G:SD2
 // H:Position I:Hand Note J:Flop Note K:Turn Note L:River Note M:SD1 Note N:SD2 Note
+// O:HIT P:Fold Q:Result
 const SHEET_TAB    = 'Hands';
-const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT'];
-const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT'];
+const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Result'];
+const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Result'];
 const FOLDER_NAME  = 'Poker Hand Tracker';
 const SHEET_NAME   = 'Poker Hand Tracker';
 const LS_SHEET_KEY = 'pht_sheet_id';
@@ -182,6 +184,7 @@ const state = {
     history:       [],
     hideHand:      false,
     showComment:   false,
+    foldStreet:    null,
 };
 
 // ─── GAPI / GIS init ─────────────────────────────────────────────────────────
@@ -280,7 +283,7 @@ async function ensureNewHeaders(id) {
     try {
         await gapi.client.sheets.spreadsheets.values.update({
             spreadsheetId: id,
-            range: `${SHEET_TAB}!H1:O1`,
+            range: `${SHEET_TAB}!H1:Q1`,
             valueInputOption: 'RAW',
             resource: { values: [NEW_HEADERS] },
         });
@@ -326,7 +329,7 @@ async function findOrCreate() {
 
     await gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: newId,
-        range: `${SHEET_TAB}!A1:O1`,
+        range: `${SHEET_TAB}!A1:Q1`,
         valueInputOption: 'RAW',
         resource: { values: [HEADER_ROW] },
     });
@@ -338,7 +341,7 @@ async function findOrCreate() {
 async function loadHistory() {
     const res = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: state.spreadsheetId,
-        range: `${SHEET_TAB}!A2:O`,
+        range: `${SHEET_TAB}!A2:Q`,
     });
     state.history = res.result.values || [];
     renderHistory();
@@ -360,15 +363,17 @@ function renderHistory() {
     const rows = [...state.history].reverse().slice(0, 25);
 
     for (const r of rows) {
-        const no    = r[0] || '';
-        const hand  = r[1] || '';
-        const flop  = r[2] || '';
-        const turn  = r[3] || '';
-        const river = r[4] || '';
-        const sd1   = r[5] || '';
-        const sd2   = r[6] || '';
-        const pos   = r[7] || '';
-        const hit   = r[14] || '';
+        const no     = r[0]  || '';
+        const hand   = r[1]  || '';
+        const flop   = r[2]  || '';
+        const turn   = r[3]  || '';
+        const river  = r[4]  || '';
+        const sd1    = r[5]  || '';
+        const sd2    = r[6]  || '';
+        const pos    = r[7]  || '';
+        const hit    = r[14] || '';
+        const fold   = r[15] || '';
+        const result = r[16] || '';
 
         const noteItems = [
             { label: 'HAND',  text: r[8]  || '' },
@@ -388,6 +393,20 @@ function renderHistory() {
             ? '<span class="cv-empty">—</span>'
             : (hit ? `<span class="hit-badge hit-${getHitTier(hit)}">${hit}</span>` : '<span class="cv-empty">—</span>');
 
+        const foldDisplay = fold
+            ? `<span class="fold-badge">${fold}</span>`
+            : '<span class="cv-empty">—</span>';
+
+        let resultDisplay = '<span class="cv-empty">—</span>';
+        if (result) {
+            const rv = parseFloat(result);
+            if (!isNaN(rv)) {
+                const rcls = rv > 0 ? 'result-win' : rv < 0 ? 'result-loss' : 'cv-empty';
+                const rpfx = rv > 0 ? '+' : '';
+                resultDisplay = `<span class="${rcls}">${rpfx}${result} BB</span>`;
+            }
+        }
+
         const holeArr  = hand ? hand.split(' ').filter(Boolean) : [];
         const boardArr = [flop, turn, river].filter(Boolean).join(' ').split(' ').filter(Boolean);
         const fcDisplay = state.hideHand
@@ -405,6 +424,8 @@ function renderHistory() {
             <td>${cardHtml(river)}</td>
             <td>${fcDisplay}</td>
             <td>${hitDisplay}</td>
+            <td>${foldDisplay}</td>
+            <td>${resultDisplay}</td>
             <td>${cardHtml(sd1)}</td>
             <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
         `;
@@ -441,8 +462,10 @@ async function saveHand() {
     const position = document.getElementById('position-select').value;
     const { comments } = state;
 
-    const hitResult = evaluatePokerHand(hand, [...flop, ...turn, ...river]);
-    const hitText   = hitResult ? hitResult.name : '';
+    const hitResult  = evaluatePokerHand(hand, [...flop, ...turn, ...river]);
+    const hitText    = hitResult ? hitResult.name : '';
+    const foldText   = state.foldStreet ? FOLD_LABEL[state.foldStreet] : '';
+    const resultText = (document.getElementById('result-input')?.value || '').trim();
 
     const row = [
         state.handNumber,
@@ -460,6 +483,8 @@ async function saveHand() {
         comments.sd1,
         comments.sd2,
         hitText,
+        foldText,
+        resultText,
     ];
 
     const btn = document.getElementById('save-btn');
@@ -467,7 +492,7 @@ async function saveHand() {
     try {
         await gapi.client.sheets.spreadsheets.values.append({
             spreadsheetId: state.spreadsheetId,
-            range: `${SHEET_TAB}!A:O`,
+            range: `${SHEET_TAB}!A:Q`,
             valueInputOption: 'RAW',
             insertDataOption: 'INSERT_ROWS',
             resource: { values: [row] },
@@ -554,6 +579,10 @@ function clearAll() {
     FIELDS.forEach(f => { state.sel[f] = []; state.comments[f] = ''; refreshFieldDisplay(f); });
     rebuildUsed();
     document.getElementById('position-select').value = '';
+    state.foldStreet = null;
+    refreshFoldBtn();
+    const ri = document.getElementById('result-input');
+    if (ri) { ri.value = ''; ri.classList.remove('win', 'loss'); }
     setActive('hand');
 }
 
@@ -775,9 +804,11 @@ function openHandDetail(r) {
         { key:'turn',  label:'TURN',  cards: r[3]||'', note: r[10]||'' },
         { key:'river', label:'RIVER', cards: r[4]||'', note: r[11]||'' },
         { key:'fivecard', label:'5-CARD', isFiveCard: true },
-        { key:'hit',   label:'HIT',   isHit: true, hitText: r[14]||'' },
-        { key:'sd1',   label:'SD1',   cards: r[5]||'', note: r[12]||'' },
-        { key:'sd2',   label:'SD2',   cards: r[6]||'', note: r[13]||'' },
+        { key:'hit',    label:'HIT',    isHit: true,    hitText:    r[14]||'' },
+        { key:'fold',   label:'FOLD',   isFold: true,   foldText:   r[15]||'' },
+        { key:'result', label:'RESULT', isResult: true, resultText: r[16]||'' },
+        { key:'sd1',    label:'SD1',    cards: r[5]||'', note: r[12]||'' },
+        { key:'sd2',    label:'SD2',    cards: r[6]||'', note: r[13]||'' },
     ];
 
     const body = document.getElementById('hand-modal-body');
@@ -803,6 +834,34 @@ function openHandDetail(r) {
             <div class="hm-field-row">
                 <span class="hm-field-label" style="color:#f59e0b">${f.label}</span>
                 <div class="hm-field-content"><div class="hm-cards">${cardsHtml}</div></div>
+            </div>`;
+        }
+        if (f.isFold) {
+            const ft = f.foldText;
+            const foldHtml = ft
+                ? `<span class="fold-badge">${ft}</span>`
+                : '<span class="cv-empty">—</span>';
+            return `
+            <div class="hm-field-row">
+                <span class="hm-field-label" style="color:#f87171">${f.label}</span>
+                <div class="hm-field-content"><div class="hm-cards">${foldHtml}</div></div>
+            </div>`;
+        }
+        if (f.isResult) {
+            const rt = f.resultText;
+            let resultHtml = '<span class="cv-empty">—</span>';
+            if (rt) {
+                const rv = parseFloat(rt);
+                if (!isNaN(rv)) {
+                    const rcls = rv > 0 ? 'result-win' : rv < 0 ? 'result-loss' : 'cv-empty';
+                    const rpfx = rv > 0 ? '+' : '';
+                    resultHtml = `<span class="${rcls}">${rpfx}${rt} BB</span>`;
+                }
+            }
+            return `
+            <div class="hm-field-row">
+                <span class="hm-field-label" style="color:#22c55e">${f.label}</span>
+                <div class="hm-field-content"><div class="hm-cards">${resultHtml}</div></div>
             </div>`;
         }
         let cardsHtml;
@@ -843,6 +902,29 @@ function toggleHideHand() {
     renderHistory();
 }
 
+// ─── Fold toggle ──────────────────────────────────────────────────────────────
+function toggleFold() {
+    if (state.foldStreet) {
+        state.foldStreet = null;
+    } else {
+        const f = state.activeField;
+        if (['hand', 'flop', 'turn', 'river'].includes(f)) state.foldStreet = f;
+    }
+    refreshFoldBtn();
+}
+
+function refreshFoldBtn() {
+    const btn = document.getElementById('fold-btn');
+    if (!btn) return;
+    if (state.foldStreet) {
+        btn.textContent = `🏳 ${FOLD_LABEL[state.foldStreet]}`;
+        btn.classList.add('fold-active');
+    } else {
+        btn.textContent = '🏳 Fold';
+        btn.classList.remove('fold-active');
+    }
+}
+
 // ─── Comment area toggle ──────────────────────────────────────────────────────
 function toggleCommentArea() {
     state.showComment = !state.showComment;
@@ -862,12 +944,19 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshPickerHeader();
     refreshCommentInput();
 
+    document.getElementById('fold-btn').addEventListener('click', toggleFold);
     document.getElementById('undo-btn').addEventListener('click', undoLast);
     document.getElementById('clear-field-btn').addEventListener('click', clearField);
     document.getElementById('clear-btn').addEventListener('click', clearAll);
     document.getElementById('save-btn').addEventListener('click', saveHand);
     document.getElementById('hide-hand-btn').addEventListener('click', toggleHideHand);
     document.getElementById('comment-toggle-btn').addEventListener('click', toggleCommentArea);
+
+    document.getElementById('result-input').addEventListener('input', function() {
+        const v = parseFloat(this.value);
+        this.classList.toggle('win',  !isNaN(v) && v > 0);
+        this.classList.toggle('loss', !isNaN(v) && v < 0);
+    });
 
     document.getElementById('comment-input').addEventListener('input', () => {
         state.comments[state.activeField] = document.getElementById('comment-input').value;

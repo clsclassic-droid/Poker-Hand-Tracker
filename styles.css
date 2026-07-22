@@ -168,20 +168,52 @@ header h1 {
 #sheet-link.visible { display: inline-block; }
 #sheet-link:hover { background: var(--blue-dim); }
 
-/* ─── Position Row ───────────────────────────────────────────────────────── */
-#position-row {
+/* ─── Meta Row (Position + Result) ──────────────────────────────────────── */
+#meta-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
+    flex-wrap: wrap;
     margin-bottom: 10px;
 }
 
-#position-row label {
+#position-row, #result-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#position-row label, #result-row label {
     font-size: .82rem;
     font-weight: 700;
     color: var(--text-dim);
     letter-spacing: .5px;
     white-space: nowrap;
+}
+
+#result-input {
+    background: var(--surface);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    font-size: .88rem;
+    font-weight: 600;
+    width: 84px;
+    text-align: center;
+    transition: border-color .15s, color .15s;
+    -moz-appearance: textfield;
+}
+#result-input::-webkit-outer-spin-button,
+#result-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+#result-input:focus { outline: none; border-color: var(--border2); }
+#result-input.win  { border-color: #16a34a; color: #4ade80; }
+#result-input.loss { border-color: #991b1b; color: #f87171; }
+
+.result-unit {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--text-muted);
 }
 
 #position-select {
@@ -409,6 +441,30 @@ header h1 {
     opacity: .3;
     cursor: not-allowed;
 }
+
+/* ─── Fold button ────────────────────────────────────────────────────────── */
+#fold-btn.fold-active {
+    background: rgba(239,68,68,.15);
+    border-color: #ef4444;
+    color: #f87171;
+}
+
+/* Fold badge in history table & modal */
+.fold-badge {
+    display: inline-block;
+    background: rgba(239,68,68,.12);
+    border: 1px solid #ef4444;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #f87171;
+    white-space: nowrap;
+}
+
+/* Result win/loss in history table & modal */
+.result-win  { color: #4ade80; font-weight: 700; }
+.result-loss { color: #f87171; font-weight: 700; }
 
 /* ─── Hide-hand button ───────────────────────────────────────────────────── */
 #hide-hand-btn {

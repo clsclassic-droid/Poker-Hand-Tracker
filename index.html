@@ -43,22 +43,29 @@
                 </a>
             </div>
 
-            <!-- Position Row -->
-            <div id="position-row">
-                <label for="position-select">ตำแหน่ง</label>
-                <select id="position-select">
-                    <option value="">— เลือก —</option>
-                    <option>SB</option>
-                    <option>BB</option>
-                    <option>UTG</option>
-                    <option>UTG+1</option>
-                    <option>Mid</option>
-                    <option>Mid+1</option>
-                    <option>HJ</option>
-                    <option>LJ</option>
-                    <option>CO</option>
-                    <option>BT</option>
-                </select>
+            <!-- Position + Result Row -->
+            <div id="meta-row">
+                <div id="position-row">
+                    <label for="position-select">ตำแหน่ง</label>
+                    <select id="position-select">
+                        <option value="">— เลือก —</option>
+                        <option>SB</option>
+                        <option>BB</option>
+                        <option>UTG</option>
+                        <option>UTG+1</option>
+                        <option>Mid</option>
+                        <option>Mid+1</option>
+                        <option>HJ</option>
+                        <option>LJ</option>
+                        <option>CO</option>
+                        <option>BT</option>
+                    </select>
+                </div>
+                <div id="result-row">
+                    <label for="result-input">RESULT</label>
+                    <input type="number" id="result-input" placeholder="0" step="any">
+                    <span class="result-unit">BB</span>
+                </div>
             </div>
 
             <!-- Fields Bar -->
@@ -75,6 +82,7 @@
                         <span id="picker-count" class="count-badge">0 / 2</span>
                     </div>
                     <div id="picker-right">
+                        <button class="icon-btn" id="fold-btn">🏳 Fold</button>
                         <button class="icon-btn" id="comment-toggle-btn">💬 Note</button>
                         <button class="icon-btn" id="undo-btn" title="ยกเลิกใบล่าสุด">↩ ยกเลิก</button>
                         <button class="icon-btn" id="clear-field-btn" title="ล้างฟิลด์นี้">✕ ล้าง</button>
@@ -116,6 +124,8 @@
                                 <th>River</th>
                                 <th>5-Card</th>
                                 <th>HIT</th>
+                                <th>Fold</th>
+                                <th>Result</th>
                                 <th>SD1</th>
                                 <th>SD2</th>
                             </tr>
