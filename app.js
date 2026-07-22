@@ -18,6 +18,7 @@ const FIELD_CFG = {
     sd2:   { label: 'SD2',   max: 2 },
 };
 const FIELDS = ['hand', 'flop', 'turn', 'river', 'sd1', 'sd2'];
+const FIELD_COLORS = { hand:'#a78bfa', flop:'#67e8f9', turn:'#fbbf24', river:'#f87171', sd1:'#818cf8', sd2:'#60a5fa' };
 
 // Sheet column layout (A-N):
 // A:No. B:Hand C:Flop D:Turn E:River F:SD1 G:SD2
@@ -418,8 +419,11 @@ function refreshCommentInput() {
     const f     = state.activeField;
     const label = document.getElementById('comment-label');
     const ta    = document.getElementById('comment-input');
-    if (label) label.textContent = '💬 ' + FIELD_CFG[f].label;
-    if (ta)    ta.value = state.comments[f];
+    if (label) {
+        label.textContent = '💬 ' + FIELD_CFG[f].label;
+        label.style.color = FIELD_COLORS[f] || 'var(--text-dim)';
+    }
+    if (ta) ta.value = state.comments[f];
 }
 
 // ─── UI Helpers ───────────────────────────────────────────────────────────────
@@ -427,7 +431,9 @@ function refreshPickerHeader() {
     const f   = state.activeField;
     const cfg = FIELD_CFG[f];
     const cnt = state.sel[f].length;
-    document.getElementById('picker-field-name').textContent = cfg.label;
+    const nameEl = document.getElementById('picker-field-name');
+    nameEl.textContent = cfg.label;
+    nameEl.style.color = FIELD_COLORS[f] || 'var(--accent)';
     const badge = document.getElementById('picker-count');
     badge.textContent = `${cnt} / ${cfg.max}`;
     badge.classList.toggle('full', cnt === cfg.max);
@@ -471,6 +477,8 @@ function refreshCardGrid() {
     const f    = state.activeField;
     const sel  = state.sel[f];
     const full = sel.length >= FIELD_CFG[f].max;
+    // When hiding hand and not on HAND field, don't expose hand cards via the grid
+    const concealHand = state.hideHand && f !== 'hand';
 
     SUITS.forEach(suit => {
         RANKS.forEach(rank => {
@@ -479,7 +487,8 @@ function refreshCardGrid() {
             if (!btn) return;
 
             const isSelected      = sel.includes(id);
-            const isUsedElsewhere = state.usedCards.has(id) && !isSelected;
+            const isUsedElsewhere = state.usedCards.has(id) && !isSelected
+                                    && !(concealHand && state.sel.hand.includes(id));
 
             btn.classList.remove('selected', 'used', 'field-full');
             btn.disabled = false;
@@ -561,12 +570,12 @@ function openHandDetail(r) {
     titleEl.innerHTML = `Hand #${no}${pos ? ` <span class="hm-pos-badge">${pos}</span>` : ''}`;
 
     const fields = [
-        { label: 'HAND',  cards: r[1] || '', note: r[8]  || '', hideCards: state.hideHand },
-        { label: 'FLOP',  cards: r[2] || '', note: r[9]  || '' },
-        { label: 'TURN',  cards: r[3] || '', note: r[10] || '' },
-        { label: 'RIVER', cards: r[4] || '', note: r[11] || '' },
-        { label: 'SD1',   cards: r[5] || '', note: r[12] || '' },
-        { label: 'SD2',   cards: r[6] || '', note: r[13] || '' },
+        { key:'hand',  label:'HAND',  cards: r[1]||'', note: r[8] ||'', hideCards: state.hideHand },
+        { key:'flop',  label:'FLOP',  cards: r[2]||'', note: r[9] ||'' },
+        { key:'turn',  label:'TURN',  cards: r[3]||'', note: r[10]||'' },
+        { key:'river', label:'RIVER', cards: r[4]||'', note: r[11]||'' },
+        { key:'sd1',   label:'SD1',   cards: r[5]||'', note: r[12]||'' },
+        { key:'sd2',   label:'SD2',   cards: r[6]||'', note: r[13]||'' },
     ];
 
     const body = document.getElementById('hand-modal-body');
@@ -578,9 +587,10 @@ function openHandDetail(r) {
             cardsHtml = f.cards ? cardHtml(f.cards) : '<span class="cv-empty">—</span>';
         }
         const noteHtml = f.note ? `<div class="hm-note">${f.note}</div>` : '';
+        const color = FIELD_COLORS[f.key] || 'var(--text-muted)';
         return `
             <div class="hm-field-row">
-                <span class="hm-field-label">${f.label}</span>
+                <span class="hm-field-label" style="color:${color}">${f.label}</span>
                 <div class="hm-field-content">
                     <div class="hm-cards">${cardsHtml}</div>
                     ${noteHtml}
@@ -602,6 +612,7 @@ function toggleHideHand() {
     btn.textContent  = state.hideHand ? '🙈 Hand' : '👁 Hand';
     btn.classList.toggle('active', state.hideHand);
     refreshFieldDisplay('hand');
+    refreshCardGrid();
     renderHistory();
 }
 
