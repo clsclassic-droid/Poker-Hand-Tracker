@@ -553,7 +553,7 @@ async function saveHand() {
     // Flush current comment textarea to state before saving
     syncCommentInput();
 
-    const position = document.getElementById('position-select').value;
+    const position = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
     const { comments } = state;
 
     const board     = [...flop, ...turn, ...river];
@@ -734,7 +734,7 @@ function clearField() {
 function clearAll() {
     FIELDS.forEach(f => { state.sel[f] = []; state.comments[f] = ''; refreshFieldDisplay(f); });
     rebuildUsed();
-    document.getElementById('position-select').value = '';
+    document.querySelectorAll('#position-chips .pos-chip').forEach(b => b.classList.remove('selected'));
     state.foldStreet = null;
     ['bet-pf','bet-flop','bet-turn','bet-river','pot-input'].forEach(id => {
         const el = document.getElementById(id);
@@ -1092,7 +1092,9 @@ function editHand(r, histIdx) {
     };
     FIELDS.forEach(f => refreshFieldDisplay(f));
 
-    document.getElementById('position-select').value = r[7] || '';
+    document.querySelectorAll('#position-chips .pos-chip').forEach(b => {
+        b.classList.toggle('selected', b.dataset.pos === (r[7] || ''));
+    });
     state.foldStreet = FOLD_TO_FIELD[r[15]] || null;
     refreshFoldBtn();
 
@@ -1228,6 +1230,14 @@ document.addEventListener('DOMContentLoaded', () => {
     buildCardGrid();
     refreshPickerHeader();
     refreshCommentInput();
+
+    document.getElementById('position-chips').addEventListener('click', e => {
+        const chip = e.target.closest('.pos-chip');
+        if (!chip) return;
+        const wasSelected = chip.classList.contains('selected');
+        document.querySelectorAll('#position-chips .pos-chip').forEach(b => b.classList.remove('selected'));
+        if (!wasSelected) chip.classList.add('selected');
+    });
 
     document.getElementById('fold-btn').addEventListener('click', toggleFold);
     document.getElementById('undo-btn').addEventListener('click', undoLast);

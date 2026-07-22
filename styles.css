@@ -294,6 +294,11 @@ header h1 {
 .bet-input:focus { outline: none; border-color: var(--border2); }
 .bet-input:disabled { opacity: .45; cursor: not-allowed; }
 
+#bet-pf    { border-left: 3px solid #a78bfa; border-radius: 0 5px 5px 0; }
+#bet-flop  { border-left: 3px solid #67e8f9; border-radius: 0 5px 5px 0; }
+#bet-turn  { border-left: 3px solid #fbbf24; border-radius: 0 5px 5px 0; }
+#bet-river { border-left: 3px solid #f87171; border-radius: 0 5px 5px 0; }
+
 .pot-input { width: 72px; border-color: #166534; }
 .pot-input:focus { border-color: var(--accent); }
 
@@ -333,28 +338,31 @@ header h1 {
 .result-preview.rp-win  { color: #4ade80; }
 .result-preview.rp-loss { color: #f87171; }
 
-#position-select {
+#position-chips {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.pos-chip {
     background: var(--surface);
-    color: var(--text);
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
-    padding: 6px 28px 6px 12px;
-    font-size: .88rem;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: .8rem;
     font-weight: 600;
+    font-family: inherit;
     cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a9ab8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    transition: border-color .15s;
-    min-width: 120px;
+    transition: background .12s, color .12s, border-color .12s;
+    white-space: nowrap;
 }
-#position-select:focus {
-    outline: none;
-    border-color: var(--accent);
+.pos-chip:hover { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+.pos-chip.selected {
+    background: var(--blue-dim);
+    border-color: var(--blue);
+    color: var(--blue);
 }
-#position-select option { background: var(--surface2); }
 
 /* ─── Fields Bar ─────────────────────────────────────────────────────────── */
 #fields-bar {
