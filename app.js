@@ -107,7 +107,7 @@ function evaluatePokerHand(hole, board) {
         [7, v=>`โฟร์ ${rn(v)}`,                 '4k'],
         [6, (v,w)=>`ฟูล ${rn(v)}/${rn(w)}`,    'fh'],
         [5, v=>`ฟลัส ${rn(v)}`,                 'fl'],
-        [4, v=>`สตรีท ${rn(v)}`,                'st'],
+        [4, v=>`เสตรท ${rn(v)}`,                 'st'],
         [3, v=>`ตอง ${rn(v)}`,                  'trips'],
         [2, (v,w)=>`สองคู่ ${rn(v)}&${rn(w)}`, '2p'],
         [1, v=>`คู่ ${rn(v)}`,                  'pair'],
@@ -146,7 +146,7 @@ function getHitTier(text) {
     if (text.startsWith('โฟร์'))   return '4k';
     if (text.startsWith('ฟูล'))    return 'fh';
     if (text.startsWith('ฟลัส'))   return 'fl';
-    if (text.startsWith('สตรีท')) return 'st';
+    if (text.startsWith('สตรีท') || text.startsWith('เสตรท')) return 'st';
     if (text.startsWith('ตอง'))    return 'trips';
     if (text.startsWith('สองคู่')) return '2p';
     if (text.startsWith('คู่'))    return 'pair';
@@ -186,6 +186,8 @@ const state = {
     hideHand:      false,
     showComment:   false,
     foldStreet:    null,
+    sheetId:       0,
+    editing:       null,
 };
 
 // ─── GAPI / GIS init ─────────────────────────────────────────────────────────
@@ -255,10 +257,15 @@ async function initSpreadsheet() {
     try {
         let id = localStorage.getItem(LS_SHEET_KEY);
         if (id) {
-            try { await gapi.client.sheets.spreadsheets.get({ spreadsheetId: id }); }
-            catch (_) { id = null; localStorage.removeItem(LS_SHEET_KEY); }
+            try {
+                const meta = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: id });
+                state.sheetId = meta.result.sheets?.find(s => s.properties.title === SHEET_TAB)?.properties?.sheetId ?? 0;
+            } catch (_) { id = null; localStorage.removeItem(LS_SHEET_KEY); }
         }
-        if (!id) id = await findOrCreate();
+        if (!id) {
+            id = await findOrCreate();
+            state.sheetId = 0;
+        }
         state.spreadsheetId = id;
         localStorage.setItem(LS_SHEET_KEY, id);
 
@@ -406,7 +413,7 @@ function renderHistory() {
             if (!isNaN(rv)) {
                 const cls = rv > 0 ? 'result-win' : 'result-loss';
                 const pfx = rv > 0 ? '+' : '';
-                resultDisplay = `<span class="${cls}">${pfx}${Math.abs(rv).toLocaleString()} ฿</span>`;
+                resultDisplay = `<span class="${cls}">${pfx}${rv.toLocaleString()}</span>`;
             }
         }
 
@@ -416,6 +423,7 @@ function renderHistory() {
             ? '<span class="cv-empty">—</span>'
             : fiveCardHtml(holeArr, boardArr);
 
+        const histIdx = state.history.indexOf(r);
         const tr = document.createElement('tr');
         tr.className = 'history-row clickable-row';
         tr.innerHTML = `
@@ -430,8 +438,14 @@ function renderHistory() {
             <td>${cardHtml(sd1)}</td>
             <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
             <td>${resultDisplay}</td>
+            <td class="row-actions">
+                <button class="row-action-btn edit-btn" title="แก้ไข">✏️</button>
+                <button class="row-action-btn del-btn" title="ลบ">🗑️</button>
+            </td>
         `;
         tr.addEventListener('click', () => openHandDetail(r));
+        tr.querySelector('.edit-btn').addEventListener('click', e => { e.stopPropagation(); editHand(r, histIdx); });
+        tr.querySelector('.del-btn').addEventListener('click',  e => { e.stopPropagation(); deleteHand(histIdx); });
         tbody.appendChild(tr);
     }
 
@@ -494,8 +508,9 @@ async function saveHand() {
         }
     }
 
+    const handNum = state.editing ? state.editing.handNum : state.handNumber;
     const row = [
-        state.handNumber,
+        handNum,
         hand.join(' '),
         flop.join(' '),
         turn.join(' '),
@@ -522,20 +537,36 @@ async function saveHand() {
     const btn = document.getElementById('save-btn');
     btn.disabled = true;
     try {
-        await gapi.client.sheets.spreadsheets.values.append({
-            spreadsheetId: state.spreadsheetId,
-            range: `${SHEET_TAB}!A:V`,
-            valueInputOption: 'RAW',
-            insertDataOption: 'INSERT_ROWS',
-            resource: { values: [row] },
-        });
-
-        showToast(`✓ บันทึก Hand #${state.handNumber} สำเร็จ!`, 'success');
-        state.history.push(row);
-        renderHistory();
-        state.handNumber++;
-        document.getElementById('hand-num-display').textContent = state.handNumber;
-        clearAll();
+        if (state.editing) {
+            const { histIdx, handNum } = state.editing;
+            const sheetRow = histIdx + 2;
+            await gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: state.spreadsheetId,
+                range: `${SHEET_TAB}!A${sheetRow}:V${sheetRow}`,
+                valueInputOption: 'RAW',
+                resource: { values: [row] },
+            });
+            state.history[histIdx] = row;
+            state.editing = null;
+            btn.textContent = '💾 บันทึก Hand';
+            showToast(`✓ อัปเดต Hand #${handNum} สำเร็จ!`, 'success');
+            renderHistory();
+            clearAll();
+        } else {
+            await gapi.client.sheets.spreadsheets.values.append({
+                spreadsheetId: state.spreadsheetId,
+                range: `${SHEET_TAB}!A:V`,
+                valueInputOption: 'RAW',
+                insertDataOption: 'INSERT_ROWS',
+                resource: { values: [row] },
+            });
+            showToast(`✓ บันทึก Hand #${state.handNumber} สำเร็จ!`, 'success');
+            state.history.push(row);
+            renderHistory();
+            state.handNumber++;
+            document.getElementById('hand-num-display').textContent = state.handNumber;
+            clearAll();
+        }
     } catch (e) {
         showToast('บันทึกล้มเหลว: ' + (e.result?.error?.message || e.message || e), 'error');
         console.error(e);
@@ -616,6 +647,11 @@ function clearAll() {
         const el = document.getElementById(id);
         if (el) { el.value = ''; el.disabled = false; }
     });
+    if (state.editing) {
+        state.editing = null;
+        document.getElementById('save-btn').textContent = '💾 บันทึก Hand';
+        document.getElementById('hand-num-display').textContent = state.handNumber;
+    }
     refreshFoldBtn(); // also calls refreshResultDisplay
     setActive('hand');
 }
@@ -880,7 +916,7 @@ function openHandDetail(r) {
                 if (!isNaN(rv)) {
                     const cls = rv > 0 ? 'result-win' : 'result-loss';
                     const pfx = rv > 0 ? '+' : '';
-                    resultHtml = `<span class="${cls}">${pfx}${Math.abs(rv).toLocaleString()} ฿</span>`;
+                    resultHtml = `<span class="${cls}">${pfx}${rv.toLocaleString()}</span>`;
                 }
             }
             return `
@@ -913,6 +949,75 @@ function openHandDetail(r) {
 
 function closeHandDetail() {
     document.getElementById('hand-modal-overlay').classList.add('hand-modal-hidden');
+}
+
+// ─── Delete / Edit hand ───────────────────────────────────────────────────────
+async function deleteHand(histIdx) {
+    const handNo = state.history[histIdx]?.[0] || '?';
+    if (!confirm(`ลบ Hand #${handNo} ใช่ไหม?`)) return;
+    try {
+        await gapi.client.sheets.spreadsheets.batchUpdate({
+            spreadsheetId: state.spreadsheetId,
+            resource: {
+                requests: [{
+                    deleteDimension: {
+                        range: {
+                            sheetId:    state.sheetId,
+                            dimension:  'ROWS',
+                            startIndex: histIdx + 1,
+                            endIndex:   histIdx + 2,
+                        },
+                    },
+                }],
+            },
+        });
+        state.history.splice(histIdx, 1);
+        if (state.editing?.histIdx === histIdx) {
+            state.editing = null;
+            document.getElementById('save-btn').textContent = '💾 บันทึก Hand';
+        }
+        calcHandNumber();
+        renderHistory();
+        showToast(`ลบ Hand #${handNo} สำเร็จ`, 'success');
+    } catch (e) {
+        showToast('ลบล้มเหลว: ' + (e.result?.error?.message || e.message || e), 'error');
+    }
+}
+
+function editHand(r, histIdx) {
+    closeHandDetail();
+    const fieldMap = { hand: r[1]||'', flop: r[2]||'', turn: r[3]||'', river: r[4]||'', sd1: r[5]||'', sd2: r[6]||'' };
+    FIELDS.forEach(f => {
+        state.sel[f] = fieldMap[f] ? fieldMap[f].split(' ').filter(Boolean) : [];
+        refreshFieldDisplay(f);
+    });
+    state.comments = {
+        hand: r[8]||'', flop: r[9]||'', turn: r[10]||'',
+        river: r[11]||'', sd1: r[12]||'', sd2: r[13]||'',
+    };
+    FIELDS.forEach(f => refreshFieldDisplay(f));
+
+    document.getElementById('position-select').value = r[7] || '';
+    state.foldStreet = FOLD_TO_FIELD[r[15]] || null;
+    refreshFoldBtn();
+
+    document.getElementById('bet-pf').value    = r[16] || '';
+    document.getElementById('bet-flop').value  = r[17] || '';
+    document.getElementById('bet-turn').value  = r[18] || '';
+    document.getElementById('bet-river').value = r[19] || '';
+    const wonEl = document.getElementById('won-input');
+    wonEl.value    = r[20] || '';
+    wonEl.disabled = !!state.foldStreet;
+    refreshResultDisplay();
+
+    rebuildUsed();
+    setActive('hand');
+
+    state.editing = { histIdx, handNum: r[0] || state.handNumber };
+    document.getElementById('save-btn').textContent = '💾 อัปเดต Hand';
+    document.getElementById('hand-num-display').textContent = r[0] || state.handNumber;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ─── Hide Hand toggle ─────────────────────────────────────────────────────────
