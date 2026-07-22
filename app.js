@@ -1064,18 +1064,38 @@ function refreshFoldBtn() {
 }
 
 function refreshResultDisplay() {
-    const betPF    = parseFloat(document.getElementById('bet-pf')?.value)   || 0;
-    const betFLOP  = parseFloat(document.getElementById('bet-flop')?.value)  || 0;
-    const betTURN  = parseFloat(document.getElementById('bet-turn')?.value)  || 0;
-    const betRIVER = parseFloat(document.getElementById('bet-river')?.value) || 0;
-    const potAmt   = parseFloat(document.getElementById('pot-input')?.value) || 0;
-    const total    = betPF + betFLOP + betTURN + betRIVER;
+    const BET_IDS    = ['bet-pf', 'bet-flop', 'bet-turn', 'bet-river'];
+    const BET_LABELS = ['PF', 'FLOP', 'TURN', 'RIVER'];
+    const betVals = BET_IDS.map(id => {
+        const el = document.getElementById(id);
+        return (el && el.value !== '') ? (parseFloat(el.value) || 0) : null;
+    });
+    const potAmt = parseFloat(document.getElementById('pot-input')?.value) || 0;
+    const total  = betVals.reduce((a, b) => a + (b ?? 0), 0);
 
     const totalEl = document.getElementById('bet-total');
     if (totalEl) totalEl.textContent = total > 0 ? total.toLocaleString() + ' ฿' : '0 ฿';
 
     const potEl = document.getElementById('pot-input');
     if (potEl) potEl.disabled = !!state.foldStreet;
+
+    // Pot Odds badge — uses last filled street
+    const badge = document.getElementById('pot-odds-badge');
+    if (badge) {
+        let lastIdx = -1;
+        for (let i = 0; i < betVals.length; i++) if (betVals[i] !== null) lastIdx = i;
+
+        if (potAmt > 0 && lastIdx >= 0 && betVals[lastIdx] > 0) {
+            const b   = betVals[lastIdx];
+            const pct = b / (potAmt + b) * 100;
+            const cls = pct <= 25 ? 'pot-odds-good' : pct <= 33 ? 'pot-odds-mid' : 'pot-odds-bad';
+            badge.textContent = BET_LABELS[lastIdx] + ' ' + pct.toFixed(1) + '%';
+            badge.className   = 'pot-odds-badge ' + cls;
+        } else {
+            badge.textContent = '—';
+            badge.className   = 'pot-odds-badge pot-odds-empty';
+        }
+    }
 
     const rp = document.getElementById('result-preview');
     if (!rp) return;
