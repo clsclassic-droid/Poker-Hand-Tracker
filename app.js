@@ -466,10 +466,10 @@ function renderHistory() {
                 : (hit ? `<span class="hit-badge hit-${getHitTier(hit)}">${hit}</span>` : '<span class="cv-empty">—</span>');
 
             let resultDisplay = '<span class="cv-empty">—</span>';
-            if (result) {
+            if (result !== '' && result !== undefined && result !== null) {
                 const rv = parseFloat(result);
                 if (!isNaN(rv)) {
-                    const cls = rv > 0 ? 'result-win' : 'result-loss';
+                    const cls = rv > 0 ? 'result-win' : rv < 0 ? 'result-loss' : 'result-tie';
                     const pfx = rv > 0 ? '+' : '';
                     resultDisplay = `<span class="${cls}">${pfx}${rv.toLocaleString()}</span>`;
                 }
@@ -561,21 +561,26 @@ async function saveHand() {
     } else if (totalBet > 0) {
         const opponents = [sd1, sd2].filter(h => h.length >= 2);
         let weWin = opponents.length === 0 ? (potAmt > 0 ? true : null) : null;
+        let tied = false;
         if (opponents.length > 0) {
             let weLose = false;
             for (const oppHole of opponents) {
                 const oppResult = evaluatePokerHand(oppHole, board);
-                if (oppResult && hitResult && _cmpScore(oppResult.score, hitResult.score) >= 0) {
-                    weLose = true; break;
+                if (oppResult && hitResult) {
+                    const cmp = _cmpScore(oppResult.score, hitResult.score);
+                    if (cmp > 0) { weLose = true; break; }
+                    if (cmp === 0) tied = true;
                 }
             }
-            weWin = !weLose;
+            weWin = weLose ? false : (tied ? null : true);
         }
         if (weWin === true) {
             const potProfit = potAmt - totalBet;
             resultVal = String(potProfit > 0 ? potProfit : totalBet);
         } else if (weWin === false) {
             resultVal = String(-totalBet);
+        } else if (tied) {
+            resultVal = '0';
         }
     }
 

@@ -584,9 +584,10 @@ header h1 {
     flex-shrink: 0;
 }
 
-/* Result win/loss in history table & modal */
+/* Result win/loss/tie in history table & modal */
 .result-win  { color: #4ade80; font-weight: 700; }
 .result-loss { color: #f87171; font-weight: 700; }
+.result-tie  { color: #94a3b8; font-weight: 700; }
 
 /* ─── Hide-hand button ───────────────────────────────────────────────────── */
 #hide-hand-btn {
