@@ -37,6 +37,7 @@
             <!-- Hand Number + Sheet Link -->
             <div id="top-bar">
                 <div id="hand-number">Hand #<span id="hand-num-display">1</span></div>
+                <button id="hide-hand-btn" class="icon-btn" title="ซ่อน/แสดง Hand">👁 Hand</button>
                 <a id="sheet-link" href="#" target="_blank" title="เปิด Google Sheet">
                     📊 เปิด Sheet
                 </a>
@@ -74,6 +75,7 @@
                         <span id="picker-count" class="count-badge">0 / 2</span>
                     </div>
                     <div id="picker-right">
+                        <button class="icon-btn" id="comment-toggle-btn">💬 Note</button>
                         <button class="icon-btn" id="undo-btn" title="ยกเลิกใบล่าสุด">↩ ยกเลิก</button>
                         <button class="icon-btn" id="clear-field-btn" title="ล้างฟิลด์นี้">✕ ล้าง</button>
                     </div>
@@ -83,8 +85,8 @@
                         <!-- Built by JS -->
                     </div>
                 </div>
-                <!-- Comment input -->
-                <div id="comment-row">
+                <!-- Comment input (hidden by default, toggle with 💬 button) -->
+                <div id="comment-row" class="comment-hidden">
                     <div id="comment-label">💬 HAND</div>
                     <textarea id="comment-input" placeholder="บันทึกเหตุการณ์ที่เกิดขึ้น..."></textarea>
                 </div>

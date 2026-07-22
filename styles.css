@@ -401,6 +401,26 @@ header h1 {
     cursor: not-allowed;
 }
 
+/* ─── Hide-hand button ───────────────────────────────────────────────────── */
+#hide-hand-btn {
+    font-size: .8rem;
+    padding: 4px 10px;
+    border-radius: var(--radius);
+}
+#hide-hand-btn.active {
+    background: #7c3aed;
+    border-color: #7c3aed;
+    color: #fff;
+}
+
+/* ─── Comment toggle ─────────────────────────────────────────────────────── */
+#comment-toggle-btn.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+.comment-hidden { display: none !important; }
+
 /* ─── Comment Row ────────────────────────────────────────────────────────── */
 #comment-row {
     display: flex;
@@ -447,6 +467,41 @@ header h1 {
     font-size: .55rem;
     vertical-align: super;
 }
+
+/* History note row */
+.note-row td {
+    background: var(--surface2);
+    padding: 8px 14px 10px;
+    border-top: none;
+}
+.note-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+}
+.note-cell .note-item {
+    font-size: .78rem;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.note-cell .note-item strong {
+    color: var(--accent);
+    font-size: .7rem;
+    letter-spacing: .5px;
+}
+.note-toggle-btn {
+    cursor: pointer;
+    user-select: none;
+    margin-left: 6px;
+    font-size: .85rem;
+    opacity: .7;
+    transition: opacity .15s;
+}
+.note-toggle-btn:hover { opacity: 1; }
+
+/* Hidden hand cards */
+.hand-hidden { filter: blur(4px); user-select: none; pointer-events: none; }
 
 /* Position badge in history table */
 .pos-badge {

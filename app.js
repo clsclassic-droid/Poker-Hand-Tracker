@@ -48,6 +48,8 @@ const state = {
     comments:      { hand:'',  flop:'',  turn:'',  river:'',  sd1:'',  sd2:'' },
     usedCards:     new Set(),
     history:       [],
+    hideHand:      false,
+    showComment:   false,
 };
 
 // ─── GAPI / GIS init ─────────────────────────────────────────────────────────
@@ -224,40 +226,67 @@ function renderHistory() {
     const tbody = document.getElementById('history-body');
     tbody.innerHTML = '';
     const rows = [...state.history].reverse().slice(0, 25);
-    for (const r of rows) {
-        const no   = r[0] || '';
-        const hand = r[1] || '';
-        const flop = r[2] || '';
-        const turn = r[3] || '';
-        const river= r[4] || '';
-        const sd1  = r[5] || '';
-        const sd2  = r[6] || '';
-        const pos  = r[7] || '';
 
-        // Build note tooltip for the row
-        const notes = [
-            r[8]  ? `HAND: ${r[8]}`  : '',
-            r[9]  ? `FLOP: ${r[9]}`  : '',
-            r[10] ? `TURN: ${r[10]}` : '',
-            r[11] ? `RIVER: ${r[11]}`: '',
-            r[12] ? `SD1: ${r[12]}`  : '',
-            r[13] ? `SD2: ${r[13]}`  : '',
-        ].filter(Boolean).join('\n');
+    for (const r of rows) {
+        const no    = r[0] || '';
+        const hand  = r[1] || '';
+        const flop  = r[2] || '';
+        const turn  = r[3] || '';
+        const river = r[4] || '';
+        const sd1   = r[5] || '';
+        const sd2   = r[6] || '';
+        const pos   = r[7] || '';
+
+        const noteItems = [
+            { label: 'HAND',  text: r[8]  || '' },
+            { label: 'FLOP',  text: r[9]  || '' },
+            { label: 'TURN',  text: r[10] || '' },
+            { label: 'RIVER', text: r[11] || '' },
+            { label: 'SD1',   text: r[12] || '' },
+            { label: 'SD2',   text: r[13] || '' },
+        ].filter(n => n.text);
+        const hasNotes = noteItems.length > 0;
+
+        const handDisplay = state.hideHand
+            ? '<span class="hand-hidden" style="filter:blur(4px)">●●</span>'
+            : cardHtml(hand);
 
         const tr = document.createElement('tr');
-        if (notes) tr.title = notes;
+        tr.className = 'history-row';
         tr.innerHTML = `
             <td>${no || '<span class="cv-empty">—</span>'}</td>
             <td>${pos ? `<span class="pos-badge">${pos}</span>` : '<span class="cv-empty">—</span>'}</td>
-            <td>${cardHtml(hand)}</td>
+            <td>${handDisplay}</td>
             <td>${cardHtml(flop)}</td>
             <td>${cardHtml(turn)}</td>
             <td>${cardHtml(river)}</td>
             <td>${cardHtml(sd1)}</td>
-            <td>${cardHtml(sd2)}${notes ? ' 💬' : ''}</td>
+            <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-toggle-btn" title="ดู/ซ่อน comment">💬</span>' : ''}</td>
         `;
         tbody.appendChild(tr);
+
+        if (hasNotes) {
+            const noteRow = document.createElement('tr');
+            noteRow.className = 'note-row';
+            noteRow.style.display = 'none';
+            const noteCell = document.createElement('td');
+            noteCell.colSpan = 8;
+            noteCell.className = 'note-cell';
+            noteCell.innerHTML = noteItems
+                .map(n => `<div class="note-item"><strong>${n.label}:</strong> ${n.text}</div>`)
+                .join('');
+            noteRow.appendChild(noteCell);
+            tbody.appendChild(noteRow);
+
+            // Wire up toggle button
+            tr.querySelector('.note-toggle-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isHidden = noteRow.style.display === 'none';
+                noteRow.style.display = isHidden ? '' : 'none';
+            });
+        }
     }
+
     const cnt = document.getElementById('history-count');
     cnt.textContent = state.history.length ? `(${state.history.length} hands)` : '';
 }
@@ -437,8 +466,13 @@ function refreshFieldDisplay(field) {
             const card = sel[i];
             const suit = card.slice(-1);
             const rank = card.slice(0, -1);
-            const col  = RED_SUITS.has(suit) ? '#f87171' : '#e2e8f0';
-            html += `<span style="color:${col}">${rank}${SUIT_SYM[suit]}</span>`;
+            // Blur hand cards when hideHand is on
+            if (field === 'hand' && state.hideHand) {
+                html += `<span style="filter:blur(4px);display:inline-block">●</span>`;
+            } else {
+                const col = RED_SUITS.has(suit) ? '#f87171' : '#e2e8f0';
+                html += `<span style="color:${col}">${rank}${SUIT_SYM[suit]}</span>`;
+            }
             if (i < cfg.max - 1) html += ' ';
         } else {
             html += '<span style="color:#2d4a6a">—</span>';
@@ -538,6 +572,28 @@ function showToast(msg, type = '') {
     toastTimer = setTimeout(() => el.className = '', 3200);
 }
 
+// ─── Hide Hand toggle ─────────────────────────────────────────────────────────
+function toggleHideHand() {
+    state.hideHand = !state.hideHand;
+    const btn = document.getElementById('hide-hand-btn');
+    btn.textContent  = state.hideHand ? '🙈 Hand' : '👁 Hand';
+    btn.classList.toggle('active', state.hideHand);
+    refreshFieldDisplay('hand');
+    renderHistory();
+}
+
+// ─── Comment area toggle ──────────────────────────────────────────────────────
+function toggleCommentArea() {
+    state.showComment = !state.showComment;
+    const row = document.getElementById('comment-row');
+    const btn = document.getElementById('comment-toggle-btn');
+    row.classList.toggle('comment-hidden', !state.showComment);
+    btn.classList.toggle('active', state.showComment);
+    if (state.showComment) {
+        document.getElementById('comment-input').focus();
+    }
+}
+
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     buildFieldsBar();
@@ -549,12 +605,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('clear-field-btn').addEventListener('click', clearField);
     document.getElementById('clear-btn').addEventListener('click', clearAll);
     document.getElementById('save-btn').addEventListener('click', saveHand);
+    document.getElementById('hide-hand-btn').addEventListener('click', toggleHideHand);
+    document.getElementById('comment-toggle-btn').addEventListener('click', toggleCommentArea);
 
-    // Save comment to state when user types
     document.getElementById('comment-input').addEventListener('input', () => {
         state.comments[state.activeField] = document.getElementById('comment-input').value;
-        // Update dot indicator on field item
-        const el = document.getElementById('fd-' + state.activeField);
-        if (el) refreshFieldDisplay(state.activeField);
+        refreshFieldDisplay(state.activeField);
     });
 });
