@@ -589,6 +589,42 @@ header h1 {
 /* Hidden hand cards */
 .hand-hidden { filter: blur(4px); user-select: none; pointer-events: none; }
 
+/* ─── HIT field tiers (fields bar) ──────────────────────────────────────── */
+#fi-hit { cursor: default !important; }
+#fi-hit:hover { filter: none; }
+.fi-hit-empty .field-label { color: var(--text-muted); }
+.fi-hit-empty .field-cards { color: var(--text-muted); font-weight: 400; font-size: .7rem; }
+.fi-hit-hc    { border-color:#2d3347; background:rgba(45,51,71,.3); }
+.fi-hit-hc    .field-label { color:#3d5269; } .fi-hit-hc    .field-cards { color:#4a6580; }
+.fi-hit-pair  { border-color:#475569; background:rgba(71,85,105,.2); }
+.fi-hit-pair  .field-label { color:#94a3b8; } .fi-hit-pair  .field-cards { color:#cbd5e1; }
+.fi-hit-2p    { border-color:#475569; background:rgba(71,85,105,.25); }
+.fi-hit-2p    .field-label { color:#94a3b8; } .fi-hit-2p    .field-cards { color:#e2e8f0; }
+.fi-hit-trips { border-color:#1d4ed8; background:rgba(29,78,216,.2); }
+.fi-hit-trips .field-label { color:#60a5fa; } .fi-hit-trips .field-cards { color:#93c5fd; }
+.fi-hit-st    { border-color:#065f46; background:rgba(6,95,70,.22); }
+.fi-hit-st    .field-label { color:#34d399; } .fi-hit-st    .field-cards { color:#6ee7b7; }
+.fi-hit-fl    { border-color:#065f46; background:rgba(6,95,70,.22); }
+.fi-hit-fl    .field-label { color:#34d399; } .fi-hit-fl    .field-cards { color:#34d399; }
+.fi-hit-fh    { border-color:#c2410c; background:rgba(194,65,12,.22); }
+.fi-hit-fh    .field-label { color:#fb923c; } .fi-hit-fh    .field-cards { color:#fed7aa; }
+.fi-hit-4k    { border-color:#b45309; background:rgba(180,83,9,.26); }
+.fi-hit-4k    .field-label { color:#fbbf24; } .fi-hit-4k    .field-cards { color:#fde68a; }
+.fi-hit-sf    { border-color:#92400e; background:rgba(146,64,14,.28); }
+.fi-hit-sf    .field-label { color:#f59e0b; } .fi-hit-sf    .field-cards { color:#fcd34d; }
+
+/* HIT badge in history table & modal */
+.hit-badge { display:inline-block; font-size:.72rem; font-weight:700; padding:1px 6px; border-radius:4px; border:1px solid; white-space:nowrap; }
+.hit-badge.hit-hc    { border-color:#2d3347; background:rgba(45,51,71,.4);    color:#4a6580; }
+.hit-badge.hit-pair  { border-color:#475569; background:rgba(71,85,105,.25);  color:#cbd5e1; }
+.hit-badge.hit-2p    { border-color:#475569; background:rgba(71,85,105,.3);   color:#e2e8f0; }
+.hit-badge.hit-trips { border-color:#1d4ed8; background:rgba(29,78,216,.25);  color:#93c5fd; }
+.hit-badge.hit-st    { border-color:#065f46; background:rgba(6,95,70,.25);    color:#6ee7b7; }
+.hit-badge.hit-fl    { border-color:#065f46; background:rgba(6,95,70,.25);    color:#34d399; }
+.hit-badge.hit-fh    { border-color:#c2410c; background:rgba(194,65,12,.25);  color:#fed7aa; }
+.hit-badge.hit-4k    { border-color:#b45309; background:rgba(180,83,9,.3);    color:#fde68a; }
+.hit-badge.hit-sf    { border-color:#92400e; background:rgba(146,64,14,.32);  color:#fcd34d; }
+
 /* Position badge in history table */
 .pos-badge {
     background: var(--surface3);

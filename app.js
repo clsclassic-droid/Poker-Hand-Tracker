@@ -19,13 +19,92 @@ const FIELD_CFG = {
 };
 const FIELDS = ['hand', 'flop', 'turn', 'river', 'sd1', 'sd2'];
 const FIELD_COLORS = { hand:'#a78bfa', flop:'#67e8f9', turn:'#fbbf24', river:'#f87171', sd1:'#818cf8', sd2:'#60a5fa' };
+const HIT_COLORS   = { hc:'#4a6580', pair:'#94a3b8', '2p':'#94a3b8', trips:'#60a5fa', st:'#34d399', fl:'#34d399', fh:'#fb923c', '4k':'#fbbf24', sf:'#f59e0b' };
+
+// ─── Poker Hand Evaluator ─────────────────────────────────────────────────────
+const _RV = {A:14,K:13,Q:12,J:11,T:10,'9':9,'8':8,'7':7,'6':6,'5':5,'4':4,'3':3,'2':2};
+const _RN = {14:'A',13:'K',12:'Q',11:'J',10:'T',9:'9',8:'8',7:'7',6:'6',5:'5',4:'4',3:'3',2:'2'};
+
+function _combos(arr, k) {
+    if (k > arr.length) return [];
+    if (k === arr.length) return [arr];
+    if (k === 1) return arr.map(x => [x]);
+    const res = [];
+    for (let i = 0; i <= arr.length - k; i++)
+        for (const rest of _combos(arr.slice(i+1), k-1)) res.push([arr[i], ...rest]);
+    return res;
+}
+
+function _scoreHand(hand) {
+    const vals  = hand.map(c => c.v).sort((a,b) => b-a);
+    const suits = hand.map(c => c.s);
+    const n     = hand.length;
+    const isFlush = n >= 5 && new Set(suits).size === 1;
+    let isStraight = false, strHigh = vals[0];
+    if (n >= 5) {
+        if (vals[0]-vals[4] === 4 && new Set(vals).size === 5) { isStraight = true; }
+        else if (vals[0]===14&&vals[1]===5&&vals[2]===4&&vals[3]===3&&vals[4]===2) { isStraight=true; strHigh=5; }
+    }
+    const cnt = {};
+    vals.forEach(v => cnt[v] = (cnt[v]||0)+1);
+    const g = Object.entries(cnt).map(([v,c]) => ({v:+v,c})).sort((a,b) => b.c-a.c||b.v-a.v);
+    if (isFlush&&isStraight) return strHigh===14&&vals[1]===13 ? [9,14] : [8,strHigh];
+    if (g[0].c===4) return [7,g[0].v];
+    if (g[0].c===3&&g[1]?.c===2) return [6,g[0].v,g[1].v];
+    if (isFlush)    return [5,vals[0]];
+    if (isStraight) return [4,strHigh];
+    if (g[0].c===3) return [3,g[0].v];
+    if (g[0].c===2&&g[1]?.c===2) return [2,g[0].v,g[1].v];
+    if (g[0].c===2) return [1,g[0].v];
+    return [0,vals[0]];
+}
+
+function evaluatePokerHand(hole, board) {
+    if (hole.length < 2) return null;
+    const cards  = [...hole,...board].map(c => ({r:c.slice(0,-1), s:c.slice(-1), v:_RV[c.slice(0,-1)]}));
+    const combos = cards.length <= 5 ? [cards] : _combos(cards, 5);
+    let best = null;
+    for (const hand of combos) {
+        const s = _scoreHand(hand);
+        if (!best || s[0]>best[0] || (s[0]===best[0]&&(s[1]||0)>(best[1]||0))) best = s;
+    }
+    if (!best) return null;
+    const rn = v => _RN[v]||v;
+    const TIERS = [
+        [9, ()=>'รอยัลฟลัส',                   'sf'],
+        [8, v=>`STF ${rn(v)}`,                  'sf'],
+        [7, v=>`โฟร์ ${rn(v)}`,                 '4k'],
+        [6, (v,w)=>`ฟูล ${rn(v)}/${rn(w)}`,    'fh'],
+        [5, v=>`ฟลัส ${rn(v)}`,                 'fl'],
+        [4, v=>`สตรีท ${rn(v)}`,                'st'],
+        [3, v=>`ตอง ${rn(v)}`,                  'trips'],
+        [2, (v,w)=>`สองคู่ ${rn(v)}&${rn(w)}`, '2p'],
+        [1, v=>`คู่ ${rn(v)}`,                  'pair'],
+        [0, v=>`HC ${rn(v)}`,                   'hc'],
+    ];
+    const t = TIERS.find(t => t[0]===best[0]);
+    return t ? { name: t[1](best[1],best[2]), tier: t[2] } : null;
+}
+
+function getHitTier(text) {
+    if (!text) return 'hc';
+    if (text.startsWith('รอยัล')||text.startsWith('STF')) return 'sf';
+    if (text.startsWith('โฟร์'))   return '4k';
+    if (text.startsWith('ฟูล'))    return 'fh';
+    if (text.startsWith('ฟลัส'))   return 'fl';
+    if (text.startsWith('สตรีท')) return 'st';
+    if (text.startsWith('ตอง'))    return 'trips';
+    if (text.startsWith('สองคู่')) return '2p';
+    if (text.startsWith('คู่'))    return 'pair';
+    return 'hc';
+}
 
 // Sheet column layout (A-N):
 // A:No. B:Hand C:Flop D:Turn E:River F:SD1 G:SD2
 // H:Position I:Hand Note J:Flop Note K:Turn Note L:River Note M:SD1 Note N:SD2 Note
 const SHEET_TAB    = 'Hands';
-const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note'];
-const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note'];
+const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT'];
+const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT'];
 const FOLDER_NAME  = 'Poker Hand Tracker';
 const SHEET_NAME   = 'Poker Hand Tracker';
 const LS_SHEET_KEY = 'pht_sheet_id';
@@ -149,7 +228,7 @@ async function ensureNewHeaders(id) {
     try {
         await gapi.client.sheets.spreadsheets.values.update({
             spreadsheetId: id,
-            range: `${SHEET_TAB}!H1:N1`,
+            range: `${SHEET_TAB}!H1:O1`,
             valueInputOption: 'RAW',
             resource: { values: [NEW_HEADERS] },
         });
@@ -195,7 +274,7 @@ async function findOrCreate() {
 
     await gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: newId,
-        range: `${SHEET_TAB}!A1:N1`,
+        range: `${SHEET_TAB}!A1:O1`,
         valueInputOption: 'RAW',
         resource: { values: [HEADER_ROW] },
     });
@@ -207,7 +286,7 @@ async function findOrCreate() {
 async function loadHistory() {
     const res = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: state.spreadsheetId,
-        range: `${SHEET_TAB}!A2:N`,
+        range: `${SHEET_TAB}!A2:O`,
     });
     state.history = res.result.values || [];
     renderHistory();
@@ -237,6 +316,7 @@ function renderHistory() {
         const sd1   = r[5] || '';
         const sd2   = r[6] || '';
         const pos   = r[7] || '';
+        const hit   = r[14] || '';
 
         const noteItems = [
             { label: 'HAND',  text: r[8]  || '' },
@@ -252,6 +332,10 @@ function renderHistory() {
             ? '<span class="hand-hidden" style="filter:blur(4px)">●●</span>'
             : cardHtml(hand);
 
+        const hitDisplay = state.hideHand
+            ? '<span class="cv-empty">—</span>'
+            : (hit ? `<span class="hit-badge hit-${getHitTier(hit)}">${hit}</span>` : '<span class="cv-empty">—</span>');
+
         const tr = document.createElement('tr');
         tr.className = 'history-row clickable-row';
         tr.innerHTML = `
@@ -261,6 +345,7 @@ function renderHistory() {
             <td>${cardHtml(flop)}</td>
             <td>${cardHtml(turn)}</td>
             <td>${cardHtml(river)}</td>
+            <td>${hitDisplay}</td>
             <td>${cardHtml(sd1)}</td>
             <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
         `;
@@ -297,6 +382,9 @@ async function saveHand() {
     const position = document.getElementById('position-select').value;
     const { comments } = state;
 
+    const hitResult = evaluatePokerHand(hand, [...flop, ...turn, ...river]);
+    const hitText   = hitResult ? hitResult.name : '';
+
     const row = [
         state.handNumber,
         hand.join(' '),
@@ -312,6 +400,7 @@ async function saveHand() {
         comments.river,
         comments.sd1,
         comments.sd2,
+        hitText,
     ];
 
     const btn = document.getElementById('save-btn');
@@ -319,7 +408,7 @@ async function saveHand() {
     try {
         await gapi.client.sheets.spreadsheets.values.append({
             spreadsheetId: state.spreadsheetId,
-            range: `${SHEET_TAB}!A:N`,
+            range: `${SHEET_TAB}!A:O`,
             valueInputOption: 'RAW',
             insertDataOption: 'INSERT_ROWS',
             resource: { values: [row] },
@@ -471,6 +560,30 @@ function refreshFieldDisplay(field) {
 
     item.classList.toggle('complete', sel.length === cfg.max);
     item.classList.toggle('active', field === state.activeField);
+
+    refreshHitDisplay();
+}
+
+function refreshHitDisplay() {
+    const el = document.getElementById('fi-hit');
+    if (!el) return;
+
+    if (state.hideHand) { el.style.display = 'none'; return; }
+    el.style.display = '';
+
+    const hole   = state.sel.hand;
+    const board  = [...state.sel.flop, ...state.sel.turn, ...state.sel.river];
+    const result = evaluatePokerHand(hole, board);
+    const fd     = document.getElementById('fd-hit');
+
+    el.className = 'field-item';
+    if (!result || hole.length < 2) {
+        el.classList.add('fi-hit-empty');
+        if (fd) fd.innerHTML = '—';
+        return;
+    }
+    el.classList.add('fi-hit-' + result.tier);
+    if (fd) fd.innerHTML = `<span class="hit-badge hit-${result.tier}">${result.name}</span>`;
 }
 
 function refreshCardGrid() {
@@ -520,6 +633,14 @@ function buildFieldsBar() {
         const slots = Array(cfg.max).fill('<span style="color:#2d4a6a">—</span>').join(' ');
         div.innerHTML = `<div class="field-label">${cfg.label}</div><div class="field-cards" id="fd-${f}">${slots}</div>`;
         bar.appendChild(div);
+
+        if (f === 'river') {
+            const hitDiv = document.createElement('div');
+            hitDiv.className = 'field-item fi-hit-empty';
+            hitDiv.id = 'fi-hit';
+            hitDiv.innerHTML = `<div class="field-label">HIT</div><div class="field-cards" id="fd-hit">—</div>`;
+            bar.appendChild(hitDiv);
+        }
     });
 }
 
@@ -574,12 +695,25 @@ function openHandDetail(r) {
         { key:'flop',  label:'FLOP',  cards: r[2]||'', note: r[9] ||'' },
         { key:'turn',  label:'TURN',  cards: r[3]||'', note: r[10]||'' },
         { key:'river', label:'RIVER', cards: r[4]||'', note: r[11]||'' },
+        { key:'hit',   label:'HIT',   isHit: true, hitText: r[14]||'' },
         { key:'sd1',   label:'SD1',   cards: r[5]||'', note: r[12]||'' },
         { key:'sd2',   label:'SD2',   cards: r[6]||'', note: r[13]||'' },
     ];
 
     const body = document.getElementById('hand-modal-body');
     body.innerHTML = fields.map(f => {
+        if (f.isHit) {
+            if (state.hideHand) return '';
+            const ht = f.hitText;
+            const cardsHtml = ht
+                ? `<span class="hit-badge hit-${getHitTier(ht)}">${ht}</span>`
+                : '<span class="cv-empty">—</span>';
+            return `
+            <div class="hm-field-row">
+                <span class="hm-field-label" style="color:#f59e0b">${f.label}</span>
+                <div class="hm-field-content"><div class="hm-cards">${cardsHtml}</div></div>
+            </div>`;
+        }
         let cardsHtml;
         if (f.hideCards) {
             cardsHtml = '<span style="filter:blur(4px);display:inline-block">●●</span>';
@@ -612,6 +746,7 @@ function toggleHideHand() {
     btn.textContent  = state.hideHand ? '🙈 Hand' : '👁 Hand';
     btn.classList.toggle('active', state.hideHand);
     refreshFieldDisplay('hand');
+    refreshHitDisplay();
     refreshCardGrid();
     renderHistory();
 }
