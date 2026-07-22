@@ -252,7 +252,7 @@ function renderHistory() {
             : cardHtml(hand);
 
         const tr = document.createElement('tr');
-        tr.className = 'history-row';
+        tr.className = 'history-row clickable-row';
         tr.innerHTML = `
             <td>${no || '<span class="cv-empty">—</span>'}</td>
             <td>${pos ? `<span class="pos-badge">${pos}</span>` : '<span class="cv-empty">—</span>'}</td>
@@ -261,30 +261,10 @@ function renderHistory() {
             <td>${cardHtml(turn)}</td>
             <td>${cardHtml(river)}</td>
             <td>${cardHtml(sd1)}</td>
-            <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-toggle-btn" title="ดู/ซ่อน comment">💬</span>' : ''}</td>
+            <td>${cardHtml(sd2)}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
         `;
+        tr.addEventListener('click', () => openHandDetail(r));
         tbody.appendChild(tr);
-
-        if (hasNotes) {
-            const noteRow = document.createElement('tr');
-            noteRow.className = 'note-row';
-            noteRow.style.display = 'none';
-            const noteCell = document.createElement('td');
-            noteCell.colSpan = 8;
-            noteCell.className = 'note-cell';
-            noteCell.innerHTML = noteItems
-                .map(n => `<div class="note-item"><strong>${n.label}:</strong> ${n.text}</div>`)
-                .join('');
-            noteRow.appendChild(noteCell);
-            tbody.appendChild(noteRow);
-
-            // Wire up toggle button
-            tr.querySelector('.note-toggle-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isHidden = noteRow.style.display === 'none';
-                noteRow.style.display = isHidden ? '' : 'none';
-            });
-        }
     }
 
     const cnt = document.getElementById('history-count');
@@ -572,6 +552,49 @@ function showToast(msg, type = '') {
     toastTimer = setTimeout(() => el.className = '', 3200);
 }
 
+// ─── Hand Detail Modal ────────────────────────────────────────────────────────
+function openHandDetail(r) {
+    const no  = r[0] || '?';
+    const pos = r[7] || '';
+
+    const titleEl = document.getElementById('hand-modal-title');
+    titleEl.innerHTML = `Hand #${no}${pos ? ` <span class="hm-pos-badge">${pos}</span>` : ''}`;
+
+    const fields = [
+        { label: 'HAND',  cards: r[1] || '', note: r[8]  || '', hideCards: state.hideHand },
+        { label: 'FLOP',  cards: r[2] || '', note: r[9]  || '' },
+        { label: 'TURN',  cards: r[3] || '', note: r[10] || '' },
+        { label: 'RIVER', cards: r[4] || '', note: r[11] || '' },
+        { label: 'SD1',   cards: r[5] || '', note: r[12] || '' },
+        { label: 'SD2',   cards: r[6] || '', note: r[13] || '' },
+    ];
+
+    const body = document.getElementById('hand-modal-body');
+    body.innerHTML = fields.map(f => {
+        let cardsHtml;
+        if (f.hideCards) {
+            cardsHtml = '<span style="filter:blur(4px);display:inline-block">●●</span>';
+        } else {
+            cardsHtml = f.cards ? cardHtml(f.cards) : '<span class="cv-empty">—</span>';
+        }
+        const noteHtml = f.note ? `<div class="hm-note">${f.note}</div>` : '';
+        return `
+            <div class="hm-field-row">
+                <span class="hm-field-label">${f.label}</span>
+                <div class="hm-field-content">
+                    <div class="hm-cards">${cardsHtml}</div>
+                    ${noteHtml}
+                </div>
+            </div>`;
+    }).join('');
+
+    document.getElementById('hand-modal-overlay').classList.remove('hand-modal-hidden');
+}
+
+function closeHandDetail() {
+    document.getElementById('hand-modal-overlay').classList.add('hand-modal-hidden');
+}
+
 // ─── Hide Hand toggle ─────────────────────────────────────────────────────────
 function toggleHideHand() {
     state.hideHand = !state.hideHand;
@@ -611,5 +634,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('comment-input').addEventListener('input', () => {
         state.comments[state.activeField] = document.getElementById('comment-input').value;
         refreshFieldDisplay(state.activeField);
+    });
+
+    document.getElementById('hand-modal-close').addEventListener('click', closeHandDetail);
+    document.getElementById('hand-modal-overlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('hand-modal-overlay')) closeHandDetail();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeHandDetail();
     });
 });
