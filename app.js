@@ -986,6 +986,7 @@ function applyFourColorToggle(enabled) {
     refreshCardGrid();
     FIELDS.forEach(f => refreshFieldDisplay(f));
     renderHistory();
+    window.recorderModule?._refreshAllCardSlots?.();
 }
 
 function applyTextCardsToggle(enabled) {
@@ -993,6 +994,7 @@ function applyTextCardsToggle(enabled) {
     saveSettings();
     FIELDS.forEach(f => refreshFieldDisplay(f));
     renderHistory();
+    window.recorderModule?._refreshAllCardSlots?.();
 }
 
 function applyCardSmallToggle(enabled) {
@@ -1000,6 +1002,7 @@ function applyCardSmallToggle(enabled) {
     saveSettings();
     FIELDS.forEach(f => refreshFieldDisplay(f));
     renderHistory();
+    window.recorderModule?._refreshAllCardSlots?.();
 }
 
 function buildCardGrid() {

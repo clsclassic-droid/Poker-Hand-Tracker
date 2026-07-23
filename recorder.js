@@ -36,22 +36,33 @@ function parseCards(str) {
 }
 
 const _SUIT_SYM = { h: '♥', d: '♦', c: '♣', s: '♠' };
-const _SUIT_CLS = { h: 'rec-cs-heart', d: 'rec-cs-diam', c: 'rec-cs-club', s: '' };
 
 function renderCardSlotHTML(cardsStr) {
-    const cards = parseCards(cardsStr);
+    const cards    = parseCards(cardsStr);
+    const useCards = !window.state?.settings?.textCards;
+    const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
     return [0, 1].map(i => {
         if (cards[i]) {
             const rank = cards[i][0], suit = cards[i][1];
-            return `<span class="rec-cs-card ${_SUIT_CLS[suit]}">${rank}${_SUIT_SYM[suit]}</span>`;
+            if (useCards) {
+                const cls = typeof suitCvClass === 'function' ? suitCvClass(suit) : (suit==='h'||suit==='d' ? 'cv-red' : 'cv-black');
+                return `<span class="mini-card${smCls}"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
+            } else {
+                const col = typeof suitInlineCol === 'function' ? suitInlineCol(suit) : (suit==='h'||suit==='d' ? '#f87171' : '#e2e8f0');
+                return `<span style="color:${col}">${rank}${_SUIT_SYM[suit]}</span>`;
+            }
         }
-        return `<span class="rec-cs-empty">—</span>`;
-    }).join('');
+        return `<span style="color:#2d4a6a">—</span>`;
+    }).join(useCards ? '' : ' ');
 }
 
 function updateCardsSlot(playerIdx) {
     const el = document.querySelector(`.rec-cards-slot[data-i="${playerIdx}"]`);
     if (el) el.innerHTML = renderCardSlotHTML(cfg?.players?.[playerIdx]?.cards || '');
+}
+
+function _refreshAllCardSlots() {
+    cfg?.players?.forEach((_, i) => updateCardsSlot(i));
 }
 
 function _addRecorderUsedCards() {
@@ -850,7 +861,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
