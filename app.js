@@ -127,18 +127,19 @@ function evaluatePokerHand(hole, board) {
     return { name: t[1](best.score[1], best.score[2]), tier: t[2], fiveCards, score: best.score };
 }
 
-function fiveCardHtml(hole, board) {
+function fiveCardHtml(hole, board, textOnly = false) {
     const result = evaluatePokerHand(hole, board);
     if (!result || !result.fiveCards.length) return '<span class="cv-empty">—</span>';
     const parts = [];
     let lastOrigin = null;
     const smCls = state.settings.cardSmall ? ' mini-card-sm' : '';
+    const useText = textOnly || state.settings.textCards;
     result.fiveCards.forEach(c => {
         if (lastOrigin === 'hole' && c.origin === 'board') parts.push('<span class="fc-sep">|</span>');
         const cls    = suitCvClass(c.suit);
         const sym    = SUIT_SYM[c.suit] || c.suit;
         const isKey  = c.origin === 'hole' && c.isKey;
-        if (state.settings.textCards) {
+        if (useText) {
             parts.push(isKey
                 ? `<span class="fc-key ${cls}">${c.rank}${sym}</span>`
                 : `<span class="${cls}">${c.rank}${sym}</span>`);
@@ -147,7 +148,7 @@ function fiveCardHtml(hole, board) {
         }
         lastOrigin = c.origin;
     });
-    return parts.join(' ');
+    return parts.join(useText ? ' ' : '');
 }
 
 function getHitTier(text) {
@@ -863,7 +864,7 @@ function refreshFiveCardDisplay() {
     const hole  = state.sel.hand;
     const board = [...state.sel.flop, ...state.sel.turn, ...state.sel.river];
     const fd    = document.getElementById('fd-fivecard');
-    if (fd) fd.innerHTML = fiveCardHtml(hole, board);
+    if (fd) fd.innerHTML = fiveCardHtml(hole, board, true);
 }
 
 function refreshHitDisplay() {
