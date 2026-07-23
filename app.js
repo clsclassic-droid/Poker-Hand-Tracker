@@ -134,9 +134,16 @@ function fiveCardHtml(hole, board) {
     let lastOrigin = null;
     result.fiveCards.forEach(c => {
         if (lastOrigin === 'hole' && c.origin === 'board') parts.push('<span class="fc-sep">|</span>');
-        const cls     = suitCvClass(c.suit);
-        const keyCls  = (c.origin === 'hole' && c.isKey) ? ' fc-key' : '';
-        parts.push(`<span class="mini-card${keyCls}"><span class="mc-rank ${cls}">${c.rank}</span><span class="mc-suit ${cls}">${SUIT_SYM[c.suit] || c.suit}</span></span>`);
+        const cls    = suitCvClass(c.suit);
+        const sym    = SUIT_SYM[c.suit] || c.suit;
+        const isKey  = c.origin === 'hole' && c.isKey;
+        if (state.settings.textCards) {
+            parts.push(isKey
+                ? `<span class="fc-key ${cls}">${c.rank}${sym}</span>`
+                : `<span class="${cls}">${c.rank}${sym}</span>`);
+        } else {
+            parts.push(`<span class="mini-card${isKey ? ' fc-key' : ''}"><span class="mc-rank ${cls}">${c.rank}</span><span class="mc-suit ${cls}">${sym}</span></span>`);
+        }
         lastOrigin = c.origin;
     });
     return parts.join(' ');
@@ -206,7 +213,7 @@ const state = {
     sheetId:       0,
     editing:       null,
     expandedDays:  new Set(),
-    settings:      { fourColor: false },
+    settings:      { fourColor: false, textCards: false },
 };
 
 // ─── Suit color helpers (respects 4-color setting) ───────────────────────────
@@ -559,8 +566,10 @@ function cardHtml(str) {
         const suit = card.slice(-1);
         const rank = card.slice(0, -1);
         const cls  = suitCvClass(suit);
+        if (state.settings.textCards)
+            return `<span class="${cls}">${rank}${SUIT_SYM[suit] || suit}</span>`;
         return `<span class="mini-card"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${SUIT_SYM[suit] || suit}</span></span>`;
-    }).join('');
+    }).join(state.settings.textCards ? ' ' : '');
 }
 
 // ─── Save ─────────────────────────────────────────────────────────────────────
@@ -945,9 +954,11 @@ function buildFieldsBar() {
 function loadSettings() {
     try {
         const s = JSON.parse(localStorage.getItem(LS_SETTINGS_KEY) || '{}');
-        state.settings.fourColor = !!s.fourColor;
+        state.settings.fourColor  = !!s.fourColor;
+        state.settings.textCards  = !!s.textCards;
     } catch(e) {}
-    document.getElementById('toggle-fourcolor').checked = state.settings.fourColor;
+    document.getElementById('toggle-fourcolor').checked  = state.settings.fourColor;
+    document.getElementById('toggle-textcards').checked  = state.settings.textCards;
 }
 
 function saveSettings() {
@@ -960,6 +971,12 @@ function applyFourColorToggle(enabled) {
     buildCardGrid();
     refreshCardGrid();
     FIELDS.forEach(f => refreshFieldDisplay(f));
+    renderHistory();
+}
+
+function applyTextCardsToggle(enabled) {
+    state.settings.textCards = enabled;
+    saveSettings();
     renderHistory();
 }
 
@@ -1306,6 +1323,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('toggle-fourcolor').addEventListener('change', e => {
         applyFourColorToggle(e.target.checked);
+    });
+    document.getElementById('toggle-textcards').addEventListener('change', e => {
+        applyTextCardsToggle(e.target.checked);
     });
     document.getElementById('hide-hand-btn').addEventListener('click', toggleHideHand);
     document.getElementById('comment-toggle-btn').addEventListener('click', toggleCommentArea);
