@@ -297,32 +297,33 @@ function renderPanel() {
     if (!el) return;
 
     const street = rec.currentStreet;
-    const tabs   = STREET_SEQ.map(s => {
+    const cards  = STREET_SEQ.map(s => {
         const idx    = STREET_SEQ.indexOf(s);
         const curIdx = STREET_SEQ.indexOf(street);
-        const cls    = idx === curIdx ? `rec-st-tab rec-st-active ${STREET_TAB_CLS[s]}`
-                     : idx < curIdx  ? 'rec-st-tab rec-st-done'
-                     : 'rec-st-tab';
-        return `<span class="${cls}">${STREET_LBL[s]}</span>`;
+        const cls    = idx === curIdx ? 'rec-sc-active'
+                     : idx < curIdx   ? 'rec-sc-done'
+                     : 'rec-sc-future';
+        return `
+            <div class="rec-street-card rec-sc-${s} ${cls}" id="rec-card-${s}">
+                <div class="rec-sc-label">${STREET_LBL[s]}</div>
+                <div class="rec-sc-feed" id="rec-feed-${s}"></div>
+            </div>`;
     }).join('');
 
     el.innerHTML = `
         <div class="rec-panel-box">
             <div class="rec-panel-header">
-                <div class="rec-street-tabs">${tabs}</div>
-                <div class="rec-panel-header-right">
-                    <div class="rec-pot-display">Pot <b>${rec.pot.toLocaleString()}</b>฿</div>
-                    <button class="rec-undo-btn" onclick="window.recorderModule._undo()">↩ ย้อน</button>
-                </div>
+                <div class="rec-pot-display">Pot <b>${rec.pot.toLocaleString()}</b>฿</div>
+                <button class="rec-undo-btn" onclick="window.recorderModule._undo()">↩ ย้อน</button>
             </div>
+            <div class="rec-streets-row">${cards}</div>
             <div id="rec-bet-bar-wrap"></div>
-            <div id="rec-feed" class="rec-feed"></div>
             <div id="rec-actor-block" class="rec-actor-block"></div>
             <div id="rec-street-footer" class="rec-street-footer"></div>
         </div>`;
 
     // Render pre-posted blind entries
-    const feed = document.getElementById('rec-feed');
+    const feed = document.getElementById(`rec-feed-${street}`);
     (rec.streets[street] || []).forEach(entry => appendFeedRow(feed, entry, false));
 
     renderBetBar();
@@ -388,7 +389,7 @@ function appendDividerRow(feed, raisingRound) {
 }
 
 function appendToFeed(entry, isAggressive) {
-    const feed = document.getElementById('rec-feed');
+    const feed = document.getElementById(`rec-feed-${rec.currentStreet}`);
     if (!feed) return;
     appendFeedRow(feed, entry, isAggressive);
     if (isAggressive && rec.needToAct.length > 0) {
@@ -398,7 +399,7 @@ function appendToFeed(entry, isAggressive) {
 }
 
 function rerenderFeed() {
-    const feed = document.getElementById('rec-feed');
+    const feed = document.getElementById(`rec-feed-${rec.currentStreet}`);
     if (!feed) return;
     feed.innerHTML = '';
 
@@ -520,27 +521,26 @@ function _doRaise(pos) {
     recordAction(pos, actionType, amt);
 }
 
+function updateStreetCards(street) {
+    STREET_SEQ.forEach(s => {
+        const card = document.getElementById(`rec-card-${s}`);
+        if (!card) return;
+        const idx    = STREET_SEQ.indexOf(s);
+        const curIdx = STREET_SEQ.indexOf(street);
+        card.className = `rec-street-card rec-sc-${s} ${
+            idx === curIdx ? 'rec-sc-active' :
+            idx < curIdx   ? 'rec-sc-done'   : 'rec-sc-future'
+        }`;
+    });
+}
+
 function _nextStreet(street) {
-    const feed   = document.getElementById('rec-feed');
-    if (feed)   feed.innerHTML = '';
     const footer = document.getElementById('rec-street-footer');
     if (footer) footer.innerHTML = '';
 
-    rec.undoStack = []; // clear undo on street transition
-
+    rec.undoStack = [];
     initStreet(street);
-
-    const tabs = STREET_SEQ.map(s => {
-        const idx    = STREET_SEQ.indexOf(s);
-        const curIdx = STREET_SEQ.indexOf(street);
-        const cls    = idx === curIdx ? `rec-st-tab rec-st-active ${STREET_TAB_CLS[s]}`
-                     : idx < curIdx  ? 'rec-st-tab rec-st-done'
-                     : 'rec-st-tab';
-        return `<span class="${cls}">${STREET_LBL[s]}</span>`;
-    }).join('');
-    const tabsEl = document.querySelector('.rec-street-tabs');
-    if (tabsEl) tabsEl.innerHTML = tabs;
-
+    updateStreetCards(street);
     updatePotBar();
     renderActorBlock();
 }

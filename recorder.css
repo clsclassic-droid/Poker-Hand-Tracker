@@ -425,6 +425,64 @@
 .rec-btn-save:hover { background: rgba(34,197,94,.2); }
 .rec-btn-save:disabled { opacity: .5; cursor: default; }
 
+/* ── 4-card street layout ───────────────────────────────────────────────────── */
+.rec-streets-row {
+    display: flex;
+    gap: 5px;
+    padding: 6px 8px;
+}
+.rec-street-card {
+    flex: 1;
+    min-width: 0;
+    border: 1.5px solid #1e2e44;
+    border-radius: 7px;
+    overflow: hidden;
+    transition: border-color .2s, opacity .2s;
+}
+.rec-sc-label {
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: center;
+    padding: 4px 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.rec-sc-feed {
+    padding: 3px 4px;
+    min-height: 40px;
+    max-height: 160px;
+    overflow-y: auto;
+}
+.rec-sc-feed::-webkit-scrollbar { width: 2px; }
+.rec-sc-feed::-webkit-scrollbar-thumb { background: #2a3f5f; }
+
+/* Street label colors */
+.rec-sc-preflop .rec-sc-label { color: #a78bfa; }
+.rec-sc-flop    .rec-sc-label { color: #67e8f9; }
+.rec-sc-turn    .rec-sc-label { color: #fbbf24; }
+.rec-sc-river   .rec-sc-label { color: #f87171; }
+
+/* Active — bright colored border */
+.rec-sc-active.rec-sc-preflop { border-color: #7c3aed; background: rgba(124,58,237,.06); }
+.rec-sc-active.rec-sc-flop    { border-color: #0891b2; background: rgba(8,145,178,.06); }
+.rec-sc-active.rec-sc-turn    { border-color: #b45309; background: rgba(180,83,9,.06); }
+.rec-sc-active.rec-sc-river   { border-color: #b91c1c; background: rgba(185,28,28,.06); }
+
+/* Done — dimmer */
+.rec-sc-done { border-color: #2a3f5f; opacity: 0.7; }
+
+/* Future — barely visible */
+.rec-sc-future { border-color: #1a2634; opacity: 0.3; }
+
+/* Compact feed rows inside cards */
+.rec-sc-feed .rec-feed-row { padding: 2px 3px; gap: 3px; }
+.rec-sc-feed .rec-fr-name { display: none; }
+.rec-sc-feed .rec-fr-pos { font-size: 9px; width: 26px; }
+.rec-sc-feed .rec-fr-act { font-size: 9.5px; }
+.rec-sc-feed .rec-feed-divider { padding: 1px 3px; }
+.rec-sc-feed .rec-div-lbl { font-size: 7.5px; }
+
 /* ── Action Log in Hand Detail Modal ──────────────────────────────────────── */
 .rec-modal-log {
     border-top: 1px solid #2a3f5f;
