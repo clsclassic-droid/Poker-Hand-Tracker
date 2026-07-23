@@ -31,11 +31,23 @@ let rec = null;
 function isOn() { return document.getElementById('toggle-recorder')?.checked || false; }
 function toast(msg, type) { if (window.showToast) window.showToast(msg, type || 'success'); }
 function loadConfig() { try { return JSON.parse(localStorage.getItem(LS_CONFIG)) || null; } catch (_) { return null; } }
-function saveConfig(c) { cfg = c; localStorage.setItem(LS_CONFIG, JSON.stringify(c)); }
+function saveConfig(c) { cfg = c; localStorage.setItem(LS_CONFIG, JSON.stringify(c)); syncPositionChips(); }
 
 function buildDefaultPlayers(n) {
     const positions = POS_PRESETS[n] || POS_PRESETS[6];
-    return positions.map(pos => ({ pos, name: '', stack: 1000, isHero: pos === 'BT' }));
+    return positions.map(pos => ({ pos, name: '', stack: 1000, isHero: false }));
+}
+
+// Show only positions configured in recorder setup; restore all when recorder is off
+function syncPositionChips() {
+    const chips     = document.querySelectorAll('#position-chips .pos-chip');
+    const configPos = (cfg?.players || []).map(p => p.pos);
+    const filterOn  = isOn() && configPos.length > 0;
+    chips.forEach(ch => {
+        const hide = filterOn && !configPos.includes(ch.dataset.pos);
+        ch.style.display = hide ? 'none' : '';
+        if (hide) ch.classList.remove('selected');
+    });
 }
 
 function sortByOrder(posArr, order) {
@@ -53,6 +65,7 @@ function applyToggle() {
     if (setupEl) setupEl.style.display = on ? '' : 'none';
     if (panelEl && !on) panelEl.style.display = 'none';
     if (on) { cfg = loadConfig(); renderSetup(); }
+    syncPositionChips();
 }
 
 // ── Player Setup UI ───────────────────────────────────────────────────────────
@@ -108,7 +121,7 @@ function collectConfig() {
     const poses   = [...document.querySelectorAll('.rec-pos-in')].map(el => el.value.trim().toUpperCase() || '?');
     const names   = [...document.querySelectorAll('.rec-name-in')].map(el => el.value.trim());
     const stacks  = [...document.querySelectorAll('.rec-player-stack')].map(el => parseFloat(el.value) || 1000);
-    const heroPos = document.querySelector('.pos-chip.active')?.dataset.pos || '';
+    const heroPos = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
     const sb      = parseFloat(document.getElementById('rec-sb')?.value) ?? 10;
     const bb      = parseFloat(document.getElementById('rec-bb')?.value) ?? 20;
     return {
@@ -128,6 +141,7 @@ function bindSetupEvents() {
         });
         cfg = { ...cfg, players: fresh };
         renderSetup();
+        syncPositionChips();
     });
 
     document.getElementById('rec-start-btn')?.addEventListener('click', () => {
