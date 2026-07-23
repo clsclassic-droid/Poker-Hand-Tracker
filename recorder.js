@@ -736,6 +736,7 @@ async function _saveLog() {
         if (window.state?.history?.[histLen - 1]) window.state.history[histLen - 1][23] = json;
         toast('✓ บันทึก Action Log แล้ว');
         if (btn) { btn.textContent = '✓ บันทึกแล้ว'; }
+        rec = null; // prevent the same log from being saved again on next hand
     } catch (err) {
         console.error('recorder save:', err);
         toast('บันทึกไม่สำเร็จ', 'error');
