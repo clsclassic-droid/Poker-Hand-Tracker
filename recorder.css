@@ -451,11 +451,7 @@
 .rec-sc-feed {
     padding: 3px 4px;
     min-height: 40px;
-    max-height: 160px;
-    overflow-y: auto;
 }
-.rec-sc-feed::-webkit-scrollbar { width: 2px; }
-.rec-sc-feed::-webkit-scrollbar-thumb { background: #2a3f5f; }
 
 /* Street label colors */
 .rec-sc-preflop .rec-sc-label { color: #a78bfa; }

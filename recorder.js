@@ -74,9 +74,6 @@ function renderSetup() {
             <td><input class="rec-pos-in"  data-i="${i}" value="${p.pos}"        maxlength="6"></td>
             <td><input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12"></td>
             <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"></td>
-            <td style="text-align:center">
-                <input type="radio" class="rec-hero-radio" name="rec-hero" value="${i}"${p.isHero ? ' checked' : ''}>
-            </td>
         </tr>`).join('');
 
     el.innerHTML = `
@@ -96,7 +93,7 @@ function renderSetup() {
                 </div>
             </div>
             <table class="rec-player-table">
-                <thead><tr><td>ตำแหน่ง</td><td>ชื่อ</td><td>Stack</td><td>Hero</td></tr></thead>
+                <thead><tr><td>ตำแหน่ง</td><td>ชื่อ</td><td>Stack</td></tr></thead>
                 <tbody>${rows}</tbody>
             </table>
             <div class="rec-setup-footer">
@@ -111,12 +108,11 @@ function collectConfig() {
     const poses   = [...document.querySelectorAll('.rec-pos-in')].map(el => el.value.trim().toUpperCase() || '?');
     const names   = [...document.querySelectorAll('.rec-name-in')].map(el => el.value.trim());
     const stacks  = [...document.querySelectorAll('.rec-player-stack')].map(el => parseFloat(el.value) || 1000);
-    const heroEl  = document.querySelector('input[name="rec-hero"]:checked');
-    const heroIdx = heroEl ? parseInt(heroEl.value) : 0;
+    const heroPos = document.querySelector('.pos-chip.active')?.dataset.pos || '';
     const sb      = parseFloat(document.getElementById('rec-sb')?.value) ?? 10;
     const bb      = parseFloat(document.getElementById('rec-bb')?.value) ?? 20;
     return {
-        players: poses.map((pos, i) => ({ pos, name: names[i] || '', stack: stacks[i], isHero: i === heroIdx })),
+        players: poses.map((pos, i) => ({ pos, name: names[i] || '', stack: stacks[i], isHero: pos === heroPos })),
         sb, bb,
     };
 }
@@ -152,6 +148,10 @@ function startRecording() {
         undoStack:     [],
     };
     cfg.players.forEach(p => { rec.stackByPos[p.pos] = p.stack; });
+
+    // Hide setup so screen is clean while recording
+    const setupEl = document.getElementById('recorder-setup');
+    if (setupEl) setupEl.style.display = 'none';
 
     const panelEl = document.getElementById('recorder-panel');
     if (panelEl) { panelEl.style.display = ''; panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
@@ -221,6 +221,9 @@ function recordAction(pos, action, amount) {
         rec.pot            += add;
         rec.potContrib[pos] = amount;
         rec.stackByPos[pos] = (rec.stackByPos[pos] || 0) - add;
+
+        const heroPlayer = cfg.players.find(p => p.isHero);
+        if (heroPlayer && pos === heroPlayer.pos) updateHeroBetInput(street, pos);
     }
 
     const isAggressive = action === 'raise' || action === 'reraise' || action === 'bet';
@@ -314,7 +317,10 @@ function renderPanel() {
         <div class="rec-panel-box">
             <div class="rec-panel-header">
                 <div class="rec-pot-display">Pot <b>${rec.pot.toLocaleString()}</b>฿</div>
-                <button class="rec-undo-btn" onclick="window.recorderModule._undo()">↩ ย้อน</button>
+                <div class="rec-panel-header-right">
+                    <button class="rec-undo-btn" onclick="window.recorderModule._toggleSetup()" title="ตั้งค่าโต๊ะ">⚙</button>
+                    <button class="rec-undo-btn" onclick="window.recorderModule._undo()">↩ ย้อน</button>
+                </div>
             </div>
             <div class="rec-streets-row">${cards}</div>
             <div id="rec-bet-bar-wrap"></div>
@@ -646,6 +652,25 @@ function renderActionLog(jsonStr) {
     } catch (_) { return ''; }
 }
 
+// ── Setup toggle (from panel gear button) ────────────────────────────────────
+function _toggleSetup() {
+    const el = document.getElementById('recorder-setup');
+    if (!el) return;
+    el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+// ── Auto-fill hero bet into main bet row ──────────────────────────────────────
+const STREET_BET_ID = { preflop: 'bet-pf', flop: 'bet-flop', turn: 'bet-turn', river: 'bet-river' };
+
+function updateHeroBetInput(street, heroPos) {
+    const contrib = rec.potContrib[heroPos] || 0;
+    if (contrib <= 0) return;
+    const input = document.getElementById(STREET_BET_ID[street]);
+    if (!input) return;
+    input.value = contrib;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 function init() {
     const tog = document.getElementById('toggle-recorder');
@@ -658,7 +683,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
