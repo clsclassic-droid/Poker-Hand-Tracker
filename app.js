@@ -824,20 +824,24 @@ function refreshFieldDisplay(field) {
     const cfg = FIELD_CFG[field];
     const sel = state.sel[field];
 
+    const useCards = !state.settings.textCards;
+    const smCls    = state.settings.cardSmall ? ' mini-card-sm' : '';
     let html = '';
     for (let i = 0; i < cfg.max; i++) {
         if (i < sel.length) {
             const card = sel[i];
             const suit = card.slice(-1);
             const rank = card.slice(0, -1);
-            // Blur hand cards when hideHand is on
             if (field === 'hand' && state.hideHand) {
                 html += `<span style="filter:blur(4px);display:inline-block">●</span>`;
+            } else if (useCards) {
+                const cls = suitCvClass(suit);
+                html += `<span class="mini-card${smCls}"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${SUIT_SYM[suit]}</span></span>`;
             } else {
                 const col = suitInlineCol(suit);
                 html += `<span style="color:${col}">${rank}${SUIT_SYM[suit]}</span>`;
             }
-            if (i < cfg.max - 1) html += ' ';
+            if (!useCards && i < cfg.max - 1) html += ' ';
         } else {
             html += '<span style="color:#2d4a6a">—</span>';
             if (i < cfg.max - 1) html += ' ';
@@ -864,7 +868,7 @@ function refreshFiveCardDisplay() {
     const hole  = state.sel.hand;
     const board = [...state.sel.flop, ...state.sel.turn, ...state.sel.river];
     const fd    = document.getElementById('fd-fivecard');
-    if (fd) fd.innerHTML = fiveCardHtml(hole, board, true);
+    if (fd) fd.innerHTML = fiveCardHtml(hole, board);
 }
 
 function refreshHitDisplay() {
@@ -982,12 +986,14 @@ function applyFourColorToggle(enabled) {
 function applyTextCardsToggle(enabled) {
     state.settings.textCards = enabled;
     saveSettings();
+    FIELDS.forEach(f => refreshFieldDisplay(f));
     renderHistory();
 }
 
 function applyCardSmallToggle(enabled) {
     state.settings.cardSmall = enabled;
     saveSettings();
+    FIELDS.forEach(f => refreshFieldDisplay(f));
     renderHistory();
 }
 
