@@ -633,6 +633,7 @@ function renderActionLog(jsonStr) {
         const data = JSON.parse(jsonStr);
         if (!data?.actions) return '';
 
+        const heroPos  = data.players?.find(p => p.isHero)?.pos || '';
         let runningPot = 0;
         let hasAny     = false;
         let colsHtml   = '';
@@ -653,16 +654,17 @@ function renderActionLog(jsonStr) {
 
                 let rows = '';
                 acts.forEach(e => {
-                    const isAgg = e.a === 'raise' || e.a === 'reraise' || e.a === 'bet';
-                    const cls   = e.a === 'fold'  ? 'rec-log-fold'
-                                : e.a === 'check' ? 'rec-log-check'
-                                : e.a === 'post'  ? 'rec-log-post'
-                                : isAgg           ? 'rec-log-raise'
-                                : 'rec-log-call';
-                    const lbl   = e.a === 'reraise' ? `re↑${e.v ? Number(e.v).toLocaleString() : ''}`
-                                : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
+                    const isAgg   = e.a === 'raise' || e.a === 'reraise' || e.a === 'bet';
+                    const cls     = e.a === 'fold'  ? 'rec-log-fold'
+                                  : e.a === 'check' ? 'rec-log-check'
+                                  : e.a === 'post'  ? 'rec-log-post'
+                                  : isAgg           ? 'rec-log-raise'
+                                  : 'rec-log-call';
+                    const lbl     = e.a === 'reraise' ? `re↑${e.v ? Number(e.v).toLocaleString() : ''}`
+                                  : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
+                    const heroRow = heroPos && e.pos === heroPos ? ' rec-log-row-hero' : '';
                     rows += `
-                        <div class="rec-log-row">
+                        <div class="rec-log-row${heroRow}">
                             <span class="rec-log-pos">${e.pos}</span>
                             <span class="rec-log-act ${cls}">${lbl}</span>
                         </div>`;
@@ -686,7 +688,7 @@ function renderActionLog(jsonStr) {
         if (!hasAny) return '';
 
         const hero     = data.players?.find(p => p.isHero);
-        const heroDisp = hero ? (hero.name ? `${hero.name} (${hero.pos})` : hero.pos) : '';
+        const heroDisp = hero ? (hero.name ? `${hero.name} (${heroPos})` : heroPos) : '';
         const heroLine = heroDisp ? `<span class="rec-log-hero-tag">Hero: <b>${heroDisp}</b></span>` : '';
 
         return `

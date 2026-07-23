@@ -532,6 +532,12 @@
     border-top: 1px solid rgba(255,255,255,.03);
 }
 .rec-log-row:first-child { border-top: none; }
+.rec-log-row-hero {
+    background: rgba(124,58,237,.13);
+    border-radius: 3px;
+    border-top-color: transparent;
+}
+.rec-log-row-hero .rec-log-pos { color: #c4b5fd; }
 .rec-log-pos {
     font-size: 9px;
     font-weight: 700;
