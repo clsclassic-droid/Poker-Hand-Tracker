@@ -967,6 +967,7 @@ function applyFourColorToggle(enabled) {
 
 function buildCardGrid() {
     const grid = document.getElementById('card-grid');
+    grid.innerHTML = '';
     SUITS.forEach(suit => {
         const lbl = document.createElement('div');
         lbl.className = suitLabelCls(suit);
@@ -1277,6 +1278,7 @@ function toggleCommentArea() {
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     buildFieldsBar();
+    loadSettings();
     buildCardGrid();
     refreshPickerHeader();
     refreshCommentInput();
@@ -1307,7 +1309,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('toggle-fourcolor').addEventListener('change', e => {
         applyFourColorToggle(e.target.checked);
     });
-    loadSettings();
     document.getElementById('hide-hand-btn').addEventListener('click', toggleHideHand);
     document.getElementById('comment-toggle-btn').addEventListener('click', toggleCommentArea);
 
