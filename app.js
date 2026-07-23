@@ -743,6 +743,7 @@ function clearAll() {
     });
     const dateEl = document.getElementById('date-input');
     if (dateEl) dateEl.value = todayISO();
+    document.getElementById('cancel-edit-btn').style.display = 'none';
     if (state.editing) {
         state.editing = null;
         document.getElementById('save-btn').textContent = '💾 บันทึก Hand';
@@ -1115,6 +1116,7 @@ function editHand(r, histIdx) {
 
     state.editing = { histIdx, handNum: r[0] || state.handNumber };
     document.getElementById('save-btn').textContent = '💾 อัปเดต Hand';
+    document.getElementById('cancel-edit-btn').style.display = '';
     document.getElementById('hand-num-display').textContent = r[0] || state.handNumber;
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1244,6 +1246,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fold-btn').addEventListener('click', toggleFold);
     document.getElementById('undo-btn').addEventListener('click', undoLast);
     document.getElementById('clear-field-btn').addEventListener('click', clearField);
+    document.getElementById('cancel-edit-btn').addEventListener('click', clearAll);
     document.getElementById('clear-btn').addEventListener('click', clearAll);
     document.getElementById('save-btn').addEventListener('click', saveHand);
     document.getElementById('hide-hand-btn').addEventListener('click', toggleHideHand);
