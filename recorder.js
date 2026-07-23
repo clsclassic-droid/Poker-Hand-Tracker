@@ -447,6 +447,13 @@ function renderActorBlock() {
     const el = document.getElementById('rec-actor-block');
     if (!el) return;
 
+    // Only 1 player left = everyone else folded; hand is over
+    if (rec.playersInHand.length <= 1) {
+        el.innerHTML = '';
+        showStreetComplete();
+        return;
+    }
+
     const pos = rec.needToAct[0];
     if (!pos) { el.innerHTML = ''; return; }
 
@@ -523,9 +530,12 @@ function showStreetComplete() {
                 <button class="rec-btn-next" onclick="window.recorderModule._nextStreet('${next}')">→ ${STREET_LBL[next]}</button>
             </div>`;
     } else {
+        const endLbl = rec.playersInHand.length <= 1
+            ? `✓ ทุกคน fold · Pot ${rec.pot.toLocaleString()} ฿`
+            : `✓ ครบทุก street · Pot ${rec.pot.toLocaleString()} ฿`;
         footer.innerHTML = `
             <div class="rec-street-done">
-                <span class="rec-done-lbl">✓ ครบทุก street · Pot ${rec.pot.toLocaleString()} ฿</span>
+                <span class="rec-done-lbl">${endLbl}</span>
                 <button class="rec-btn-save" id="rec-save-btn" onclick="window.recorderModule._saveLog()">💾 Save Action Log</button>
             </div>`;
     }
@@ -567,6 +577,12 @@ function _nextStreet(street) {
     initStreet(street);
     updateStreetCards(street);
     updatePotBar();
+
+    // Guard: if only 1 player remains, don't start the street — go to save
+    if (rec.playersInHand.length <= 1) {
+        showStreetComplete();
+        return;
+    }
     renderActorBlock();
 }
 
