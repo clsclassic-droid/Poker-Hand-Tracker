@@ -611,57 +611,65 @@ function renderActionLog(jsonStr) {
         if (!data?.actions) return '';
 
         let runningPot = 0;
-        let streetHtml = '';
+        let hasAny     = false;
+        let colsHtml   = '';
 
         STREET_SEQ.forEach(street => {
             const acts = data.actions[street];
-            if (!acts || acts.length === 0) return;
+            const hasActs = acts && acts.length > 0;
 
-            const contrib = {};
-            acts.forEach(e => {
-                if (e.v && e.a !== 'fold' && e.a !== 'check') {
-                    contrib[e.pos] = Math.max(contrib[e.pos] || 0, e.v);
-                }
-            });
-            runningPot += Object.values(contrib).reduce((s, v) => s + v, 0);
+            if (hasActs) {
+                hasAny = true;
+                const contrib = {};
+                acts.forEach(e => {
+                    if (e.v && e.a !== 'fold' && e.a !== 'check') {
+                        contrib[e.pos] = Math.max(contrib[e.pos] || 0, e.v);
+                    }
+                });
+                runningPot += Object.values(contrib).reduce((s, v) => s + v, 0);
 
-            let actionItems = '';
-            acts.forEach(e => {
-                const isAgg = e.a === 'raise' || e.a === 'reraise' || e.a === 'bet';
-                const cls   = e.a === 'fold'  ? 'rec-log-fold'
-                            : e.a === 'check' ? 'rec-log-check'
-                            : e.a === 'post'  ? 'rec-log-post'
-                            : isAgg           ? 'rec-log-raise'
-                            : 'rec-log-call';
-                const lbl   = e.a === 'reraise' ? `re-raise ${Number(e.v || 0).toLocaleString()}`
-                            : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
-                const pd    = data.players?.find(p => p.pos === e.pos);
-                const disp  = pd?.name ? `${pd.name}(${e.pos})` : e.pos;
-                if (actionItems) actionItems += ' · ';
-                actionItems += `<b>${disp}</b> <span class="${cls}">${lbl}</span>`;
-            });
+                let rows = '';
+                acts.forEach(e => {
+                    const isAgg = e.a === 'raise' || e.a === 'reraise' || e.a === 'bet';
+                    const cls   = e.a === 'fold'  ? 'rec-log-fold'
+                                : e.a === 'check' ? 'rec-log-check'
+                                : e.a === 'post'  ? 'rec-log-post'
+                                : isAgg           ? 'rec-log-raise'
+                                : 'rec-log-call';
+                    const lbl   = e.a === 'reraise' ? `re↑${e.v ? Number(e.v).toLocaleString() : ''}`
+                                : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
+                    rows += `
+                        <div class="rec-log-row">
+                            <span class="rec-log-pos">${e.pos}</span>
+                            <span class="rec-log-act ${cls}">${lbl}</span>
+                        </div>`;
+                });
 
-            const stCls = { preflop:'rec-st-pf', flop:'rec-st-fl', turn:'rec-st-tu', river:'rec-st-rv' }[street];
-            streetHtml += `
-                <div class="rec-modal-row">
-                    <span class="rec-modal-street ${stCls}">${STREET_LBL[street]}</span>
-                    <div class="rec-modal-acts">
-                        ${actionItems}
-                        <div class="rec-modal-pot">Pot ${runningPot.toLocaleString()} ฿</div>
-                    </div>
-                </div>`;
+                colsHtml += `
+                    <div class="rec-log-col rec-log-col-${street}">
+                        <div class="rec-log-col-hd">${STREET_LBL[street]}</div>
+                        <div class="rec-log-col-body">${rows}</div>
+                        <div class="rec-log-col-pot">Pot ${runningPot.toLocaleString()} ฿</div>
+                    </div>`;
+            } else {
+                colsHtml += `
+                    <div class="rec-log-col rec-log-col-${street} rec-log-col-empty">
+                        <div class="rec-log-col-hd">${STREET_LBL[street]}</div>
+                        <div class="rec-log-col-body"></div>
+                    </div>`;
+            }
         });
 
-        if (!streetHtml) return '';
+        if (!hasAny) return '';
 
         const hero     = data.players?.find(p => p.isHero);
         const heroDisp = hero ? (hero.name ? `${hero.name} (${hero.pos})` : hero.pos) : '';
-        const heroLine = heroDisp ? `<span style="font-size:10px;color:#4a6580">Hero: <b style="color:#22c55e">${heroDisp}</b></span>` : '';
+        const heroLine = heroDisp ? `<span class="rec-log-hero-tag">Hero: <b>${heroDisp}</b></span>` : '';
 
         return `
             <div class="rec-modal-log">
-                <div class="rec-modal-log-title">Action Log ${heroLine}</div>
-                ${streetHtml}
+                <div class="rec-modal-log-title">ACTION LOG ${heroLine}</div>
+                <div class="rec-log-grid">${colsHtml}</div>
             </div>`;
     } catch (_) { return ''; }
 }

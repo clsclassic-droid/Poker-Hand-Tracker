@@ -482,47 +482,95 @@
 /* ── Action Log in Hand Detail Modal ──────────────────────────────────────── */
 .rec-modal-log {
     border-top: 1px solid #2a3f5f;
-    margin-top: 4px;
-    padding-top: 4px;
+    margin-top: 6px;
+    padding-top: 6px;
 }
 .rec-modal-log-title {
-    font-size: 9.5px;
+    font-size: 9px;
     font-weight: 700;
     letter-spacing: 1.5px;
     color: #4a6580;
     text-transform: uppercase;
-    padding: 7px 0 5px;
+    padding: 0 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
-.rec-modal-row {
+.rec-log-hero-tag {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: #4a6580;
+    text-transform: none;
+}
+.rec-log-hero-tag b { color: #22c55e; }
+
+/* 4-column grid */
+.rec-log-grid {
     display: grid;
-    grid-template-columns: 52px 1fr;
-    gap: 10px;
-    padding: 7px 0;
-    border-top: 1px solid #1e2e44;
-    align-items: start;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
 }
-.rec-modal-street {
-    font-size: 9.5px;
+.rec-log-col {
+    border-radius: 6px;
+    overflow: hidden;
+    background: #0f1e2e;
+}
+.rec-log-col-empty { opacity: 0.3; }
+
+/* Column headers — colored per street */
+.rec-log-col-hd {
+    font-size: 8.5px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    text-align: center;
+    padding: 4px 2px;
     text-transform: uppercase;
-    padding-top: 2px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
 }
-.rec-st-pf { color: #a78bfa; }
-.rec-st-fl { color: #67e8f9; }
-.rec-st-tu { color: #fbbf24; }
-.rec-st-rv { color: #f87171; }
-.rec-modal-acts { font-size: 11px; color: #7a9ab8; line-height: 1.7; }
-.rec-log-act { display: inline; }
-.rec-log-act b { color: #e2e8f0; font-weight: 700; }
+.rec-log-col-preflop .rec-log-col-hd { color: #a78bfa; background: rgba(124,58,237,.08); }
+.rec-log-col-flop    .rec-log-col-hd { color: #67e8f9; background: rgba(8,145,178,.08); }
+.rec-log-col-turn    .rec-log-col-hd { color: #fbbf24; background: rgba(180,83,9,.08); }
+.rec-log-col-river   .rec-log-col-hd { color: #f87171; background: rgba(185,28,28,.08); }
+
+.rec-log-col-body { padding: 4px 5px; }
+
+/* Action rows */
+.rec-log-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 1.5px 0;
+    border-top: 1px solid rgba(255,255,255,.03);
+}
+.rec-log-row:first-child { border-top: none; }
+.rec-log-pos {
+    font-size: 9px;
+    font-weight: 700;
+    color: #4a6580;
+    min-width: 22px;
+    flex-shrink: 0;
+}
+.rec-log-act {
+    font-size: 9.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Action colors (shared with recorder feed) */
 .rec-log-fold  { color: #f87171; }
 .rec-log-call  { color: #60a5fa; }
 .rec-log-raise { color: #fbbf24; }
 .rec-log-check { color: #7a9ab8; }
 .rec-log-post  { color: #344d6e; }
-.rec-modal-pot {
-    font-size: 10px;
+
+/* Pot line at bottom of each column */
+.rec-log-col-pot {
+    font-size: 9px;
+    font-weight: 700;
     color: #22c55e;
-    margin-top: 2px;
+    padding: 3px 5px;
+    border-top: 1px solid rgba(255,255,255,.05);
     font-variant-numeric: tabular-nums;
+    text-align: right;
 }
