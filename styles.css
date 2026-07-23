@@ -497,8 +497,10 @@ header h1 {
     padding: 2px 0;
     user-select: none;
 }
-.suit-red  { color: #ef4444; }
+.suit-red   { color: #ef4444; }
 .suit-black { color: #94a3b8; }
+.suit-blue  { color: #60a5fa; }
+.suit-green { color: #4ade80; }
 
 /* Card button */
 .card-btn {
@@ -522,8 +524,10 @@ header h1 {
 .card-rank { font-size: .88rem; }
 .card-suit { font-size: .72rem; }
 
-.card-btn.red-card  { color: var(--red-card); }
+.card-btn.red-card   { color: var(--red-card); }
 .card-btn.black-card { color: #1e293b; }
+.card-btn.blue-card  { color: #1d4ed8; }
+.card-btn.green-card { color: #15803d; }
 
 /* Hover */
 .card-btn:hover:not(:disabled):not(.used) {
@@ -965,6 +969,8 @@ header h1 {
 /* Card color in table */
 .cv-red   { color: #f87171; }
 .cv-black { color: #cbd5e1; }
+.cv-blue  { color: #60a5fa; }
+.cv-green { color: #4ade80; }
 .cv-empty { color: var(--text-muted); }
 
 /* ─── Date Group Rows (history) ──────────────────────────────────────────── */

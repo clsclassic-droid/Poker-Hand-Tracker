@@ -1,13 +1,15 @@
 // ─── Constants ──────────────────────────────────────────────────────────────
 const RANKS = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
 const SUITS = [
-    { symbol: '♠', code: 's', red: false },
-    { symbol: '♥', code: 'h', red: true  },
-    { symbol: '♦', code: 'd', red: true  },
-    { symbol: '♣', code: 'c', red: false },
+    { symbol: '♠', code: 's', red: false, cls: 'black' },
+    { symbol: '♥', code: 'h', red: true,  cls: 'red'   },
+    { symbol: '♦', code: 'd', red: true,  cls: 'blue'  },
+    { symbol: '♣', code: 'c', red: false, cls: 'green' },
 ];
 const SUIT_SYM = { s: '♠', h: '♥', d: '♦', c: '♣' };
 const RED_SUITS = new Set(['h', 'd']);
+const SUIT_CV  = { s: 'cv-black', h: 'cv-red', d: 'cv-blue', c: 'cv-green' };
+const SUIT_COL = { s: '#e2e8f0', h: '#f87171', d: '#60a5fa', c: '#4ade80' };
 
 const FIELD_CFG = {
     hand:  { label: 'HAND',  max: 2 },
@@ -130,7 +132,7 @@ function fiveCardHtml(hole, board) {
     let lastOrigin = null;
     result.fiveCards.forEach(c => {
         if (lastOrigin === 'hole' && c.origin === 'board') parts.push('<span class="fc-sep">|</span>');
-        const cls  = RED_SUITS.has(c.suit) ? 'cv-red' : 'cv-black';
+        const cls  = SUIT_CV[c.suit] || 'cv-black';
         const text = `${c.rank}${SUIT_SYM[c.suit] || c.suit}`;
         parts.push((c.origin === 'hole' && c.isKey)
             ? `<span class="fc-key ${cls}">${text}</span>`
@@ -536,7 +538,7 @@ function cardHtml(str) {
     return str.split(' ').filter(Boolean).map(card => {
         const suit = card.slice(-1);
         const rank = card.slice(0, -1);
-        const cls  = RED_SUITS.has(suit) ? 'cv-red' : 'cv-black';
+        const cls  = SUIT_CV[suit] || 'cv-black';
         return `<span class="${cls}">${rank}${SUIT_SYM[suit] || suit}</span>`;
     }).join(' ');
 }
@@ -800,7 +802,7 @@ function refreshFieldDisplay(field) {
             if (field === 'hand' && state.hideHand) {
                 html += `<span style="filter:blur(4px);display:inline-block">●</span>`;
             } else {
-                const col = RED_SUITS.has(suit) ? '#f87171' : '#e2e8f0';
+                const col = SUIT_COL[suit] || '#e2e8f0';
                 html += `<span style="color:${col}">${rank}${SUIT_SYM[suit]}</span>`;
             }
             if (i < cfg.max - 1) html += ' ';
@@ -923,7 +925,7 @@ function buildCardGrid() {
     const grid = document.getElementById('card-grid');
     SUITS.forEach(suit => {
         const lbl = document.createElement('div');
-        lbl.className = 'suit-label ' + (suit.red ? 'suit-red' : 'suit-black');
+        lbl.className = 'suit-label suit-' + suit.cls;
         lbl.textContent = suit.symbol;
         grid.appendChild(lbl);
 
@@ -931,7 +933,7 @@ function buildCardGrid() {
             const id  = rank + suit.code;
             const btn = document.createElement('button');
             btn.id        = 'cb-' + id;
-            btn.className = 'card-btn ' + (suit.red ? 'red-card' : 'black-card');
+            btn.className = 'card-btn ' + suit.cls + '-card';
             btn.innerHTML = `<span class="card-rank">${rank}</span><span class="card-suit">${suit.symbol}</span>`;
             btn.addEventListener('click', () => onCardClick(id));
             grid.appendChild(btn);
