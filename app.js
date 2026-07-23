@@ -217,6 +217,7 @@ const state = {
     expandedDays:  new Set(),
     settings:      { fourColor: false, textCards: false, cardSmall: false },
 };
+window.state = state;
 
 // ─── Suit color helpers (respects 4-color setting) ───────────────────────────
 function suitCvClass(suit) {
