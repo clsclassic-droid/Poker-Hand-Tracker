@@ -572,8 +572,9 @@ async function saveHand() {
     if (state.foldStreet) {
         if (totalBet > 0) resultVal = String(-totalBet);
     } else if (totalBet > 0) {
+        const effectivePot = potAmt > 0 ? potAmt : totalBet;
         const opponents = [sd1, sd2].filter(h => h.length >= 2);
-        let weWin = opponents.length === 0 ? (potAmt > 0 ? true : null) : null;
+        let weWin = opponents.length === 0 ? true : null;
         let tied = false;
         if (opponents.length > 0) {
             let weLose = false;
@@ -588,7 +589,7 @@ async function saveHand() {
             weWin = weLose ? false : (tied ? null : true);
         }
         if (weWin === true) {
-            const potProfit = potAmt - totalBet;
+            const potProfit = effectivePot - totalBet;
             resultVal = String(potProfit > 0 ? potProfit : totalBet);
         } else if (weWin === false) {
             resultVal = String(-totalBet);
@@ -1201,8 +1202,9 @@ function refreshResultDisplay() {
             rp.textContent = '—';
             rp.className = 'result-preview';
         }
-    } else if (potAmt > 0) {
-        const potProfit = potAmt - total;
+    } else if (total > 0) {
+        const effectivePot = potAmt > 0 ? potAmt : total;
+        const potProfit = effectivePot - total;
         const display = potProfit > 0 ? potProfit : total;
         rp.textContent = '+' + display.toLocaleString() + ' ฿';
         rp.className = 'result-preview rp-win';
