@@ -393,7 +393,7 @@ function buildJson() {
     return JSON.stringify({ players: cfg.players, actions: rec.streets });
 }
 
-function _saveLog() {
+async function _saveLog() {
     const json = buildJson();
     if (!json) return;
 
@@ -409,20 +409,21 @@ function _saveLog() {
     const btn      = document.getElementById('rec-save-btn');
     if (btn) { btn.disabled = true; btn.textContent = 'กำลังบันทึก...'; }
 
-    gapi.client.sheets.spreadsheets.values.update({
-        spreadsheetId,
-        range: `${SHEET_TAB}!X${sheetRow}`,
-        valueInputOption: 'RAW',
-        resource: { values: [[json]] },
-    }).then(() => {
+    try {
+        await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: `${SHEET_TAB}!X${sheetRow}`,
+            valueInputOption: 'RAW',
+            resource: { values: [[json]] },
+        });
         if (window.state?.history?.[histLen - 1]) window.state.history[histLen - 1][23] = json;
         toast('✓ บันทึก Action Log แล้ว');
         if (btn) { btn.textContent = '✓ บันทึกแล้ว'; }
-    }).catch(err => {
+    } catch (err) {
         console.error('recorder save:', err);
         toast('บันทึกไม่สำเร็จ', 'error');
         if (btn) { btn.disabled = false; btn.textContent = '💾 Save Action Log'; }
-    });
+    }
 }
 
 // ── Public action handlers (called from inline onclick) ───────────────────────
