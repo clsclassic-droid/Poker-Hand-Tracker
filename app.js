@@ -134,11 +134,9 @@ function fiveCardHtml(hole, board) {
     let lastOrigin = null;
     result.fiveCards.forEach(c => {
         if (lastOrigin === 'hole' && c.origin === 'board') parts.push('<span class="fc-sep">|</span>');
-        const cls  = suitCvClass(c.suit);
-        const text = `${c.rank}${SUIT_SYM[c.suit] || c.suit}`;
-        parts.push((c.origin === 'hole' && c.isKey)
-            ? `<span class="fc-key ${cls}">${text}</span>`
-            : `<span class="${cls}">${text}</span>`);
+        const cls     = suitCvClass(c.suit);
+        const keyCls  = (c.origin === 'hole' && c.isKey) ? ' fc-key' : '';
+        parts.push(`<span class="mini-card${keyCls}"><span class="mc-rank ${cls}">${c.rank}</span><span class="mc-suit ${cls}">${SUIT_SYM[c.suit] || c.suit}</span></span>`);
         lastOrigin = c.origin;
     });
     return parts.join(' ');
@@ -561,8 +559,8 @@ function cardHtml(str) {
         const suit = card.slice(-1);
         const rank = card.slice(0, -1);
         const cls  = suitCvClass(suit);
-        return `<span class="${cls}">${rank}${SUIT_SYM[suit] || suit}</span>`;
-    }).join(' ');
+        return `<span class="mini-card"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${SUIT_SYM[suit] || suit}</span></span>`;
+    }).join('');
 }
 
 // ─── Save ─────────────────────────────────────────────────────────────────────
