@@ -87,6 +87,7 @@ function renderSetup() {
             <td><input class="rec-pos-in"  data-i="${i}" value="${p.pos}"        maxlength="6"></td>
             <td><input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12"></td>
             <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"></td>
+            <td><input class="rec-cards-in" data-i="${i}" value="${p.cards || ''}" placeholder="Ah Kd" maxlength="5" spellcheck="false"></td>
         </tr>`).join('');
 
     el.innerHTML = `
@@ -103,14 +104,17 @@ function renderSetup() {
                         <select id="rec-count">${countOpts}</select>
                         <span class="rec-dd-arr">▾</span>
                     </div>
+                    <button class="rec-collapse-btn" id="rec-collapse-btn" title="ซ่อน/แสดง">▲</button>
                 </div>
             </div>
-            <table class="rec-player-table">
-                <thead><tr><td>ตำแหน่ง</td><td>ชื่อ</td><td>Stack</td></tr></thead>
-                <tbody>${rows}</tbody>
-            </table>
-            <div class="rec-setup-footer">
-                <button id="rec-start-btn" class="rec-btn-primary">🎯 เริ่มบันทึก Action</button>
+            <div class="rec-setup-body">
+                <table class="rec-player-table">
+                    <thead><tr><td>ตำแหน่ง</td><td>ชื่อ</td><td>Stack</td><td>ไพ่ที่ถือ <span class="rec-cards-hint">A=A · T=10 · h♥ d♦ c♣ s♠</span></td></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div class="rec-setup-footer">
+                    <button id="rec-start-btn" class="rec-btn-primary">🎯 เริ่มบันทึก Action</button>
+                </div>
             </div>
         </div>`;
 
@@ -121,11 +125,12 @@ function collectConfig() {
     const poses   = [...document.querySelectorAll('.rec-pos-in')].map(el => el.value.trim().toUpperCase() || '?');
     const names   = [...document.querySelectorAll('.rec-name-in')].map(el => el.value.trim());
     const stacks  = [...document.querySelectorAll('.rec-player-stack')].map(el => parseFloat(el.value) || 1000);
+    const cards   = [...document.querySelectorAll('.rec-cards-in')].map(el => el.value.trim());
     const heroPos = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
     const sb      = parseFloat(document.getElementById('rec-sb')?.value) ?? 10;
     const bb      = parseFloat(document.getElementById('rec-bb')?.value) ?? 20;
     return {
-        players: poses.map((pos, i) => ({ pos, name: names[i] || '', stack: stacks[i], isHero: pos === heroPos })),
+        players: poses.map((pos, i) => ({ pos, name: names[i] || '', stack: stacks[i], isHero: pos === heroPos, cards: cards[i] || '' })),
         sb, bb,
     };
 }
@@ -137,11 +142,19 @@ function bindSetupEvents() {
         const prev  = {};
         cfg?.players?.forEach(p => { prev[p.pos] = p; });
         fresh.forEach(p => {
-            if (prev[p.pos]) { p.stack = prev[p.pos].stack; p.isHero = prev[p.pos].isHero; p.name = prev[p.pos].name || ''; }
+            if (prev[p.pos]) { p.stack = prev[p.pos].stack; p.isHero = prev[p.pos].isHero; p.name = prev[p.pos].name || ''; p.cards = prev[p.pos].cards || ''; }
         });
         cfg = { ...cfg, players: fresh };
         renderSetup();
         syncPositionChips();
+    });
+
+    document.getElementById('rec-collapse-btn')?.addEventListener('click', () => {
+        const box = document.querySelector('.rec-setup-box');
+        const btn = document.getElementById('rec-collapse-btn');
+        if (!box) return;
+        const collapsed = box.classList.toggle('rec-setup-collapsed');
+        if (btn) btn.textContent = collapsed ? '▼' : '▲';
     });
 
     document.getElementById('rec-start-btn')?.addEventListener('click', () => {
@@ -162,10 +175,6 @@ function startRecording() {
         undoStack:     [],
     };
     cfg.players.forEach(p => { rec.stackByPos[p.pos] = p.stack; });
-
-    // Hide setup so screen is clean while recording
-    const setupEl = document.getElementById('recorder-setup');
-    if (setupEl) setupEl.style.display = 'none';
 
     const panelEl = document.getElementById('recorder-panel');
     if (panelEl) { panelEl.style.display = ''; panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }

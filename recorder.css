@@ -132,6 +132,47 @@
 
 .rec-blind-in { width: 54px !important; }
 
+/* Hole cards input */
+.rec-cards-in {
+    background: #1e2e44;
+    border: 1px solid #2a3f5f;
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 600;
+    width: 58px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-family: monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.rec-cards-in:focus { outline: none; border-color: #7c3aed; }
+.rec-cards-hint {
+    font-size: 8.5px;
+    font-weight: 400;
+    color: #344d6e;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-left: 4px;
+}
+
+/* Collapse button */
+.rec-collapse-btn {
+    background: none;
+    border: 1px solid #2a3f5f;
+    color: #4a6580;
+    font-size: 9px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    cursor: pointer;
+    line-height: 1;
+    margin-left: 4px;
+}
+.rec-collapse-btn:hover { border-color: #7a9ab8; color: #7a9ab8; }
+
+/* Collapsed state */
+.rec-setup-collapsed .rec-setup-body { display: none; }
+
 /* Setup footer */
 .rec-setup-footer {
     display: flex;
