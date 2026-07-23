@@ -224,29 +224,31 @@ function pushUndoState() {
 function recordAction(pos, action, amount) {
     pushUndoState();
 
-    const street = rec.currentStreet;
+    const street       = rec.currentStreet;
+    const isAggressive = action === 'raise' || action === 'reraise' || action === 'bet';
     const entry  = { pos, a: action };
     if (amount > 0) entry.v = amount;
     rec.streets[street].push(entry);
 
     if (action !== 'fold' && action !== 'check' && amount > 0) {
         const prev = rec.potContrib[pos] || 0;
-        const add  = Math.max(0, amount - prev);
+        // Aggressive: amount = ADDITIONAL (raise size); total = prev + amount
+        // Call: amount = total commitment level; add = difference
+        const newTotal = isAggressive ? prev + amount : amount;
+        const add      = newTotal - prev;
         rec.pot            += add;
-        rec.potContrib[pos] = amount;
+        rec.potContrib[pos] = newTotal;
         rec.stackByPos[pos] = (rec.stackByPos[pos] || 0) - add;
 
         const heroPlayer = cfg.players.find(p => p.isHero);
         if (heroPlayer && pos === heroPlayer.pos) updateHeroBetInput(street, pos);
     }
 
-    const isAggressive = action === 'raise' || action === 'reraise' || action === 'bet';
-
     if (action === 'fold') {
         rec.playersInHand = rec.playersInHand.filter(p => p !== pos);
-        rec.needToAct     = rec.needToAct.filter(p => p !== pos);
+        rec.needToAct = rec.needToAct.filter(p => p !== pos);
     } else if (isAggressive) {
-        rec.currentBet   = amount;
+        rec.currentBet   = rec.potContrib[pos]; // total commitment of raiser
         rec.raisingRound++;
         const order     = rec.currentStreet === 'preflop' ? PF_ORDER : POST_ORDER;
         const remaining = rec.playersInHand.filter(p => p !== pos);
