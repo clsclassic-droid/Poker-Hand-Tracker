@@ -395,7 +395,7 @@ async function findOrCreate() {
 async function loadHistory() {
     const res = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: state.spreadsheetId,
-        range: `${SHEET_TAB}!A2:W`,
+        range: `${SHEET_TAB}!A2:X`,
     });
     state.history = res.result.values || [];
     state.expandedDays = new Set([todayISO()]);
@@ -1122,6 +1122,11 @@ function openHandDetail(r) {
                 </div>
             </div>`;
     }).join('');
+
+    if (r[23] && window.recorderModule) {
+        const logHtml = window.recorderModule.renderActionLog(r[23]);
+        if (logHtml) body.innerHTML += logHtml;
+    }
 
     document.getElementById('hand-modal-overlay').classList.remove('hand-modal-hidden');
 }

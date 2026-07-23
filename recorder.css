@@ -1,0 +1,441 @@
+/* ── recorder.css — Detailed Action Recorder (optional feature) ──────────────
+   ถอดออกได้ทั้งก้อน: ลบไฟล์นี้ + เอา <link> ออกจาก index.html
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Player Setup Panel ────────────────────────────────────────────────────── */
+#recorder-setup {
+    margin: 0 0 6px;
+}
+.rec-setup-box {
+    background: #162032;
+    border: 1px solid #2a3f5f;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.rec-setup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    background: #1e2e44;
+    border-bottom: 1px solid #2a3f5f;
+    gap: 10px;
+}
+.rec-setup-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #7a9ab8;
+    text-transform: uppercase;
+}
+.rec-count-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.rec-small-lbl {
+    font-size: 10px;
+    color: #4a6580;
+}
+.rec-dd-wrap {
+    position: relative;
+    display: inline-block;
+}
+.rec-dd-wrap select {
+    background: #162032;
+    border: 1px solid #2a3f5f;
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 24px 4px 8px;
+    border-radius: 6px;
+    appearance: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+.rec-dd-wrap select:focus { outline: none; border-color: #344d6e; }
+.rec-dd-arr {
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4a6580;
+    pointer-events: none;
+    font-size: 10px;
+}
+
+/* Player table */
+.rec-player-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.rec-player-table thead td {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #4a6580;
+    text-transform: uppercase;
+    padding: 6px 14px 4px;
+}
+.rec-player-table tbody tr {
+    border-top: 1px solid #1e2e44;
+}
+.rec-player-table tbody tr:hover { background: rgba(255,255,255,.02); }
+.rec-player-table tbody td {
+    padding: 5px 14px;
+    vertical-align: middle;
+}
+.rec-pos-in {
+    background: #1e2e44;
+    border: 1px solid #2a3f5f;
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 700;
+    width: 58px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    text-align: center;
+    font-family: inherit;
+    text-transform: uppercase;
+}
+.rec-pos-in:focus { outline: none; border-color: #3b82f6; }
+.rec-stack-in {
+    background: #1e2e44;
+    border: 1px solid #2a3f5f;
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 600;
+    width: 72px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    text-align: right;
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+}
+.rec-stack-in:focus { outline: none; border-color: #3b82f6; }
+.rec-hero-radio { accent-color: #22c55e; cursor: pointer; }
+
+/* Setup footer */
+.rec-setup-footer {
+    display: flex;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid #1e2e44;
+}
+.rec-btn-secondary {
+    background: transparent;
+    border: 1px solid #2a3f5f;
+    color: #7a9ab8;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.rec-btn-secondary:hover { border-color: #344d6e; color: #e2e8f0; }
+.rec-btn-primary {
+    flex: 1;
+    background: rgba(34,197,94,.12);
+    border: 1px solid #22c55e;
+    color: #22c55e;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 0;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.rec-btn-primary:hover { background: rgba(34,197,94,.2); }
+
+/* ── Action Recorder Panel ─────────────────────────────────────────────────── */
+#recorder-panel {
+    margin-top: 12px;
+}
+.rec-panel-box {
+    background: #162032;
+    border: 1px solid #2a3f5f;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Street header */
+.rec-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    background: #1e2e44;
+    border-bottom: 1px solid #2a3f5f;
+}
+.rec-street-tabs { display: flex; gap: 4px; }
+.rec-st-tab {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    color: #2a3f5f;
+    border: 1px solid #1e2e44;
+}
+.rec-st-active.preflop-tab { background: rgba(124,58,237,.2); color: #a78bfa; border-color: rgba(124,58,237,.4); }
+.rec-st-active.flop-tab    { background: rgba(8,145,178,.2);  color: #67e8f9; border-color: rgba(8,145,178,.4); }
+.rec-st-active.turn-tab    { background: rgba(180,83,9,.2);   color: #fbbf24; border-color: rgba(180,83,9,.4); }
+.rec-st-active.river-tab   { background: rgba(185,28,28,.2);  color: #f87171; border-color: rgba(185,28,28,.4); }
+.rec-st-done { color: #344d6e; text-decoration: line-through; }
+.rec-pot-display { font-size: 11px; color: #4a6580; }
+.rec-pot-display b { color: #22c55e; font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* Bet level bar */
+.rec-bet-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(245,158,11,.06);
+    border-bottom: 1px solid rgba(245,158,11,.15);
+}
+.rec-bet-lbl { font-size: 10px; color: #4a6580; }
+.rec-bet-val { font-size: 12px; font-weight: 700; color: #fbbf24; font-variant-numeric: tabular-nums; }
+.rec-raise-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: rgba(245,158,11,.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245,158,11,.3);
+    margin-left: auto;
+}
+
+/* Action Feed */
+.rec-feed {
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+.rec-feed::-webkit-scrollbar { width: 3px; }
+.rec-feed::-webkit-scrollbar-thumb { background: #2a3f5f; border-radius: 2px; }
+.rec-feed-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+}
+.rec-feed-row + .rec-feed-row { border-top: 1px solid rgba(255,255,255,.03); }
+.rec-feed-hero { background: rgba(34,197,94,.04); border-left: 2px solid rgba(34,197,94,.3); }
+.rec-fr-pos {
+    font-size: 10px;
+    font-weight: 700;
+    width: 34px;
+    color: #4a6580;
+    flex-shrink: 0;
+}
+.rec-fr-hero-pos { color: #22c55e; }
+.rec-fr-name { flex: 1; font-size: 10px; color: #2a3f5f; }
+.rec-fr-act { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rec-act-fold  { color: #f87171; }
+.rec-act-call  { color: #60a5fa; }
+.rec-act-raise { color: #fbbf24; }
+.rec-act-check { color: #7a9ab8; }
+
+/* Raise divider */
+.rec-feed-divider {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 14px;
+}
+.rec-div-line { flex: 1; height: 1px; background: rgba(245,158,11,.2); }
+.rec-div-lbl {
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(245,158,11,.5);
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* Current actor block */
+.rec-actor-block {
+    padding: 10px 14px;
+    background: #0f2237;
+    border-top: 2px solid #3b82f6;
+}
+.rec-actor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+}
+.rec-actor-who {
+    font-size: 13px;
+    font-weight: 700;
+    color: #60a5fa;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.rec-actor-hero { color: #22c55e; }
+.rec-hero-tag {
+    font-size: 9px;
+    background: rgba(34,197,94,.15);
+    color: #22c55e;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 700;
+}
+.rec-actor-stack {
+    font-size: 11px;
+    color: #4a6580;
+    font-variant-numeric: tabular-nums;
+}
+.rec-to-call {
+    font-size: 10px;
+    background: rgba(59,130,246,.1);
+    border: 1px solid rgba(59,130,246,.2);
+    color: #93c5fd;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 7px;
+    font-variant-numeric: tabular-nums;
+}
+.rec-act-row { display: flex; gap: 5px; margin-bottom: 7px; }
+.rec-ab {
+    flex: 1;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 0;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+.rec-ab-fold  { background: rgba(239,68,68,.12);  color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+.rec-ab-call  { background: rgba(59,130,246,.12); color: #60a5fa; border: 1px solid rgba(59,130,246,.3); }
+.rec-ab-raise { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.3); }
+.rec-ab-check { background: rgba(122,154,184,.1); color: #7a9ab8; border: 1px solid #2a3f5f; }
+.rec-ab:hover { filter: brightness(1.15); }
+.rec-ab:active { transform: scale(0.97); }
+
+/* Amount row */
+.rec-amount-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.rec-amt-lbl { font-size: 11px; color: #4a6580; }
+.rec-amt-in {
+    background: #162032;
+    border: 1px solid #2a3f5f;
+    color: #e2e8f0;
+    font-size: 13px;
+    font-weight: 700;
+    width: 80px;
+    padding: 5px 7px;
+    border-radius: 6px;
+    text-align: right;
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+}
+.rec-amt-in:focus { outline: none; border-color: #344d6e; }
+.rec-quick-btns { display: flex; gap: 4px; flex: 1; }
+.rec-qb {
+    flex: 1;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 0;
+    border-radius: 5px;
+    background: #162032;
+    border: 1px solid #2a3f5f;
+    color: #7a9ab8;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+}
+.rec-qb:hover { border-color: #344d6e; color: #e2e8f0; }
+
+/* Street complete footer */
+.rec-street-footer { border-top: 1px solid #2a3f5f; }
+.rec-street-done {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 14px;
+}
+.rec-done-lbl { font-size: 11px; color: #4a6580; font-variant-numeric: tabular-nums; }
+.rec-btn-next {
+    background: rgba(59,130,246,.12);
+    border: 1px solid #3b82f6;
+    color: #60a5fa;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+}
+.rec-btn-next:hover { background: rgba(59,130,246,.2); }
+.rec-btn-save {
+    background: rgba(34,197,94,.12);
+    border: 1px solid #22c55e;
+    color: #22c55e;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+}
+.rec-btn-save:hover { background: rgba(34,197,94,.2); }
+.rec-btn-save:disabled { opacity: .5; cursor: default; }
+
+/* ── Action Log in Hand Detail Modal ──────────────────────────────────────── */
+.rec-modal-log {
+    border-top: 1px solid #2a3f5f;
+    margin-top: 4px;
+    padding-top: 4px;
+}
+.rec-modal-log-title {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #4a6580;
+    text-transform: uppercase;
+    padding: 7px 0 5px;
+}
+.rec-modal-row {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 10px;
+    padding: 7px 0;
+    border-top: 1px solid #1e2e44;
+    align-items: start;
+}
+.rec-modal-street {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding-top: 2px;
+}
+.rec-st-pf { color: #a78bfa; }
+.rec-st-fl { color: #67e8f9; }
+.rec-st-tu { color: #fbbf24; }
+.rec-st-rv { color: #f87171; }
+.rec-modal-acts { font-size: 11px; color: #7a9ab8; line-height: 1.7; }
+.rec-log-act { display: inline; }
+.rec-log-act b { color: #e2e8f0; font-weight: 700; }
+.rec-log-fold  { color: #f87171; }
+.rec-log-call  { color: #60a5fa; }
+.rec-log-raise { color: #fbbf24; }
+.rec-log-check { color: #7a9ab8; }
+.rec-modal-pot {
+    font-size: 10px;
+    color: #22c55e;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+}

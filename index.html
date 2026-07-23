@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poker Hand Tracker</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="recorder.css">
 </head>
 <body>
     <div id="app">
@@ -68,6 +69,9 @@
                 <!-- Built by JS -->
             </div>
 
+            <!-- Recorder: Player Setup (optional feature — visible only when toggle on) -->
+            <div id="recorder-setup" style="display:none"></div>
+
             <!-- Bet Row -->
             <div id="bet-row">
                 <div class="bet-cell"><input type="number" id="bet-pf"    class="bet-input" placeholder="0" step="any"></div>
@@ -116,6 +120,9 @@
             <div id="actions">
                 <button id="cancel-edit-btn" class="btn-cancel" style="display:none">✕ ยกเลิกแก้ไข</button>
             </div>
+
+            <!-- Recorder: Action Panel (optional feature — appears after recording starts) -->
+            <div id="recorder-panel" style="display:none"></div>
 
             <!-- History Table -->
             <div id="history-section">
@@ -198,6 +205,16 @@
                         <span class="toggle-track"></span>
                     </div>
                 </label>
+                <label class="setting-row">
+                    <div class="setting-info">
+                        <span class="setting-title">บันทึก Action ละเอียด</span>
+                        <span class="setting-desc">ตั้งค่าโต๊ะ + บันทึก fold/call/raise ทุกคน</span>
+                    </div>
+                    <div class="toggle-wrap">
+                        <input type="checkbox" id="toggle-recorder" class="toggle-input">
+                        <span class="toggle-track"></span>
+                    </div>
+                </label>
             </div>
         </div>
     </div>
@@ -208,6 +225,7 @@
     <!-- Load app first so callbacks are defined when Google scripts fire -->
     <script src="config.js"></script>
     <script src="app.js"></script>
+    <script src="recorder.js"></script>
     <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
     <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
 </body>
