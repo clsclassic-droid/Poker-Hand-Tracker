@@ -203,8 +203,9 @@ function recordAction(pos, action, amount) {
     } else if (isAggressive) {
         rec.currentBet   = amount;
         rec.raisingRound++;
-        // Everyone in hand except raiser must act again
-        rec.needToAct = rec.playersInHand.filter(p => p !== pos);
+        // Everyone in hand except raiser must act again (re-sort by position order)
+        const order = rec.currentStreet === 'preflop' ? PF_ORDER : POST_ORDER;
+        rec.needToAct = sortByOrder(rec.playersInHand.filter(p => p !== pos), order);
     } else {
         // check or call — just remove from queue
         rec.needToAct = rec.needToAct.filter(p => p !== pos);
