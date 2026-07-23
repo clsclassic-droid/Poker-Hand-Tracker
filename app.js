@@ -1048,13 +1048,13 @@ function openHandDetail(r) {
     const fb = '<span class="f-badge">F</span>';
 
     const fields = [
-        { key:'hand',    label:'HAND',  cards: r[1]||'', note: r[8] ||'', hideCards: state.hideHand, hasFold: foldField === 'hand' },
-        { key:'flop',    label:'FLOP',  cards: r[2]||'', note: r[9] ||'', hasFold: foldField === 'flop' },
-        { key:'turn',    label:'TURN',  cards: r[3]||'', note: r[10]||'', hasFold: foldField === 'turn' },
-        { key:'river',   label:'RIVER', cards: r[4]||'', note: r[11]||'', hasFold: foldField === 'river' },
+        { key:'hand',    label:'HAND',  cards: r[1]||'', note: r[8] ||'', hideCards: state.hideHand, hasFold: foldField === 'hand',  bet: r[16]||'' },
+        { key:'flop',    label:'FLOP',  cards: r[2]||'', note: r[9] ||'', hasFold: foldField === 'flop',  bet: r[17]||'' },
+        { key:'turn',    label:'TURN',  cards: r[3]||'', note: r[10]||'', hasFold: foldField === 'turn',  bet: r[18]||'' },
+        { key:'river',   label:'RIVER', cards: r[4]||'', note: r[11]||'', hasFold: foldField === 'river', bet: r[19]||'' },
         { key:'fivecard', label:'5-CARD', isFiveCard: true },
         { key:'hit',     label:'HIT',   isHit: true, hitText: r[14]||'' },
-        { key:'result',  label:'RESULT', isResult: true, resultText: r[21]||'' },
+        { key:'result',  label:'RESULT', isResult: true, resultText: r[21]||'', pot: r[20]||'' },
         { key:'sd1',     label:'SD1',   cards: r[5]||'', note: r[12]||'' },
         { key:'sd2',     label:'SD2',   cards: r[6]||'', note: r[13]||'' },
     ];
@@ -1095,10 +1095,11 @@ function openHandDetail(r) {
                     resultHtml = `<span class="${cls}">${pfx}${rv.toLocaleString()}</span>`;
                 }
             }
+            const potHtml = f.pot ? `<div class="hm-pot">Pot ${parseFloat(f.pot).toLocaleString()} ฿</div>` : '';
             return `
             <div class="hm-field-row">
                 <span class="hm-field-label" style="color:#22c55e">${f.label}</span>
-                <div class="hm-field-content"><div class="hm-cards">${resultHtml}</div></div>
+                <div class="hm-field-content"><div class="hm-cards">${resultHtml}</div>${potHtml}</div>
             </div>`;
         }
         let cardsHtml;
@@ -1108,13 +1109,15 @@ function openHandDetail(r) {
             cardsHtml = f.cards ? cardHtml(f.cards) : '<span class="cv-empty">—</span>';
         }
         if (f.hasFold) cardsHtml += ' ' + fb;
+        const betVal = f.bet ? parseFloat(f.bet) : NaN;
+        const betHtml = (!isNaN(betVal) && betVal !== 0) ? `<span class="hm-bet">฿ ${betVal.toLocaleString()}</span>` : '';
         const noteHtml = f.note ? `<div class="hm-note">${f.note}</div>` : '';
         const color = FIELD_COLORS[f.key] || 'var(--text-muted)';
         return `
             <div class="hm-field-row">
                 <span class="hm-field-label" style="color:${color}">${f.label}</span>
                 <div class="hm-field-content">
-                    <div class="hm-cards">${cardsHtml}</div>
+                    <div class="hm-cards">${cardsHtml}${betHtml}</div>
                     ${noteHtml}
                 </div>
             </div>`;
