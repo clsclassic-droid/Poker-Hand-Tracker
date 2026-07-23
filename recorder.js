@@ -459,9 +459,12 @@ function renderActorBlock() {
     const canCheck  = toCall === 0;
 
     const pot      = rec.pot;
-    const minRaise = rec.currentBet > 0 ? rec.currentBet * 2 : (cfg.bb || 20);
-    const halfPot  = Math.max(minRaise, Math.round(pot / 2 / 10) * 10);
-    const fullPot  = Math.max(minRaise, Math.round(pot / 10) * 10);
+    const snap10   = v => Math.ceil(v / 10) * 10;
+    const minRaise = snap10(rec.currentBet > 0 ? rec.currentBet * 2 : (cfg.bb || 20));
+    const thirdPot = Math.max(minRaise, snap10(pot / 3));
+    const halfPot  = Math.max(minRaise, snap10(pot / 2));
+    const threeQPot= Math.max(minRaise, snap10(pot * 0.75));
+    const fullPot  = Math.max(minRaise, snap10(pot));
 
     const callHtml = canCheck
         ? `<button class="rec-ab rec-ab-check" onclick="window.recorderModule._act('${pos}','check',0)">CHECK</button>`
@@ -489,11 +492,13 @@ function renderActorBlock() {
         </div>
         <div class="rec-amount-row">
             <span class="rec-amt-lbl">${raiseLabel.toLowerCase()}</span>
-            <input class="rec-amt-in" id="rec-raise-amt" type="number" value="${minRaise}" min="1" step="10">
+            <input class="rec-amt-in" id="rec-raise-amt" type="number" value="${minRaise}" min="${minRaise}" step="10">
             <span class="rec-amt-lbl">฿</span>
             <div class="rec-quick-btns">
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${minRaise}">Min</button>
+                <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${thirdPot}">⅓P</button>
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${halfPot}">½P</button>
+                <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${threeQPot}">¾P</button>
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${fullPot}">Pot</button>
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${stack}">All-in</button>
             </div>
