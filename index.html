@@ -40,6 +40,7 @@
                 <label for="date-input" class="date-lbl">วันที่</label>
                 <input type="date" id="date-input" class="date-input">
                 <button id="hide-hand-btn" class="icon-btn" title="ซ่อน/แสดง Hand">👁 Hand</button>
+                <button id="settings-btn" class="icon-btn" title="ตั้งค่า">⚙ ตั้งค่า</button>
                 <a id="sheet-link" href="#" target="_blank" title="เปิด Google Sheet">
                     📊 เปิด Sheet
                 </a>
@@ -95,8 +96,8 @@
                     <div id="picker-right">
                         <button class="icon-btn" id="fold-btn">🏳 Fold</button>
                         <button class="icon-btn" id="comment-toggle-btn">💬 Note</button>
-                        <button class="icon-btn" id="undo-btn" title="ยกเลิกใบล่าสุด">↩ ยกเลิก</button>
                         <button class="icon-btn" id="clear-field-btn" title="ล้างฟิลด์นี้">✕ ล้าง</button>
+                        <button id="save-btn" class="icon-btn save-icon-btn">💾 บันทึก Hand</button>
                     </div>
                 </div>
                 <div id="card-grid-wrap">
@@ -114,8 +115,6 @@
             <!-- Action Buttons -->
             <div id="actions">
                 <button id="cancel-edit-btn" class="btn-cancel" style="display:none">✕ ยกเลิกแก้ไข</button>
-                <button id="clear-btn" class="btn-secondary">🗑 ล้างทั้งหมด</button>
-                <button id="save-btn" class="btn-primary">💾 บันทึก Hand</button>
             </div>
 
             <!-- History Table -->
@@ -158,6 +157,28 @@
                 <button id="hand-modal-close" class="icon-btn">✕</button>
             </div>
             <div id="hand-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-overlay">
+        <div id="settings-panel">
+            <div id="settings-header">
+                <span>ตั้งค่า</span>
+                <button id="settings-close" class="icon-btn">✕</button>
+            </div>
+            <div id="settings-body">
+                <label class="setting-row">
+                    <div class="setting-info">
+                        <span class="setting-title">4-Color Deck</span>
+                        <span class="setting-desc">♦ น้ำเงิน · ♣ เขียว (อ่านง่ายขึ้น)</span>
+                    </div>
+                    <div class="toggle-wrap">
+                        <input type="checkbox" id="toggle-fourcolor" class="toggle-input">
+                        <span class="toggle-track"></span>
+                    </div>
+                </label>
+            </div>
         </div>
     </div>
 

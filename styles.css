@@ -1060,6 +1060,97 @@ header h1 {
 #toast.success { background: #14532d; border-color: #166534; color: #86efac; }
 #toast.error   { background: #7f1d1d; border-color: #991b1b; color: #fca5a5; }
 
+/* ─── Save icon button ───────────────────────────────────────────────────── */
+.save-icon-btn {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+}
+.save-icon-btn:hover { background: rgba(34,197,94,.22); }
+
+/* ─── Settings overlay ───────────────────────────────────────────────────── */
+.settings-hidden { display: none; }
+
+#settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 150;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+#settings-overlay.visible { display: flex; }
+
+#settings-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    width: 340px;
+    max-width: 92vw;
+    padding: 20px;
+}
+
+#settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+}
+
+.setting-info { display: flex; flex-direction: column; gap: 3px; }
+.setting-title { font-size: .9rem; font-weight: 600; }
+.setting-desc  { font-size: .78rem; color: var(--text-dim); }
+
+.toggle-wrap { position: relative; flex-shrink: 0; }
+.toggle-input { position: absolute; opacity: 0; width: 0; height: 0; }
+.toggle-track {
+    display: block;
+    width: 40px;
+    height: 22px;
+    background: var(--border2);
+    border-radius: 11px;
+    transition: background .2s;
+    cursor: pointer;
+}
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform .2s;
+}
+.toggle-input:checked + .toggle-track { background: var(--accent); }
+.toggle-input:checked + .toggle-track::after { transform: translateX(18px); }
+
+/* ─── 4-color deck classes ───────────────────────────────────────────────── */
+.cv-blue  { color: #60a5fa; }
+.cv-green { color: #4ade80; }
+.suit-blue  { color: #60a5fa; }
+.suit-green { color: #4ade80; }
+.card-btn.blue-card  { color: #1d4ed8; }
+.card-btn.green-card { color: #15803d; }
+
+/* ─── Actions row — hide when only invisible button remains ─────────────── */
+#actions:has(button[style*="display:none"]:only-child) { margin-bottom: 0; padding: 0; }
+
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
     header { padding: 8px 12px; }

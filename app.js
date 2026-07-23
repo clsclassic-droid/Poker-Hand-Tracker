@@ -6,8 +6,12 @@ const SUITS = [
     { symbol: '♦', code: 'd', red: true  },
     { symbol: '♣', code: 'c', red: false },
 ];
-const SUIT_SYM = { s: '♠', h: '♥', d: '♦', c: '♣' };
+const SUIT_SYM  = { s: '♠', h: '♥', d: '♦', c: '♣' };
 const RED_SUITS = new Set(['h', 'd']);
+
+const SUIT_CV_4  = { s: 'cv-black', h: 'cv-red', d: 'cv-blue', c: 'cv-green' };
+const SUIT_COL_4 = { s: '#e2e8f0', h: '#f87171', d: '#60a5fa', c: '#4ade80' };
+const SUITS_4CLS = { s: 'black',   h: 'red',     d: 'blue',    c: 'green' };
 
 const FIELD_CFG = {
     hand:  { label: 'HAND',  max: 2 },
@@ -130,7 +134,7 @@ function fiveCardHtml(hole, board) {
     let lastOrigin = null;
     result.fiveCards.forEach(c => {
         if (lastOrigin === 'hole' && c.origin === 'board') parts.push('<span class="fc-sep">|</span>');
-        const cls  = RED_SUITS.has(c.suit) ? 'cv-red' : 'cv-black';
+        const cls  = suitCvClass(c.suit);
         const text = `${c.rank}${SUIT_SYM[c.suit] || c.suit}`;
         parts.push((c.origin === 'hole' && c.isKey)
             ? `<span class="fc-key ${cls}">${text}</span>`
@@ -176,7 +180,8 @@ function formatDateThai(iso) {
 }
 const FOLDER_NAME  = 'Poker Hand Tracker';
 const SHEET_NAME   = 'Poker Hand Tracker';
-const LS_SHEET_KEY = 'pht_sheet_id';
+const LS_SHEET_KEY    = 'pht_sheet_id';
+const LS_SETTINGS_KEY = 'pht_settings';
 
 const DISCOVERY_DOCS = [
     'https://sheets.googleapis.com/$discovery/rest?version=v4',
@@ -203,7 +208,26 @@ const state = {
     sheetId:       0,
     editing:       null,
     expandedDays:  new Set(),
+    settings:      { fourColor: false },
 };
+
+// ─── Suit color helpers (respects 4-color setting) ───────────────────────────
+function suitCvClass(suit) {
+    if (state.settings.fourColor) return SUIT_CV_4[suit] || 'cv-black';
+    return RED_SUITS.has(suit) ? 'cv-red' : 'cv-black';
+}
+function suitInlineCol(suit) {
+    if (state.settings.fourColor) return SUIT_COL_4[suit] || '#e2e8f0';
+    return RED_SUITS.has(suit) ? '#f87171' : '#e2e8f0';
+}
+function suitCardCls(suit) {
+    if (state.settings.fourColor) return (SUITS_4CLS[suit] || 'black') + '-card';
+    return RED_SUITS.has(suit) ? 'red-card' : 'black-card';
+}
+function suitLabelCls(suit) {
+    if (state.settings.fourColor) return 'suit-label suit-' + (SUITS_4CLS[suit.code] || 'black');
+    return 'suit-label ' + (suit.red ? 'suit-red' : 'suit-black');
+}
 
 // ─── GAPI / GIS init ─────────────────────────────────────────────────────────
 function gapiLoaded() {
@@ -536,7 +560,7 @@ function cardHtml(str) {
     return str.split(' ').filter(Boolean).map(card => {
         const suit = card.slice(-1);
         const rank = card.slice(0, -1);
-        const cls  = RED_SUITS.has(suit) ? 'cv-red' : 'cv-black';
+        const cls  = suitCvClass(suit);
         return `<span class="${cls}">${rank}${SUIT_SYM[suit] || suit}</span>`;
     }).join(' ');
 }
@@ -800,7 +824,7 @@ function refreshFieldDisplay(field) {
             if (field === 'hand' && state.hideHand) {
                 html += `<span style="filter:blur(4px);display:inline-block">●</span>`;
             } else {
-                const col = RED_SUITS.has(suit) ? '#f87171' : '#e2e8f0';
+                const col = suitInlineCol(suit);
                 html += `<span style="color:${col}">${rank}${SUIT_SYM[suit]}</span>`;
             }
             if (i < cfg.max - 1) html += ' ';
@@ -919,11 +943,33 @@ function buildFieldsBar() {
     });
 }
 
+// ─── Settings ─────────────────────────────────────────────────────────────────
+function loadSettings() {
+    try {
+        const s = JSON.parse(localStorage.getItem(LS_SETTINGS_KEY) || '{}');
+        state.settings.fourColor = !!s.fourColor;
+    } catch(e) {}
+    document.getElementById('toggle-fourcolor').checked = state.settings.fourColor;
+}
+
+function saveSettings() {
+    localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify(state.settings));
+}
+
+function applyFourColorToggle(enabled) {
+    state.settings.fourColor = enabled;
+    saveSettings();
+    buildCardGrid();
+    refreshCardGrid();
+    FIELDS.forEach(f => refreshFieldDisplay(f));
+    renderHistory();
+}
+
 function buildCardGrid() {
     const grid = document.getElementById('card-grid');
     SUITS.forEach(suit => {
         const lbl = document.createElement('div');
-        lbl.className = 'suit-label ' + (suit.red ? 'suit-red' : 'suit-black');
+        lbl.className = suitLabelCls(suit);
         lbl.textContent = suit.symbol;
         grid.appendChild(lbl);
 
@@ -931,7 +977,7 @@ function buildCardGrid() {
             const id  = rank + suit.code;
             const btn = document.createElement('button');
             btn.id        = 'cb-' + id;
-            btn.className = 'card-btn ' + (suit.red ? 'red-card' : 'black-card');
+            btn.className = 'card-btn ' + suitCardCls(suit.code);
             btn.innerHTML = `<span class="card-rank">${rank}</span><span class="card-suit">${suit.symbol}</span>`;
             btn.addEventListener('click', () => onCardClick(id));
             grid.appendChild(btn);
@@ -1244,11 +1290,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('fold-btn').addEventListener('click', toggleFold);
-    document.getElementById('undo-btn').addEventListener('click', undoLast);
     document.getElementById('clear-field-btn').addEventListener('click', clearField);
     document.getElementById('cancel-edit-btn').addEventListener('click', clearAll);
-    document.getElementById('clear-btn').addEventListener('click', clearAll);
     document.getElementById('save-btn').addEventListener('click', saveHand);
+
+    document.getElementById('settings-btn').addEventListener('click', () => {
+        document.getElementById('settings-overlay').classList.add('visible');
+    });
+    document.getElementById('settings-close').addEventListener('click', () => {
+        document.getElementById('settings-overlay').classList.remove('visible');
+    });
+    document.getElementById('settings-overlay').addEventListener('click', e => {
+        if (e.target === document.getElementById('settings-overlay'))
+            document.getElementById('settings-overlay').classList.remove('visible');
+    });
+    document.getElementById('toggle-fourcolor').addEventListener('change', e => {
+        applyFourColorToggle(e.target.checked);
+    });
+    loadSettings();
     document.getElementById('hide-hand-btn').addEventListener('click', toggleHideHand);
     document.getElementById('comment-toggle-btn').addEventListener('click', toggleCommentArea);
 
