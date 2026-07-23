@@ -116,6 +116,29 @@
 .rec-stack-in:focus { outline: none; border-color: #3b82f6; }
 .rec-hero-radio { accent-color: #22c55e; cursor: pointer; }
 
+/* Name input */
+.rec-name-in {
+    background: #1e2e44;
+    border: 1px solid #2a3f5f;
+    color: #e2e8f0;
+    font-size: 11px;
+    width: 74px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-family: inherit;
+}
+.rec-name-in:focus { outline: none; border-color: #3b82f6; }
+
+/* Blind row */
+.rec-blind-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-top: 1px solid #1e2e44;
+}
+.rec-blind-in { width: 68px !important; }
+
 /* Setup footer */
 .rec-setup-footer {
     display: flex;
@@ -184,8 +207,22 @@
 .rec-st-active.turn-tab    { background: rgba(180,83,9,.2);   color: #fbbf24; border-color: rgba(180,83,9,.4); }
 .rec-st-active.river-tab   { background: rgba(185,28,28,.2);  color: #f87171; border-color: rgba(185,28,28,.4); }
 .rec-st-done { color: #344d6e; text-decoration: line-through; }
+.rec-panel-header-right { display: flex; align-items: center; gap: 8px; }
 .rec-pot-display { font-size: 11px; color: #4a6580; }
 .rec-pot-display b { color: #22c55e; font-size: 13px; font-variant-numeric: tabular-nums; }
+.rec-undo-btn {
+    background: transparent;
+    border: 1px solid #2a3f5f;
+    color: #7a9ab8;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+}
+.rec-undo-btn:hover { border-color: #344d6e; color: #e2e8f0; }
 
 /* Bet level bar */
 .rec-bet-bar {
@@ -239,6 +276,8 @@
 .rec-act-call  { color: #60a5fa; }
 .rec-act-raise { color: #fbbf24; }
 .rec-act-check { color: #7a9ab8; }
+.rec-act-post  { color: #344d6e; }
+.rec-pos-tag   { font-size: 9px; color: #4a6580; font-weight: 400; }
 
 /* Raise divider */
 .rec-feed-divider {
@@ -433,6 +472,7 @@
 .rec-log-call  { color: #60a5fa; }
 .rec-log-raise { color: #fbbf24; }
 .rec-log-check { color: #7a9ab8; }
+.rec-log-post  { color: #344d6e; }
 .rec-modal-pot {
     font-size: 10px;
     color: #22c55e;
