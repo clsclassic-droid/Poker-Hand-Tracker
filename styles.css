@@ -386,7 +386,7 @@ header h1 {
 }
 /* Per-street color tokens */
 .field-item[data-field="hand"]  { --fi-c: #7c3aed; --fi-dim: rgba(124,58,237,.14); --fi-t: #a78bfa; }
-.field-item[data-field="flop"]  { --fi-c: #0891b2; --fi-dim: rgba(8,145,178,.14);  --fi-t: #67e8f9; }
+.field-item[data-field="flop"]  { --fi-c: #0891b2; --fi-dim: rgba(8,145,178,.14);  --fi-t: #67e8f9; min-width: 90px; }
 .field-item[data-field="turn"]  { --fi-c: #b45309; --fi-dim: rgba(180,83,9,.14);   --fi-t: #fbbf24; }
 .field-item[data-field="river"] { --fi-c: #b91c1c; --fi-dim: rgba(185,28,28,.14);  --fi-t: #f87171; }
 .field-item[data-field="sd1"]   { --fi-c: #4338ca; --fi-dim: rgba(67,56,202,.12);  --fi-t: #818cf8; }
