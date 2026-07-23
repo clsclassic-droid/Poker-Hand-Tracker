@@ -26,6 +26,106 @@ const STREET_TAB_CLS = { preflop:'preflop-tab', flop:'flop-tab', turn:'turn-tab'
 
 let cfg = null;
 let rec = null;
+let _pickerIdx     = -1;
+let _pickerHandler = null;
+
+// ── Card picker helpers ───────────────────────────────────────────────────────
+function parseCards(str) {
+    if (!str) return [];
+    return (String(str).match(/[AKQJT2-9][hdcs]/gi) || [])
+        .map(c => c[0].toUpperCase() + c[1].toLowerCase()).slice(0, 2);
+}
+
+const _SUIT_SYM = { h: '♥', d: '♦', c: '♣', s: '♠' };
+const _SUIT_CLS = { h: 'rec-cs-heart', d: 'rec-cs-diam', c: 'rec-cs-club', s: '' };
+
+function renderCardSlotHTML(cardsStr) {
+    const cards = parseCards(cardsStr);
+    return [0, 1].map(i => {
+        if (cards[i]) {
+            const rank = cards[i][0], suit = cards[i][1];
+            return `<span class="rec-cs-card ${_SUIT_CLS[suit]}">${rank}${_SUIT_SYM[suit]}</span>`;
+        }
+        return `<span class="rec-cs-empty">—</span>`;
+    }).join('');
+}
+
+function updateCardsSlot(playerIdx) {
+    const el = document.querySelector(`.rec-cards-slot[data-i="${playerIdx}"]`);
+    if (el) el.innerHTML = renderCardSlotHTML(cfg?.players?.[playerIdx]?.cards || '');
+}
+
+function openCardPicker(playerIdx) {
+    const existing = document.getElementById('rec-card-picker');
+    if (_pickerIdx === playerIdx && existing) { closeCardPicker(); return; }
+    closeCardPicker();
+    _pickerIdx = playerIdx;
+
+    const usedCards = new Set();
+    cfg?.players?.forEach((p, i) => {
+        if (i !== playerIdx) parseCards(p.cards).forEach(c => usedCards.add(c));
+    });
+    const selCards = parseCards(cfg?.players?.[playerIdx]?.cards || '');
+
+    const RANKS = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+    const SUITS = [['s','♠','rec-cp-s'],['h','♥','rec-cp-h'],['d','♦','rec-cp-d'],['c','♣','rec-cp-c']];
+
+    let html = '';
+    SUITS.forEach(([s, sym, cls]) => {
+        html += `<div class="rec-cp-row">`;
+        RANKS.forEach(r => {
+            const id  = r + s;
+            const sel = selCards.includes(id);
+            const used= usedCards.has(id);
+            html += `<button class="rec-cp-card ${cls}${sel ? ' rec-cp-sel' : ''}${used ? ' rec-cp-used' : ''}" data-card="${id}"${used ? ' disabled' : ''}>${r}<span>${sym}</span></button>`;
+        });
+        html += `</div>`;
+    });
+
+    const picker = document.createElement('div');
+    picker.id        = 'rec-card-picker';
+    picker.className = 'rec-card-picker';
+    picker.innerHTML = html;
+    document.body.appendChild(picker);
+
+    const slotEl = document.querySelector(`.rec-cards-slot[data-i="${playerIdx}"]`);
+    if (slotEl) {
+        const r = slotEl.getBoundingClientRect();
+        const left = Math.max(4, Math.min(r.left, window.innerWidth - 360));
+        const top  = r.bottom + 4;
+        picker.style.cssText = `position:fixed;z-index:9999;left:${left}px;top:${top}px`;
+    }
+
+    picker.addEventListener('click', e => {
+        const btn = e.target.closest('.rec-cp-card:not([disabled])');
+        if (!btn) return;
+        const card = btn.dataset.card;
+        const p    = cfg?.players?.[playerIdx];
+        if (!p) return;
+        let sel = parseCards(p.cards);
+        const idx = sel.indexOf(card);
+        if (idx >= 0)         { sel.splice(idx, 1); }
+        else if (sel.length < 2) { sel.push(card); }
+        else                  { sel = [sel[1], card]; }
+        p.cards = sel.join('');
+        updateCardsSlot(playerIdx);
+        openCardPicker(playerIdx);
+    });
+
+    _pickerHandler = e => {
+        if (!document.getElementById('rec-card-picker')?.contains(e.target) &&
+            !e.target.closest('.rec-cards-slot')) {
+            closeCardPicker();
+        }
+    };
+    setTimeout(() => document.addEventListener('mousedown', _pickerHandler), 50);
+}
+
+function closeCardPicker() {
+    if (_pickerHandler) { document.removeEventListener('mousedown', _pickerHandler); _pickerHandler = null; }
+    document.getElementById('rec-card-picker')?.remove();
+    _pickerIdx = -1;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function isOn() { return document.getElementById('toggle-recorder')?.checked || false; }
@@ -87,7 +187,7 @@ function renderSetup() {
             <td><input class="rec-pos-in"  data-i="${i}" value="${p.pos}"        maxlength="6"></td>
             <td><input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12"></td>
             <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"></td>
-            <td><input class="rec-cards-in" data-i="${i}" value="${p.cards || ''}" placeholder="Ah Kd" maxlength="5" spellcheck="false"></td>
+            <td><button class="rec-cards-slot" data-i="${i}">${renderCardSlotHTML(p.cards || '')}</button></td>
         </tr>`).join('');
 
     el.innerHTML = `
@@ -109,7 +209,7 @@ function renderSetup() {
             </div>
             <div class="rec-setup-body">
                 <table class="rec-player-table">
-                    <thead><tr><td>ตำแหน่ง</td><td>ชื่อ</td><td>Stack</td><td>ไพ่ที่ถือ <span class="rec-cards-hint">A=A · T=10 · h♥ d♦ c♣ s♠</span></td></tr></thead>
+                    <thead><tr><td>ตำแหน่ง</td><td>ชื่อ</td><td>Stack</td><td>ไพ่ที่ถือ</td></tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
                 <div class="rec-setup-footer">
@@ -125,12 +225,11 @@ function collectConfig() {
     const poses   = [...document.querySelectorAll('.rec-pos-in')].map(el => el.value.trim().toUpperCase() || '?');
     const names   = [...document.querySelectorAll('.rec-name-in')].map(el => el.value.trim());
     const stacks  = [...document.querySelectorAll('.rec-player-stack')].map(el => parseFloat(el.value) || 1000);
-    const cards   = [...document.querySelectorAll('.rec-cards-in')].map(el => el.value.trim());
     const heroPos = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
     const sb      = parseFloat(document.getElementById('rec-sb')?.value) ?? 10;
     const bb      = parseFloat(document.getElementById('rec-bb')?.value) ?? 20;
     return {
-        players: poses.map((pos, i) => ({ pos, name: names[i] || '', stack: stacks[i], isHero: pos === heroPos, cards: cards[i] || '' })),
+        players: poses.map((pos, i) => ({ pos, name: names[i] || '', stack: stacks[i], isHero: pos === heroPos, cards: cfg?.players?.[i]?.cards || '' })),
         sb, bb,
     };
 }
@@ -147,6 +246,11 @@ function bindSetupEvents() {
         cfg = { ...cfg, players: fresh };
         renderSetup();
         syncPositionChips();
+    });
+
+    document.querySelector('.rec-player-table')?.addEventListener('click', e => {
+        const slot = e.target.closest('.rec-cards-slot');
+        if (slot) openCardPicker(parseInt(slot.dataset.i));
     });
 
     document.getElementById('rec-collapse-btn')?.addEventListener('click', () => {
