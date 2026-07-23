@@ -132,63 +132,27 @@
 
 .rec-blind-in { width: 54px !important; }
 
-/* Hole cards slot button */
+/* Hole cards slot button — looks like field bar items */
 .rec-cards-slot {
-    background: #1e2e44;
-    border: 1px solid #2a3f5f;
-    border-radius: 5px;
-    padding: 3px 8px;
+    background: #0f1e2e;
+    border: 1.5px solid #2a3f5f;
+    border-radius: 6px;
+    padding: 4px 8px;
     cursor: pointer;
     display: inline-flex;
-    gap: 5px;
+    gap: 4px;
     align-items: center;
-    min-width: 60px;
+    min-width: 62px;
     font-family: inherit;
+    transition: border-color .15s;
 }
-.rec-cards-slot:hover { border-color: #7c3aed; }
-.rec-cs-card { font-size: 12px; font-weight: 700; color: #e2e8f0; font-family: monospace; }
+.rec-cards-slot:hover  { border-color: #7c3aed; }
+.rec-cards-slot.active { border-color: #7c3aed; background: rgba(124,58,237,.08); }
+.rec-cs-card  { font-size: 13px; font-weight: 700; color: #e2e8f0; font-family: monospace; letter-spacing: .5px; }
 .rec-cs-heart { color: #f87171; }
 .rec-cs-diam  { color: #60a5fa; }
 .rec-cs-club  { color: #4ade80; }
-.rec-cs-empty { font-size: 11px; color: #344d6e; }
-
-/* Card picker popup */
-.rec-card-picker {
-    background: #0f1e2e;
-    border: 1px solid #2a3f5f;
-    border-radius: 8px;
-    padding: 6px;
-    box-shadow: 0 8px 28px rgba(0,0,0,.7);
-    user-select: none;
-}
-.rec-cp-row { display: flex; gap: 2px; margin-bottom: 2px; }
-.rec-cp-row:last-child { margin-bottom: 0; }
-.rec-cp-card {
-    width: 24px;
-    height: 28px;
-    border: 1px solid #1e2e44;
-    border-radius: 3px;
-    background: #162032;
-    cursor: pointer;
-    font-size: 8.5px;
-    font-weight: 700;
-    line-height: 1;
-    padding: 2px 0 0;
-    font-family: inherit;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-}
-.rec-cp-card span { font-size: 9px; line-height: 1; }
-.rec-cp-card:hover:not([disabled]) { background: #1e3050; border-color: #4a6580; }
-.rec-cp-s { color: #e2e8f0; }
-.rec-cp-h { color: #f87171; }
-.rec-cp-d { color: #60a5fa; }
-.rec-cp-c { color: #4ade80; }
-.rec-cp-sel { background: rgba(124,58,237,.35) !important; border-color: #7c3aed !important; }
-.rec-cp-used { opacity: 0.2; cursor: default; }
+.rec-cs-empty { font-size: 11px; color: #344d6e; letter-spacing: 2px; }
 
 /* Collapse button */
 .rec-collapse-btn {

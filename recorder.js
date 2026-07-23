@@ -26,8 +26,7 @@ const STREET_TAB_CLS = { preflop:'preflop-tab', flop:'flop-tab', turn:'turn-tab'
 
 let cfg = null;
 let rec = null;
-let _pickerIdx     = -1;
-let _pickerHandler = null;
+let recActivePlayer = -1;
 
 // ── Card picker helpers ───────────────────────────────────────────────────────
 function parseCards(str) {
@@ -55,76 +54,80 @@ function updateCardsSlot(playerIdx) {
     if (el) el.innerHTML = renderCardSlotHTML(cfg?.players?.[playerIdx]?.cards || '');
 }
 
-function openCardPicker(playerIdx) {
-    const existing = document.getElementById('rec-card-picker');
-    if (_pickerIdx === playerIdx && existing) { closeCardPicker(); return; }
-    closeCardPicker();
-    _pickerIdx = playerIdx;
-
-    const usedCards = new Set();
+function _syncRecUsedCards() {
+    // Rebuild app usedCards, then add recorder cards from OTHER players on top
+    if (typeof rebuildUsed === 'function') rebuildUsed();
+    if (!window.state?.usedCards) return;
     cfg?.players?.forEach((p, i) => {
-        if (i !== playerIdx) parseCards(p.cards).forEach(c => usedCards.add(c));
+        if (i !== recActivePlayer) parseCards(p.cards).forEach(c => window.state.usedCards.add(c));
     });
-    const selCards = parseCards(cfg?.players?.[playerIdx]?.cards || '');
-
-    const RANKS = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
-    const SUITS = [['s','♠','rec-cp-s'],['h','♥','rec-cp-h'],['d','♦','rec-cp-d'],['c','♣','rec-cp-c']];
-
-    let html = '';
-    SUITS.forEach(([s, sym, cls]) => {
-        html += `<div class="rec-cp-row">`;
-        RANKS.forEach(r => {
-            const id  = r + s;
-            const sel = selCards.includes(id);
-            const used= usedCards.has(id);
-            html += `<button class="rec-cp-card ${cls}${sel ? ' rec-cp-sel' : ''}${used ? ' rec-cp-used' : ''}" data-card="${id}"${used ? ' disabled' : ''}>${r}<span>${sym}</span></button>`;
-        });
-        html += `</div>`;
-    });
-
-    const picker = document.createElement('div');
-    picker.id        = 'rec-card-picker';
-    picker.className = 'rec-card-picker';
-    picker.innerHTML = html;
-    document.body.appendChild(picker);
-
-    const slotEl = document.querySelector(`.rec-cards-slot[data-i="${playerIdx}"]`);
-    if (slotEl) {
-        const r = slotEl.getBoundingClientRect();
-        const left = Math.max(4, Math.min(r.left, window.innerWidth - 360));
-        const top  = r.bottom + 4;
-        picker.style.cssText = `position:fixed;z-index:9999;left:${left}px;top:${top}px`;
-    }
-
-    picker.addEventListener('click', e => {
-        const btn = e.target.closest('.rec-cp-card:not([disabled])');
-        if (!btn) return;
-        const card = btn.dataset.card;
-        const p    = cfg?.players?.[playerIdx];
-        if (!p) return;
-        let sel = parseCards(p.cards);
-        const idx = sel.indexOf(card);
-        if (idx >= 0)         { sel.splice(idx, 1); }
-        else if (sel.length < 2) { sel.push(card); }
-        else                  { sel = [sel[1], card]; }
-        p.cards = sel.join('');
-        updateCardsSlot(playerIdx);
-        openCardPicker(playerIdx);
-    });
-
-    _pickerHandler = e => {
-        if (!document.getElementById('rec-card-picker')?.contains(e.target) &&
-            !e.target.closest('.rec-cards-slot')) {
-            closeCardPicker();
-        }
-    };
-    setTimeout(() => document.addEventListener('mousedown', _pickerHandler), 50);
 }
 
-function closeCardPicker() {
-    if (_pickerHandler) { document.removeEventListener('mousedown', _pickerHandler); _pickerHandler = null; }
-    document.getElementById('rec-card-picker')?.remove();
-    _pickerIdx = -1;
+function _activatePlayerPicker(playerIdx) {
+    if (recActivePlayer === playerIdx) { _deactivatePlayerPicker(); return; }
+    recActivePlayer = playerIdx;
+
+    const p    = cfg?.players?.[playerIdx];
+    const lbl  = p?.name ? `${p.name} (${p.pos})` : (p?.pos || '');
+    const sel  = parseCards(p?.cards || '');
+
+    // Hijack the picker header
+    const nameEl  = document.getElementById('picker-field-name');
+    const countEl = document.getElementById('picker-count');
+    const labelEl = document.getElementById('picker-label');
+    if (labelEl)  labelEl.textContent = 'ไพ่ที่ถือ:';
+    if (nameEl)  { nameEl.textContent = lbl; nameEl.style.color = '#a78bfa'; }
+    if (countEl) { countEl.textContent = `${sel.length} / 2`; countEl.classList.toggle('full', sel.length >= 2); }
+
+    // Mark active slot visually
+    document.querySelectorAll('.rec-cards-slot').forEach(el => el.classList.remove('active'));
+    document.querySelector(`.rec-cards-slot[data-i="${playerIdx}"]`)?.classList.add('active');
+
+    _syncRecUsedCards();
+    if (typeof refreshCardGrid === 'function') refreshCardGrid();
+
+    // Scroll picker into view
+    document.getElementById('card-picker-section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function _deactivatePlayerPicker() {
+    if (recActivePlayer === -1) return;
+    recActivePlayer = -1;
+    document.querySelectorAll('.rec-cards-slot').forEach(el => el.classList.remove('active'));
+
+    // Restore picker label
+    const labelEl = document.getElementById('picker-label');
+    if (labelEl) labelEl.textContent = 'กำลังเลือก:';
+
+    // Rebuild used + restore grid to current field
+    if (typeof rebuildUsed === 'function') rebuildUsed();
+    if (typeof refreshPickerHeader === 'function') refreshPickerHeader();
+    if (typeof refreshCardGrid === 'function') refreshCardGrid();
+}
+
+function _interceptCard(cardId) {
+    if (recActivePlayer < 0) return false;
+    const p = cfg?.players?.[recActivePlayer];
+    if (!p) return false;
+
+    let sel = parseCards(p.cards);
+    const idx = sel.indexOf(cardId);
+    if (idx >= 0) {
+        sel.splice(idx, 1);
+    } else {
+        if (sel.length >= 2) return true; // full — consume event, do nothing
+        sel.push(cardId);
+    }
+    p.cards = sel.join('');
+    updateCardsSlot(recActivePlayer);
+
+    // Update count badge
+    const countEl = document.getElementById('picker-count');
+    if (countEl) { countEl.textContent = `${sel.length} / 2`; countEl.classList.toggle('full', sel.length >= 2); }
+
+    _syncRecUsedCards();
+    if (typeof refreshCardGrid === 'function') refreshCardGrid();
+    return true;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -250,7 +253,7 @@ function bindSetupEvents() {
 
     document.querySelector('.rec-player-table')?.addEventListener('click', e => {
         const slot = e.target.closest('.rec-cards-slot');
-        if (slot) openCardPicker(parseInt(slot.dataset.i));
+        if (slot) _activatePlayerPicker(parseInt(slot.dataset.i));
     });
 
     document.getElementById('rec-collapse-btn')?.addEventListener('click', () => {
@@ -843,7 +846,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker };
 document.addEventListener('DOMContentLoaded', init);
 
 })();

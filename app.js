@@ -707,6 +707,7 @@ async function saveHand() {
 
 // ─── Card Selection ────────────────────────────────────────────────────────────
 function onCardClick(cardId) {
+    if (window.recorderModule?._interceptCard?.(cardId)) return;
     const f   = state.activeField;
     const cfg = FIELD_CFG[f];
     const sel = state.sel[f];
@@ -737,6 +738,7 @@ function rebuildUsed() {
 }
 
 function setActive(field) {
+    window.recorderModule?._deactivatePlayerPicker?.();
     syncCommentInput();  // save current field's comment before switching
     state.activeField = field;
     document.querySelectorAll('.field-item').forEach(el => {
