@@ -28,11 +28,12 @@
     color: #7a9ab8;
     text-transform: uppercase;
 }
-.rec-count-wrap {
+.rec-count-wrap, .rec-header-right {
     display: flex;
     align-items: center;
     gap: 6px;
 }
+.rec-hdr-sep { margin-left: 8px; border-left: 1px solid #2a3f5f; padding-left: 10px; }
 .rec-small-lbl {
     font-size: 10px;
     color: #4a6580;
@@ -129,15 +130,7 @@
 }
 .rec-name-in:focus { outline: none; border-color: #3b82f6; }
 
-/* Blind row */
-.rec-blind-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-top: 1px solid #1e2e44;
-}
-.rec-blind-in { width: 68px !important; }
+.rec-blind-in { width: 54px !important; }
 
 /* Setup footer */
 .rec-setup-footer {

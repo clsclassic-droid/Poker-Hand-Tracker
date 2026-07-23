@@ -83,8 +83,12 @@ function renderSetup() {
         <div class="rec-setup-box">
             <div class="rec-setup-header">
                 <span class="rec-setup-title">ตั้งค่าโต๊ะ</span>
-                <div class="rec-count-wrap">
-                    <span class="rec-small-lbl">ผู้เล่น</span>
+                <div class="rec-header-right">
+                    <span class="rec-small-lbl">SB</span>
+                    <input class="rec-stack-in rec-blind-in" id="rec-sb" type="number" value="${sb}" min="1" step="1">
+                    <span class="rec-small-lbl">BB</span>
+                    <input class="rec-stack-in rec-blind-in" id="rec-bb" type="number" value="${bb}" min="1" step="1">
+                    <span class="rec-small-lbl rec-hdr-sep">ผู้เล่น</span>
                     <div class="rec-dd-wrap">
                         <select id="rec-count">${countOpts}</select>
                         <span class="rec-dd-arr">▾</span>
@@ -95,12 +99,6 @@ function renderSetup() {
                 <thead><tr><td>ตำแหน่ง</td><td>ชื่อ</td><td>Stack</td><td>Hero</td></tr></thead>
                 <tbody>${rows}</tbody>
             </table>
-            <div class="rec-blind-row">
-                <span class="rec-small-lbl">Small Blind</span>
-                <input class="rec-stack-in rec-blind-in" id="rec-sb" type="number" value="${sb}" min="1" step="1">
-                <span class="rec-small-lbl" style="margin-left:10px">Big Blind</span>
-                <input class="rec-stack-in rec-blind-in" id="rec-bb" type="number" value="${bb}" min="1" step="1">
-            </div>
             <div class="rec-setup-footer">
                 <button id="rec-start-btn" class="rec-btn-primary">🎯 เริ่มบันทึก Action</button>
             </div>
