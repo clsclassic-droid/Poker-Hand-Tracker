@@ -694,6 +694,7 @@ async function saveHand() {
             renderHistory();
             state.handNumber++;
             document.getElementById('hand-num-display').textContent = state.handNumber;
+            window.recorderModule?._saveLog();
             clearAll();
         }
     } catch (e) {

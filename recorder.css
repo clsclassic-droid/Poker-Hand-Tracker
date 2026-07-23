@@ -398,6 +398,7 @@
     padding: 9px 14px;
 }
 .rec-done-lbl { font-size: 11px; color: #4a6580; font-variant-numeric: tabular-nums; }
+.rec-done-hint { font-size: 10px; color: #2e4a62; margin-left: auto; }
 .rec-btn-next {
     background: rgba(59,130,246,.12);
     border: 1px solid #3b82f6;
@@ -411,20 +412,6 @@
     font-family: inherit;
 }
 .rec-btn-next:hover { background: rgba(59,130,246,.2); }
-.rec-btn-save {
-    background: rgba(34,197,94,.12);
-    border: 1px solid #22c55e;
-    color: #22c55e;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 7px;
-    cursor: pointer;
-    white-space: nowrap;
-    font-family: inherit;
-}
-.rec-btn-save:hover { background: rgba(34,197,94,.2); }
-.rec-btn-save:disabled { opacity: .5; cursor: default; }
 
 /* ── 4-card street layout ───────────────────────────────────────────────────── */
 .rec-streets-row {

@@ -538,7 +538,7 @@ function showStreetComplete() {
         footer.innerHTML = `
             <div class="rec-street-done">
                 <span class="rec-done-lbl">${endLbl}</span>
-                <button class="rec-btn-save" id="rec-save-btn" onclick="window.recorderModule._saveLog()">💾 Save Action Log</button>
+                <span class="rec-done-hint">กด บันทึก Hand เพื่อเซฟทั้ง hand + action log</span>
             </div>`;
     }
 }
