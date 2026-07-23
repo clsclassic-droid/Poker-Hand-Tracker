@@ -735,6 +735,7 @@ function onCardClick(cardId) {
 function rebuildUsed() {
     state.usedCards.clear();
     FIELDS.forEach(f => state.sel[f].forEach(c => state.usedCards.add(c)));
+    window.recorderModule?._addRecorderUsedCards?.();
 }
 
 function setActive(field) {

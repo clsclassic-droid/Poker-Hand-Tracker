@@ -54,13 +54,16 @@ function updateCardsSlot(playerIdx) {
     if (el) el.innerHTML = renderCardSlotHTML(cfg?.players?.[playerIdx]?.cards || '');
 }
 
-function _syncRecUsedCards() {
-    // Rebuild app usedCards, then add recorder cards from OTHER players on top
-    if (typeof rebuildUsed === 'function') rebuildUsed();
-    if (!window.state?.usedCards) return;
-    cfg?.players?.forEach((p, i) => {
+function _addRecorderUsedCards() {
+    // Called by rebuildUsed() in app.js — adds all recorder hole cards (except active picker player) to usedCards
+    if (!window.state?.usedCards || !cfg?.players) return;
+    cfg.players.forEach((p, i) => {
         if (i !== recActivePlayer) parseCards(p.cards).forEach(c => window.state.usedCards.add(c));
     });
+}
+
+function _syncRecUsedCards() {
+    if (typeof rebuildUsed === 'function') rebuildUsed(); // already calls _addRecorderUsedCards via hook
 }
 
 function _activatePlayerPicker(playerIdx) {
@@ -847,7 +850,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
