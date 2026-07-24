@@ -356,24 +356,27 @@
     margin-bottom: 7px;
 }
 .rec-actor-who {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
     color: #60a5fa;
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-wrap: wrap;
 }
 .rec-actor-hero { color: #22c55e; }
 .rec-hero-tag {
-    font-size: 9px;
+    font-size: 10px;
     background: rgba(34,197,94,.15);
     color: #22c55e;
     padding: 1px 5px;
     border-radius: 3px;
     font-weight: 700;
 }
-.rec-actor-stack {
-    font-size: 11px;
+.rec-actor-stack { display: none; }
+.rec-actor-stack-inline {
+    font-size: 12px;
+    font-weight: 600;
     color: #4a6580;
     font-variant-numeric: tabular-nums;
 }
@@ -419,9 +422,9 @@
     font-size: 14px;
     font-weight: 700;
     width: 120px;
-    padding: 6px 8px;
+    padding: 6px 24px 6px 8px;
     border-radius: 6px;
-    text-align: right;
+    text-align: center;
     font-family: inherit;
     font-variant-numeric: tabular-nums;
 }

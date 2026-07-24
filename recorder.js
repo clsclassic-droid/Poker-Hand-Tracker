@@ -767,8 +767,7 @@ function renderActorBlock() {
 
     el.innerHTML = `
         <div class="rec-actor-header">
-            <div class="rec-actor-who${isHero ? ' rec-actor-hero' : ''}">${nameHtml}</div>
-            <span class="rec-actor-stack">${stack.toLocaleString()} ฿</span>
+            <div class="rec-actor-who${isHero ? ' rec-actor-hero' : ''}">${nameHtml} <span class="rec-actor-stack-inline">Stack ${stack.toLocaleString()} ฿</span></div>
         </div>
         ${toCall > 0 ? `<div class="rec-to-call">ต้อง call เพิ่ม ${toCall.toLocaleString()} ฿ (รวม ${rec.currentBet.toLocaleString()} ฿)</div>` : ''}
         <div class="rec-act-row">
