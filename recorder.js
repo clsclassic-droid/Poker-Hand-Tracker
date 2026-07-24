@@ -58,17 +58,16 @@ function holeCardsInlineHTML(cardsStr) {
     }).join('');
 }
 
-// Board cards for a street header (reads from window.state.sel)
+// Board cards for street header — always mini-card-sm (compact panel)
 function boardCardsHTML(street) {
     const cards = window.state?.sel?.[street];
     if (!cards || !cards.length) return '';
     const useCards = !window.state?.settings?.textCards;
-    const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
     return cards.map(c => {
         const rank = c[0], suit = c[1];
         if (useCards) {
             const cls = typeof suitCvClass === 'function' ? suitCvClass(suit) : (suit==='h'||suit==='d' ? 'cv-red' : 'cv-black');
-            return `<span class="mini-card${smCls}"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
+            return `<span class="mini-card mini-card-sm"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
         }
         return _cardTextSpan(rank, suit);
     }).join('');
@@ -481,7 +480,7 @@ function initStreet(street) {
 
     const order     = street === 'preflop' ? PF_ORDER : POST_ORDER;
     rec.actionOrder = sortByOrder(rec.playersInHand, order);
-    rec.needToAct   = [...rec.actionOrder];
+    rec.needToAct   = rec.actionOrder.filter(p => (rec.stackByPos[p] || 0) > 0);
 
     // Auto-post blinds preflop
     if (street === 'preflop') {
@@ -544,7 +543,7 @@ function recordAction(pos, action, amount) {
 
     if (action === 'fold') {
         rec.playersInHand = rec.playersInHand.filter(p => p !== pos);
-        rec.needToAct = rec.needToAct.filter(p => p !== pos);
+        rec.needToAct = rec.needToAct.filter(p => p !== pos && (rec.stackByPos[p] || 0) > 0);
     } else if (isAggressive) {
         rec.currentBet   = rec.potContrib[pos]; // total commitment of raiser
         rec.raisingRound++;
@@ -571,8 +570,10 @@ function recordAction(pos, action, amount) {
                 if (remaining.includes(order[i])) rec.needToAct.push(order[i]);
             }
         }
+        // Skip all-in players — they can't act with 0 chips
+        rec.needToAct = rec.needToAct.filter(p => (rec.stackByPos[p] || 0) > 0);
     } else {
-        rec.needToAct = rec.needToAct.filter(p => p !== pos);
+        rec.needToAct = rec.needToAct.filter(p => p !== pos && (rec.stackByPos[p] || 0) > 0);
     }
 
     appendToFeed(entry, isAggressive);
@@ -809,9 +810,9 @@ function renderActorBlock() {
         <div class="rec-act-row">
             <button class="rec-ab rec-ab-fold"  onclick="window.recorderModule._act('${pos}','fold',0)">FOLD</button>
             ${callHtml}
-            <button class="rec-ab rec-ab-raise" onclick="window.recorderModule._doRaise('${pos}')">${raiseLabel}</button>
+            ${stack > 0 ? `<button class="rec-ab rec-ab-raise" onclick="window.recorderModule._doRaise('${pos}')">${raiseLabel}</button>` : ''}
         </div>
-        <div class="rec-amount-row">
+        ${stack > 0 ? `<div class="rec-amount-row">
             <span class="rec-amt-lbl">${raiseLabel.toLowerCase()}</span>
             <input class="rec-amt-in" id="rec-raise-amt" type="number" value="${minRaise}" min="${minRaise}" max="${maxRaise}" step="10">
             <span class="rec-amt-lbl">฿</span>
@@ -823,7 +824,7 @@ function renderActorBlock() {
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${fullPot}">Pot</button>
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${maxRaise}">All-in</button>
             </div>
-        </div>`;
+        </div>` : ''}`;
 }
 
 function showStreetComplete() {
