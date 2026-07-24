@@ -108,6 +108,45 @@ body[data-theme="pastel"] .field-label { color: var(--text-muted); }
 /* pot odds badge */
 body[data-theme="pastel"] .pot-odds-badge { background: rgba(34,144,208,.12); color: #0066aa; border-color: rgba(34,144,208,.2); }
 
+/* ─── HIT field + badges (dark-mode colors are invisible on cream bg) ──── */
+body[data-theme="pastel"] .fi-hit-hc    { border-color:#8a9aaa; background:rgba(100,120,140,.08); }
+body[data-theme="pastel"] .fi-hit-hc    .field-label { color:#4a6075; }
+body[data-theme="pastel"] .fi-hit-hc    .field-cards { color:#3a5065; }
+body[data-theme="pastel"] .fi-hit-pair  { border-color:#7a8aaa; background:rgba(80,100,130,.1); }
+body[data-theme="pastel"] .fi-hit-pair  .field-label { color:#4a6080; }
+body[data-theme="pastel"] .fi-hit-pair  .field-cards { color:#2d4a6a; }
+body[data-theme="pastel"] .fi-hit-2p    { border-color:#6a8aaa; background:rgba(60,90,130,.12); }
+body[data-theme="pastel"] .fi-hit-2p    .field-label { color:#3a5070; }
+body[data-theme="pastel"] .fi-hit-2p    .field-cards { color:#1a3a5a; }
+body[data-theme="pastel"] .fi-hit-trips { border-color:#1d4ed8; background:rgba(29,78,216,.1); }
+body[data-theme="pastel"] .fi-hit-trips .field-label { color:#1a44c8; }
+body[data-theme="pastel"] .fi-hit-trips .field-cards { color:#0033aa; }
+body[data-theme="pastel"] .fi-hit-st    { border-color:#1a7a40; background:rgba(26,122,64,.1); }
+body[data-theme="pastel"] .fi-hit-st    .field-label { color:#1a7a40; }
+body[data-theme="pastel"] .fi-hit-st    .field-cards { color:#0a5530; }
+body[data-theme="pastel"] .fi-hit-fl    { border-color:#1a7a40; background:rgba(26,122,64,.12); }
+body[data-theme="pastel"] .fi-hit-fl    .field-label { color:#1a7a40; }
+body[data-theme="pastel"] .fi-hit-fl    .field-cards { color:#0a5530; }
+body[data-theme="pastel"] .fi-hit-fh    { border-color:#c24a00; background:rgba(194,74,0,.1); }
+body[data-theme="pastel"] .fi-hit-fh    .field-label { color:#c24a00; }
+body[data-theme="pastel"] .fi-hit-fh    .field-cards { color:#903800; }
+body[data-theme="pastel"] .fi-hit-4k    { border-color:#b45000; background:rgba(180,80,0,.1); }
+body[data-theme="pastel"] .fi-hit-4k    .field-label { color:#a04500; }
+body[data-theme="pastel"] .fi-hit-4k    .field-cards { color:#703000; }
+body[data-theme="pastel"] .fi-hit-sf    { border-color:#7b4800; background:rgba(123,72,0,.12); }
+body[data-theme="pastel"] .fi-hit-sf    .field-label { color:#7b4800; }
+body[data-theme="pastel"] .fi-hit-sf    .field-cards { color:#5a3500; }
+
+body[data-theme="pastel"] .hit-badge.hit-hc    { border-color:#8a9aaa; background:rgba(100,120,140,.1);  color:#3a5065; }
+body[data-theme="pastel"] .hit-badge.hit-pair  { border-color:#7a8aaa; background:rgba(80,100,130,.12); color:#2d4a6a; }
+body[data-theme="pastel"] .hit-badge.hit-2p    { border-color:#6a8aaa; background:rgba(60,90,130,.14);  color:#1a3a5a; }
+body[data-theme="pastel"] .hit-badge.hit-trips { border-color:#1d4ed8; background:rgba(29,78,216,.12);  color:#0033aa; }
+body[data-theme="pastel"] .hit-badge.hit-st    { border-color:#1a7a40; background:rgba(26,122,64,.12);  color:#0a5530; }
+body[data-theme="pastel"] .hit-badge.hit-fl    { border-color:#1a7a40; background:rgba(26,122,64,.12);  color:#0a5530; }
+body[data-theme="pastel"] .hit-badge.hit-fh    { border-color:#c24a00; background:rgba(194,74,0,.12);   color:#903800; }
+body[data-theme="pastel"] .hit-badge.hit-4k    { border-color:#b45000; background:rgba(180,80,0,.12);   color:#703000; }
+body[data-theme="pastel"] .hit-badge.hit-sf    { border-color:#7b4800; background:rgba(123,72,0,.14);   color:#5a3500; }
+
 /* toast */
 body[data-theme="pastel"] #toast { background: #333; color: #fff; }
 body[data-theme="pastel"] #toast.success { background: #1a8040; }
@@ -243,8 +282,8 @@ body[data-theme="pastel"] .rec-fr-name     { color: #7a6550; }
 body[data-theme="pastel"] .rec-act-fold    { color: #cc3333; }
 body[data-theme="pastel"] .rec-act-call    { color: #0066aa; }
 body[data-theme="pastel"] .rec-act-raise   { color: #cc7700; }
-body[data-theme="pastel"] .rec-act-check   { color: #9a8870; }
-body[data-theme="pastel"] .rec-act-post    { color: #b0a090; }
+body[data-theme="pastel"] .rec-act-check   { color: #6b5940; }
+body[data-theme="pastel"] .rec-act-post    { color: #7a6050; }
 body[data-theme="pastel"] .rec-act-reraise { color: #9933cc; }
 body[data-theme="pastel"] .rec-act-bet     { color: #cc7700; }
 
@@ -365,7 +404,7 @@ body[data-theme="pastel"] .rec-sc-river .rec-sc-label { color: #5b3db8; }
 body[data-theme="pastel"] .rec-sc-board-cards { border-bottom-color: rgba(0,0,0,.06); }
 body[data-theme="pastel"] .rec-sc-pot { color: #1a6e3a; border-top-color: rgba(0,0,0,.07); }
 body[data-theme="pastel"] .rec-sc-feed .rec-fr-pos  { color: #2ea8e0; }
-body[data-theme="pastel"] .rec-sc-feed .rec-fr-name { color: #a09080; }
+body[data-theme="pastel"] .rec-sc-feed .rec-fr-name { color: #6b5940; }
 
 /* street-specific pos colors in feed */
 body[data-theme="pastel"] .rec-sc-preflop .rec-sc-feed .rec-fr-pos { color: #cc5500; }

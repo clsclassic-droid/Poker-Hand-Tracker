@@ -869,6 +869,8 @@ header h1 {
 
 .fc-sep { color: var(--border2); margin: 0 1px; font-size: .85em; vertical-align: middle; }
 
+.mini-card.rec-card-placeholder { opacity: .45; border-style: dashed; }
+
 /* ─── HIT field tiers (fields bar) ──────────────────────────────────────── */
 #fi-hit { cursor: default !important; }
 #fi-hit:hover { filter: none; }

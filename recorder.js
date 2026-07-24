@@ -88,7 +88,9 @@ function renderCardSlotHTML(cardsStr) {
                 return `<span style="color:${col}">${rank}${_SUIT_SYM[suit]}</span>`;
             }
         }
-        return `<span style="color:#2d4a6a">—</span>`;
+        if (useCards)
+            return `<span class="mini-card${smCls} rec-card-placeholder"><span class="mc-rank" style="color:var(--text-muted)">?</span><span class="mc-suit"></span></span>`;
+        return `<span style="color:var(--text-muted)">?</span>`;
     }).join(useCards ? '' : ' ');
 }
 
@@ -99,6 +101,10 @@ function updateCardsSlot(playerIdx) {
 
 function _refreshAllCardSlots() {
     cfg?.players?.forEach((_, i) => updateCardsSlot(i));
+}
+
+function _refreshAllFeedCards() {
+    cfg?.players?.forEach((_, i) => _updateFeedCards(i));
 }
 
 // Live-update hole-card spans in all recorded street feed rows for one player.
@@ -1099,7 +1105,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _overrideCardGrid, _updateHeroSlot, _updateBoardCards };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards };
 document.addEventListener('DOMContentLoaded', init);
 
 })();

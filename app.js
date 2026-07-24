@@ -1014,6 +1014,7 @@ function applyTextCardsToggle(enabled) {
     FIELDS.forEach(f => refreshFieldDisplay(f));
     renderHistory();
     window.recorderModule?._refreshAllCardSlots?.();
+    window.recorderModule?._refreshAllFeedCards?.();
 }
 
 function applyCardSmallToggle(enabled) {
@@ -1022,6 +1023,7 @@ function applyCardSmallToggle(enabled) {
     FIELDS.forEach(f => refreshFieldDisplay(f));
     renderHistory();
     window.recorderModule?._refreshAllCardSlots?.();
+    window.recorderModule?._refreshAllFeedCards?.();
 }
 
 function buildCardGrid() {
