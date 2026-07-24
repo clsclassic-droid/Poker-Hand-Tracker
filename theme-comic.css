@@ -163,7 +163,22 @@ body[data-theme="comic"] .field-item.complete .field-label { color: var(--text-d
 
 /* Per-field vivid backgrounds — override generic white */
 body[data-theme="comic"] .field-item[data-field="hand"]  { background: url('Picture/%E2%80%94Pngtree%E2%80%94pure%20watercolor%20purple%20background_928012.jpg') center/cover; border-color:var(--ink); }
-body[data-theme="comic"] .field-item[data-field="flop"]  { background: linear-gradient(150deg,#1d4ed8,#3b82f6); border-color:var(--ink); }
+body[data-theme="comic"] .field-item[data-field="flop"] {
+    background:
+        /* กระดาษส่องผ่าน — white bloom highlights */
+        radial-gradient(ellipse 45% 55% at 20% 25%, rgba(255,255,255,.38) 0%, transparent 65%),
+        radial-gradient(ellipse 35% 45% at 78% 72%, rgba(200,235,255,.28) 0%, transparent 60%),
+        /* ชั้นสีน้ำฟ้าที่สอง — cool/violet overlay */
+        linear-gradient(215deg, rgba(120,160,255,.50) 0%, rgba(60,110,240,.38) 55%, rgba(30,70,200,.52) 100%),
+        /* ชั้นหลัก — blue watercolour wash */
+        linear-gradient(140deg, rgba(90,170,255,.92) 0%, rgba(50,130,250,.88) 45%, rgba(25,85,220,.96) 100%);
+    border-color: rgba(20,65,180,.70);
+    box-shadow:
+        3px 3px 0 var(--ink),
+        0 3px 18px rgba(50,120,255,.28),
+        inset 0 2px 16px rgba(255,255,255,.22),
+        inset 0 -5px 12px rgba(15,50,160,.22);
+}
 body[data-theme="comic"] .field-item[data-field="turn"]  { background: linear-gradient(150deg,#c2410c,#f97316); border-color:var(--ink); }
 body[data-theme="comic"] .field-item[data-field="river"] { background: linear-gradient(150deg,#be123c,#f43f5e); border-color:var(--ink); }
 body[data-theme="comic"] .field-item[data-field="sd1"]   { background: linear-gradient(150deg,#7e22ce,#a855f7); border-color:var(--ink); }
@@ -199,7 +214,16 @@ body[data-theme="comic"] .bet-input {
 }
 /* Per-street coloured bet inputs */
 body[data-theme="comic"] #bet-pf    { background:url('Picture/%E2%80%94Pngtree%E2%80%94pure%20watercolor%20purple%20background_928012.jpg') center/cover; color:#fff; border-color:var(--ink); font-weight:700; }
-body[data-theme="comic"] #bet-flop  { background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff; border-color:var(--ink); font-weight:700; }
+body[data-theme="comic"] #bet-flop {
+    background:
+        radial-gradient(ellipse 50% 60% at 18% 28%, rgba(255,255,255,.32) 0%, transparent 65%),
+        linear-gradient(145deg, rgba(90,170,255,.92) 0%, rgba(50,130,250,.88) 50%, rgba(25,85,220,.96) 100%);
+    color: #fff;
+    border-color: rgba(20,65,180,.70);
+    box-shadow: inset 0 2px 8px rgba(255,255,255,.22), inset 0 -3px 8px rgba(15,50,160,.20);
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(15,50,160,.5);
+}
 body[data-theme="comic"] #bet-turn  { background:linear-gradient(135deg,#c2410c,#f97316); color:#fff; border-color:var(--ink); font-weight:700; }
 body[data-theme="comic"] #bet-river { background:linear-gradient(135deg,#be123c,#f43f5e); color:#fff; border-color:var(--ink); font-weight:700; }
 body[data-theme="comic"] #bet-pf::placeholder,
