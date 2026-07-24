@@ -1031,6 +1031,12 @@ function _updateHeroSlot() {
     if (el) el.innerHTML = renderCardSlotHTML(window.state?.sel?.hand?.join('') || '');
 }
 
+// Called by app.js after FLOP/TURN/RIVER cards change — updates board cards in the recorder panel
+function _updateBoardCards(field) {
+    const el = document.getElementById(`rec-sc-board-${field}`);
+    if (el) el.innerHTML = boardCardsHTML(field);
+}
+
 // ── Auto-fill hero bet into main bet row ──────────────────────────────────────
 const STREET_BET_ID = { preflop: 'bet-pf', flop: 'bet-flop', turn: 'bet-turn', river: 'bet-river' };
 
@@ -1055,7 +1061,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _overrideCardGrid, _updateHeroSlot };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _overrideCardGrid, _updateHeroSlot, _updateBoardCards };
 document.addEventListener('DOMContentLoaded', init);
 
 })();

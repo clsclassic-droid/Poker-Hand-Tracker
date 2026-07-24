@@ -862,6 +862,7 @@ function refreshFieldDisplay(field) {
     refreshFiveCardDisplay();
     refreshHitDisplay();
     if (field === 'hand') window.recorderModule?._updateHeroSlot?.();
+    else window.recorderModule?._updateBoardCards?.(field);
 }
 
 function refreshFiveCardDisplay() {
