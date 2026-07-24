@@ -783,8 +783,9 @@ function onCardClick(cardId) {
     if (sel.length === cfg.max) {
         const recOn = document.getElementById('toggle-recorder')?.checked || false;
         const avail = recOn ? FIELDS.filter(fl => fl !== 'sd1' && fl !== 'sd2') : FIELDS;
-        const next  = avail[avail.indexOf(f) + 1];
-        if (next) setTimeout(() => setActive(next), 160);
+        // After last available field, wrap to first (HAND) so board cards dim to "used"
+        const next  = avail[avail.indexOf(f) + 1] ?? (recOn ? avail[0] : null);
+        if (next && next !== f) setTimeout(() => setActive(next), 160);
     }
 }
 
