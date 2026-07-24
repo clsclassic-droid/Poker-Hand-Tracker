@@ -531,6 +531,7 @@ function pushUndoState() {
         currentBet:    rec.currentBet,
         raisingRound:  rec.raisingRound,
         needToAct:     [...rec.needToAct],
+        currentStreet: rec.currentStreet,
     });
 }
 
@@ -615,14 +616,31 @@ function _undo() {
     rec.currentBet    = prev.currentBet;
     rec.raisingRound  = prev.raisingRound;
     rec.needToAct     = prev.needToAct;
+    if (prev.currentStreet) rec.currentStreet = prev.currentStreet;
 
+    // Clear feeds for streets that are now "future" after restoring
+    const restoredIdx = STREET_SEQ.indexOf(rec.currentStreet);
+    STREET_SEQ.forEach((s, i) => {
+        if (i > restoredIdx) {
+            const feed = document.getElementById(`rec-feed-${s}`);
+            if (feed) feed.innerHTML = '';
+            const pot = document.getElementById(`rec-sc-pot-${s}`);
+            if (pot) pot.innerHTML = '';
+        }
+    });
+
+    updateStreetCards(rec.currentStreet);
     rerenderFeed();
     updatePotBar();
 
     const footer = document.getElementById('rec-street-footer');
     if (footer) footer.innerHTML = '';
 
-    renderActorBlock();
+    if (rec.needToAct.length === 0 || rec.playersInHand.length <= 1) {
+        showStreetComplete();
+    } else {
+        renderActorBlock();
+    }
 }
 
 // ── Panel render ──────────────────────────────────────────────────────────────
@@ -907,7 +925,7 @@ function _nextStreet(street) {
     const footer = document.getElementById('rec-street-footer');
     if (footer) footer.innerHTML = '';
 
-    rec.undoStack = [];
+    pushUndoState();
     initStreet(street);
     updateStreetCards(street);
     updatePotBar();
