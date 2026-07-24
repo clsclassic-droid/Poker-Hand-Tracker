@@ -929,6 +929,8 @@ function refreshCardGrid() {
             }
         });
     });
+    // Let recorder highlight the active player's hole cards on top of normal grid state
+    window.recorderModule?._overrideCardGrid?.();
 }
 
 // ─── Build DOM ────────────────────────────────────────────────────────────────

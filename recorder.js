@@ -37,6 +37,41 @@ function parseCards(str) {
 
 const _SUIT_SYM = { h: '♥', d: '♦', c: '♣', s: '♠' };
 
+function _cardTextSpan(rank, suit) {
+    const col = typeof suitInlineCol === 'function' ? suitInlineCol(suit) : (suit==='h'||suit==='d' ? '#f87171' : '#e2e8f0');
+    return `<span style="color:${col}">${rank}${_SUIT_SYM[suit]}</span>`;
+}
+
+// Tiny inline hole cards for feed rows (always mini-card-sm)
+function holeCardsInlineHTML(cardsStr) {
+    const cards = parseCards(cardsStr);
+    if (!cards.length) return '';
+    const useCards = !window.state?.settings?.textCards;
+    return cards.map(c => {
+        const rank = c[0], suit = c[1];
+        if (useCards) {
+            const cls = typeof suitCvClass === 'function' ? suitCvClass(suit) : (suit==='h'||suit==='d' ? 'cv-red' : 'cv-black');
+            return `<span class="mini-card mini-card-sm"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
+        }
+        return _cardTextSpan(rank, suit);
+    }).join('');
+}
+
+// Board cards for a street header (reads from window.state.sel)
+function boardCardsHTML(street) {
+    const cards = window.state?.sel?.[street];
+    if (!cards || !cards.length) return '';
+    const useCards = !window.state?.settings?.textCards;
+    return cards.map(c => {
+        const rank = c[0], suit = c[1];
+        if (useCards) {
+            const cls = typeof suitCvClass === 'function' ? suitCvClass(suit) : (suit==='h'||suit==='d' ? 'cv-red' : 'cv-black');
+            return `<span class="mini-card mini-card-sm"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
+        }
+        return _cardTextSpan(rank, suit);
+    }).join('');
+}
+
 function renderCardSlotHTML(cardsStr) {
     const cards    = parseCards(cardsStr);
     const useCards = !window.state?.settings?.textCards;
@@ -74,21 +109,56 @@ function _addRecorderUsedCards() {
 }
 
 function _syncRecUsedCards() {
-    if (typeof rebuildUsed === 'function') rebuildUsed(); // already calls _addRecorderUsedCards via hook
+    if (typeof rebuildUsed === 'function') rebuildUsed(); // calls _addRecorderUsedCards via hook
+}
+
+// Called at the END of app.js refreshCardGrid() — completely re-renders grid state
+// for recorder picker context, overriding whatever refreshCardGrid just set.
+// Uses querySelectorAll to avoid needing SUITS/RANKS from app.js scope.
+function _overrideCardGrid() {
+    if (recActivePlayer < 0) return;
+    const p       = cfg?.players?.[recActivePlayer];
+    const holeSel = parseCards(p?.cards || '');
+    const holeSet = new Set(holeSel);
+    const used    = window.state?.usedCards || new Set();
+    const isFull  = holeSel.length >= 2;
+
+    document.querySelectorAll('#card-grid .card-btn').forEach(btn => {
+        const id = btn.id.slice(3); // strip 'cb-' prefix
+        btn.classList.remove('selected', 'used', 'field-full');
+        btn.disabled = false;
+        if (holeSet.has(id)) {
+            btn.classList.add('selected');
+        } else if (used.has(id)) {
+            btn.classList.add('used');
+            btn.disabled = true;
+        } else if (isFull) {
+            btn.classList.add('field-full');
+            btn.disabled = true;
+        }
+    });
+}
+
+// _applyRecPickerToGrid: rebuild used-cards then trigger a normal refreshCardGrid
+// (which calls _overrideCardGrid at the end automatically)
+function _applyRecPickerToGrid() {
+    _syncRecUsedCards();
+    if (typeof refreshCardGrid === 'function') refreshCardGrid();
 }
 
 function _activatePlayerPicker(playerIdx) {
     if (recActivePlayer === playerIdx) { _deactivatePlayerPicker(); return; }
+    _deactivatePlayerPicker(); // clean up previous if any
     recActivePlayer = playerIdx;
 
-    const p    = cfg?.players?.[playerIdx];
-    const lbl  = p?.name ? `${p.name} (${p.pos})` : (p?.pos || '');
-    const sel  = parseCards(p?.cards || '');
+    const p   = cfg?.players?.[playerIdx];
+    const lbl = p?.name ? `${p.name} (${p.pos})` : (p?.pos || '');
+    const sel = parseCards(p?.cards || '');
 
-    // Hijack the picker header
+    // Override picker header manually — don't touch state.activeField
+    const labelEl = document.getElementById('picker-label');
     const nameEl  = document.getElementById('picker-field-name');
     const countEl = document.getElementById('picker-count');
-    const labelEl = document.getElementById('picker-label');
     if (labelEl)  labelEl.textContent = 'ไพ่ที่ถือ:';
     if (nameEl)  { nameEl.textContent = lbl; nameEl.style.color = '#a78bfa'; }
     if (countEl) { countEl.textContent = `${sel.length} / 2`; countEl.classList.toggle('full', sel.length >= 2); }
@@ -97,10 +167,8 @@ function _activatePlayerPicker(playerIdx) {
     document.querySelectorAll('.rec-cards-slot').forEach(el => el.classList.remove('active'));
     document.querySelector(`.rec-cards-slot[data-i="${playerIdx}"]`)?.classList.add('active');
 
-    _syncRecUsedCards();
-    if (typeof refreshCardGrid === 'function') refreshCardGrid();
+    _applyRecPickerToGrid(); // rebuilds usedCards + refreshCardGrid (which calls _overrideCardGrid)
 
-    // Scroll picker into view
     document.getElementById('card-picker-section')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -109,11 +177,9 @@ function _deactivatePlayerPicker() {
     recActivePlayer = -1;
     document.querySelectorAll('.rec-cards-slot').forEach(el => el.classList.remove('active'));
 
-    // Restore picker label
     const labelEl = document.getElementById('picker-label');
     if (labelEl) labelEl.textContent = 'กำลังเลือก:';
 
-    // Rebuild used + restore grid to current field
     if (typeof rebuildUsed === 'function') rebuildUsed();
     if (typeof refreshPickerHeader === 'function') refreshPickerHeader();
     if (typeof refreshCardGrid === 'function') refreshCardGrid();
@@ -129,18 +195,18 @@ function _interceptCard(cardId) {
     if (idx >= 0) {
         sel.splice(idx, 1);
     } else {
-        if (sel.length >= 2) return true; // full — consume event, do nothing
+        if (sel.length >= 2) return true; // full — consume, do nothing
         sel.push(cardId);
     }
     p.cards = sel.join('');
+
     updateCardsSlot(recActivePlayer);
 
-    // Update count badge
+    // Update header count badge
     const countEl = document.getElementById('picker-count');
     if (countEl) { countEl.textContent = `${sel.length} / 2`; countEl.classList.toggle('full', sel.length >= 2); }
 
-    _syncRecUsedCards();
-    if (typeof refreshCardGrid === 'function') refreshCardGrid();
+    _applyRecPickerToGrid(); // rebuilds usedCards + refreshCardGrid → _overrideCardGrid auto-applies
     return true;
 }
 
@@ -452,10 +518,15 @@ function renderPanel() {
         const cls    = idx === curIdx ? 'rec-sc-active'
                      : idx < curIdx   ? 'rec-sc-done'
                      : 'rec-sc-future';
+        const boardDiv = s !== 'preflop'
+            ? `<div class="rec-sc-board-cards" id="rec-sc-board-${s}">${boardCardsHTML(s)}</div>`
+            : '';
         return `
             <div class="rec-street-card rec-sc-${s} ${cls}" id="rec-card-${s}">
                 <div class="rec-sc-label">${STREET_LBL[s]}</div>
+                ${boardDiv}
                 <div class="rec-sc-feed" id="rec-feed-${s}"></div>
+                <div class="rec-sc-pot" id="rec-sc-pot-${s}"></div>
             </div>`;
     }).join('');
 
@@ -480,12 +551,16 @@ function renderPanel() {
 
     renderBetBar();
     renderActorBlock();
+    const initPotEl = document.getElementById(`rec-sc-pot-${street}`);
+    if (initPotEl && rec.pot > 0) initPotEl.textContent = `Pot ${rec.pot.toLocaleString()} ฿`;
 }
 
 function updatePotBar() {
     const el = document.querySelector('.rec-pot-display');
     if (el) el.innerHTML = `Pot <b>${rec.pot.toLocaleString()}</b>฿`;
     renderBetBar();
+    const potEl = document.getElementById(`rec-sc-pot-${rec.currentStreet}`);
+    if (potEl) potEl.textContent = `Pot ${rec.pot.toLocaleString()} ฿`;
 }
 
 function renderBetBar() {
@@ -522,10 +597,12 @@ function appendFeedRow(feed, entry, isAgg) {
                  : a === 'post'    ? `post ${v ? Number(v).toLocaleString() : ''}`
                  : v ? `${a} ${Number(v).toLocaleString()}` : a;
 
+    const hcHtml = holeCardsInlineHTML(player?.cards || '');
     const row = document.createElement('div');
     row.className = `rec-feed-row${isHero ? ' rec-feed-hero' : ''}`;
     row.innerHTML = `
         <span class="rec-fr-pos${isHero ? ' rec-fr-hero-pos' : ''}">${pos}</span>
+        ${hcHtml ? `<span class="rec-fr-cards">${hcHtml}</span>` : ''}
         <span class="rec-fr-name">${name || (isHero ? '● Hero' : '')}</span>
         <span class="rec-fr-act ${actCls}">${label}</span>`;
     feed.appendChild(row);
@@ -710,6 +787,10 @@ function _nextStreet(street) {
     updateStreetCards(street);
     updatePotBar();
 
+    // Refresh board cards for new street (cards may have been selected since panel rendered)
+    const boardEl = document.getElementById(`rec-sc-board-${street}`);
+    if (boardEl) boardEl.innerHTML = boardCardsHTML(street);
+
     // Guard: if only 1 player remains, don't start the street — go to save
     if (rec.playersInHand.length <= 1) {
         showStreetComplete();
@@ -721,7 +802,12 @@ function _nextStreet(street) {
 // ── Save to Sheet (column X = r[23]) ─────────────────────────────────────────
 function buildJson() {
     if (!rec || !cfg) return null;
-    return JSON.stringify({ players: cfg.players, actions: rec.streets, sb: cfg.sb, bb: cfg.bb });
+    const boards = {
+        flop:  [...(window.state?.sel?.flop  || [])],
+        turn:  [...(window.state?.sel?.turn  || [])],
+        river: [...(window.state?.sel?.river || [])],
+    };
+    return JSON.stringify({ players: cfg.players, actions: rec.streets, sb: cfg.sb, bb: cfg.bb, boards });
 }
 
 async function _saveLog() {
@@ -765,6 +851,7 @@ function renderActionLog(jsonStr) {
         if (!data?.actions) return '';
 
         const heroPos  = data.players?.find(p => p.isHero)?.pos || '';
+        const boards   = data.boards || {};
         let runningPot = 0;
         let hasAny     = false;
         let colsHtml   = '';
@@ -783,27 +870,45 @@ function renderActionLog(jsonStr) {
                 });
                 runningPot += Object.values(contrib).reduce((s, v) => s + v, 0);
 
+                // Board cards in column header
+                const streetBoard = boards[street] || [];
+                const boardHtml   = streetBoard.length
+                    ? `<div class="rec-log-col-board">${streetBoard.map(c => {
+                        const col = typeof suitInlineCol === 'function' ? suitInlineCol(c[1]) : (c[1]==='h'||c[1]==='d' ? '#f87171' : '#e2e8f0');
+                        return `<span style="color:${col}">${c[0]}${_SUIT_SYM[c[1]]}</span>`;
+                      }).join(' ')}</div>`
+                    : '';
+
                 let rows = '';
                 acts.forEach(e => {
-                    const isAgg   = e.a === 'raise' || e.a === 'reraise' || e.a === 'bet';
-                    const cls     = e.a === 'fold'  ? 'rec-log-fold'
-                                  : e.a === 'check' ? 'rec-log-check'
-                                  : e.a === 'post'  ? 'rec-log-post'
-                                  : isAgg           ? 'rec-log-raise'
-                                  : 'rec-log-call';
-                    const lbl     = e.a === 'reraise' ? `re↑${e.v ? Number(e.v).toLocaleString() : ''}`
-                                  : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
-                    const heroRow = heroPos && e.pos === heroPos ? ' rec-log-row-hero' : '';
+                    const isAgg        = e.a === 'raise' || e.a === 'reraise' || e.a === 'bet';
+                    const cls          = e.a === 'fold'  ? 'rec-log-fold'
+                                      : e.a === 'check' ? 'rec-log-check'
+                                      : e.a === 'post'  ? 'rec-log-post'
+                                      : isAgg           ? 'rec-log-raise'
+                                      : 'rec-log-call';
+                    const lbl          = e.a === 'reraise' ? `re↑${e.v ? Number(e.v).toLocaleString() : ''}`
+                                      : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
+                    const heroRow      = heroPos && e.pos === heroPos ? ' rec-log-row-hero' : '';
+                    const playerInData = data.players?.find(p => p.pos === e.pos);
+                    const hcCards      = parseCards(playerInData?.cards || '');
+                    const hcHtml       = hcCards.length
+                        ? `<span class="rec-log-hc">${hcCards.map(c => {
+                            const col = typeof suitInlineCol === 'function' ? suitInlineCol(c[1]) : (c[1]==='h'||c[1]==='d' ? '#f87171' : '#e2e8f0');
+                            return `<span style="color:${col}">${c[0]}${_SUIT_SYM[c[1]]}</span>`;
+                          }).join('')}</span>`
+                        : '';
                     rows += `
                         <div class="rec-log-row${heroRow}">
                             <span class="rec-log-pos">${e.pos}</span>
+                            ${hcHtml}
                             <span class="rec-log-act ${cls}">${lbl}</span>
                         </div>`;
                 });
 
                 colsHtml += `
                     <div class="rec-log-col rec-log-col-${street}">
-                        <div class="rec-log-col-hd">${STREET_LBL[street]}</div>
+                        <div class="rec-log-col-hd">${STREET_LBL[street]}${boardHtml}</div>
                         <div class="rec-log-col-body">${rows}</div>
                         <div class="rec-log-col-pot">Pot ${runningPot.toLocaleString()} ฿</div>
                     </div>`;
@@ -861,7 +966,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _overrideCardGrid };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
