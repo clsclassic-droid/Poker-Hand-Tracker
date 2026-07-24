@@ -396,6 +396,7 @@ function bindSetupEvents() {
     document.getElementById('rec-start-btn')?.addEventListener('click', () => {
         saveConfig(collectConfig());
         if (!cfg.players || cfg.players.length < 2) { toast('กรุณาตั้งค่าผู้เล่นก่อน', 'error'); return; }
+        if (!cfg.players.some(p => p.isHero)) { toast('กรุณากดเลือกตำแหน่ง Hero ก่อนเริ่มบันทึก', 'error'); return; }
         startRecording();
     });
 }
