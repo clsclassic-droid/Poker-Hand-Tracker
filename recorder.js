@@ -48,6 +48,11 @@ function holeCardsInlineHTML(cardsStr) {
     if (!cards.length) return '';
     const useCards = !window.state?.settings?.textCards;
     const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
+    if (window.state?.hideHand) {
+        if (useCards)
+            return `<span class="mini-card${smCls}" style="filter:blur(3px)"><span class="mc-rank">●</span><span class="mc-suit"></span></span>`.repeat(cards.length);
+        return `<span style="filter:blur(3px)">●●</span>`;
+    }
     return cards.map(c => {
         const rank = c[0], suit = c[1];
         if (useCards) {
@@ -77,6 +82,11 @@ function renderCardSlotHTML(cardsStr) {
     const cards    = parseCards(cardsStr);
     const useCards = !window.state?.settings?.textCards;
     const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
+    if (window.state?.hideHand && cards.length > 0) {
+        if (useCards)
+            return Array(cards.length).fill(`<span class="mini-card${smCls}" style="filter:blur(3px)"><span class="mc-rank">●</span><span class="mc-suit"></span></span>`).join('');
+        return `<span style="filter:blur(3px)">●●</span>`;
+    }
     return [0, 1].map(i => {
         if (cards[i]) {
             const rank = cards[i][0], suit = cards[i][1];

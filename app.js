@@ -1249,6 +1249,8 @@ function toggleHideHand() {
     refreshHitDisplay();
     refreshCardGrid();
     renderHistory();
+    window.recorderModule?._refreshAllCardSlots?.();
+    window.recorderModule?._refreshAllFeedCards?.();
 }
 
 // ─── Fold toggle ──────────────────────────────────────────────────────────────
