@@ -307,6 +307,7 @@ function applyToggle() {
         const el = document.getElementById(id);
         if (el) el.style.display = on ? 'none' : '';
     });
+    if (typeof updateShowdownHeader === 'function') updateShowdownHeader();
 }
 
 // ── Player Setup UI ───────────────────────────────────────────────────────────

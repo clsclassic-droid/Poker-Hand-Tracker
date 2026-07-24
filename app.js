@@ -413,7 +413,18 @@ function calcHandNumber() {
     document.getElementById('hand-num-display').textContent = state.handNumber;
 }
 
+function updateShowdownHeader() {
+    const recOn = document.getElementById('toggle-recorder')?.checked || false;
+    const th1   = document.getElementById('th-showdown-sd1');
+    const th2   = document.getElementById('th-showdown-sd2');
+    if (!th1 || !th2) return;
+    th1.colSpan     = recOn ? 2 : 1;
+    th1.textContent = recOn ? 'Showdown' : 'SD1';
+    th2.style.display = recOn ? 'none' : '';
+}
+
 function renderHistory() {
+    updateShowdownHeader();
     const tbody = document.getElementById('history-body');
     tbody.innerHTML = '';
     const fb = '<span class="f-badge">F</span>';
