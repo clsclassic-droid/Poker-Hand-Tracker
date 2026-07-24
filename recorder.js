@@ -262,7 +262,13 @@ function _interceptCard(cardId) {
 function isOn() { return document.getElementById('toggle-recorder')?.checked || false; }
 function toast(msg, type) { if (window.showToast) window.showToast(msg, type || 'success'); }
 function loadConfig() { try { return JSON.parse(localStorage.getItem(LS_CONFIG)) || null; } catch (_) { return null; } }
-function saveConfig(c) { cfg = c; localStorage.setItem(LS_CONFIG, JSON.stringify(c)); syncPositionChips(); }
+function saveConfig(c) {
+    cfg = c;
+    // Strip hole cards before persisting — cards are session-only and should not survive a page refresh
+    const persisted = { ...c, players: c.players?.map(p => ({ ...p, cards: '' })) || [] };
+    localStorage.setItem(LS_CONFIG, JSON.stringify(persisted));
+    syncPositionChips();
+}
 
 function buildDefaultPlayers(n) {
     const positions = POS_PRESETS[n] || POS_PRESETS[6];
