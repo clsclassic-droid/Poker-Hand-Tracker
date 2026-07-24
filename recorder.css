@@ -101,6 +101,8 @@
     text-transform: uppercase;
 }
 .rec-pos-in:focus { outline: none; border-color: #3b82f6; }
+.rec-pos-in.selected { background: #172554; border-color: #3b82f6; color: #93c5fd; }
+.rec-pos-in { cursor: pointer; }
 .rec-stack-in {
     background: #1e2e44;
     border: 1px solid #2a3f5f;

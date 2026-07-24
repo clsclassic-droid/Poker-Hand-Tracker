@@ -259,9 +259,10 @@ function renderSetup() {
         .map(n => `<option value="${n}"${n === count ? ' selected' : ''}>${n} คน</option>`)
         .join('');
 
+    const heroPos = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
     const rows = players.map((p, i) => `
         <tr>
-            <td><input class="rec-pos-in"  data-i="${i}" value="${p.pos}"        maxlength="6"></td>
+            <td><input class="rec-pos-in${p.pos === heroPos ? ' selected' : ''}"  data-i="${i}" value="${p.pos}" maxlength="6"></td>
             <td><input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12"></td>
             <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"></td>
             <td><button class="rec-cards-slot" data-i="${i}">${renderCardSlotHTML(p.cards || '')}</button></td>
@@ -326,6 +327,19 @@ function bindSetupEvents() {
     });
 
     document.querySelector('.rec-player-table')?.addEventListener('click', e => {
+        const posInput = e.target.closest('.rec-pos-in');
+        if (posInput) {
+            const pos = posInput.value;
+            // Update hidden pos-chips so saveHand picks up correct position
+            document.querySelectorAll('#position-chips .pos-chip').forEach(b => {
+                b.classList.toggle('selected', b.dataset.pos === pos);
+            });
+            // Update visual selection on pos inputs
+            document.querySelectorAll('.rec-pos-in').forEach(inp => {
+                inp.classList.toggle('selected', inp === posInput);
+            });
+            return;
+        }
         const slot = e.target.closest('.rec-cards-slot');
         if (slot) _activatePlayerPicker(parseInt(slot.dataset.i));
     });
