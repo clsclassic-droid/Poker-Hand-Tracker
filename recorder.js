@@ -746,15 +746,18 @@ function renderActorBlock() {
 
     const pot      = rec.pot;
     const snap10   = v => Math.ceil(v / 10) * 10;
-    const minRaise = snap10(rec.currentBet > 0 ? rec.currentBet * 2 : (cfg.bb || 20));
-    const thirdPot = Math.max(minRaise, snap10(pot / 3));
-    const halfPot  = Math.max(minRaise, snap10(pot / 2));
-    const threeQPot= Math.max(minRaise, snap10(pot * 0.75));
-    const fullPot  = Math.max(minRaise, snap10(pot));
+    const cap      = v => Math.min(v, stack); // never exceed remaining stack
+    const minRaise  = cap(snap10(rec.currentBet > 0 ? rec.currentBet * 2 : (cfg.bb || 20)));
+    const thirdPot  = cap(Math.max(minRaise, snap10(pot / 3)));
+    const halfPot   = cap(Math.max(minRaise, snap10(pot / 2)));
+    const threeQPot = cap(Math.max(minRaise, snap10(pot * 0.75)));
+    const fullPot   = cap(Math.max(minRaise, snap10(pot)));
 
+    const callAmt  = Math.min(rec.currentBet, alreadyIn + stack); // cap call at all-in amount
+    const callDisp = Math.min(toCall, stack);
     const callHtml = canCheck
         ? `<button class="rec-ab rec-ab-check" onclick="window.recorderModule._act('${pos}','check',0)">CHECK</button>`
-        : `<button class="rec-ab rec-ab-call"  onclick="window.recorderModule._act('${pos}','call',${rec.currentBet})">CALL ${toCall.toLocaleString()}</button>`;
+        : `<button class="rec-ab rec-ab-call"  onclick="window.recorderModule._act('${pos}','call',${callAmt})">CALL ${callDisp.toLocaleString()}${stack < toCall ? ' ⚡' : ''}</button>`;
 
     const hasOpened = rec.streets[rec.currentStreet].some(e => e.a === 'raise' || e.a === 'bet' || e.a === 'reraise');
     const raiseLabel = !hasOpened && rec.currentBet === 0 ? 'BET'
@@ -769,7 +772,7 @@ function renderActorBlock() {
         <div class="rec-actor-header">
             <div class="rec-actor-who${isHero ? ' rec-actor-hero' : ''}">${nameHtml} <span class="rec-actor-stack-inline">Stack ${stack.toLocaleString()} ฿</span></div>
         </div>
-        ${toCall > 0 ? `<div class="rec-to-call">ต้อง call เพิ่ม ${toCall.toLocaleString()} ฿ (รวม ${rec.currentBet.toLocaleString()} ฿)</div>` : ''}
+        ${toCall > 0 ? `<div class="rec-to-call">ต้อง call เพิ่ม ${callDisp.toLocaleString()} ฿${stack < toCall ? ' ⚡ all-in' : ` (รวม ${rec.currentBet.toLocaleString()} ฿)`}</div>` : ''}
         <div class="rec-act-row">
             <button class="rec-ab rec-ab-fold"  onclick="window.recorderModule._act('${pos}','fold',0)">FOLD</button>
             ${callHtml}
