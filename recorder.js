@@ -116,20 +116,8 @@ function _updateFeedCards(playerIdx) {
         feed.querySelectorAll('.rec-feed-row').forEach(row => {
             const posEl = row.querySelector('.rec-fr-pos');
             if (!posEl || posEl.textContent.trim() !== p.pos) return;
-            let cardsEl = row.querySelector('.rec-fr-cards');
-            if (hcHtml) {
-                if (cardsEl) {
-                    cardsEl.innerHTML = hcHtml;
-                } else {
-                    const span = document.createElement('span');
-                    span.className = 'rec-fr-cards';
-                    span.innerHTML = hcHtml;
-                    const nameEl = row.querySelector('.rec-fr-name');
-                    if (nameEl) nameEl.insertAdjacentElement('afterend', span);
-                }
-            } else if (cardsEl) {
-                cardsEl.remove();
-            }
+            const cardsEl = row.querySelector('.rec-fr-cards');
+            if (cardsEl) cardsEl.innerHTML = hcHtml;
         });
     });
 }
@@ -717,7 +705,7 @@ function appendFeedRow(feed, entry, isAgg) {
     row.innerHTML = `
         <span class="rec-fr-pos${isHero ? ' rec-fr-hero-pos' : ''}">${pos}</span>
         <span class="rec-fr-name">${name || (isHero ? '● Hero' : '')}</span>
-        ${hcHtml ? `<span class="rec-fr-cards">${hcHtml}</span>` : ''}
+        <span class="rec-fr-cards">${hcHtml}</span>
         <span class="rec-fr-act ${actCls}">${label}</span>`;
     feed.appendChild(row);
 }
