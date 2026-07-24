@@ -701,7 +701,7 @@ function appendFeedRow(feed, entry, isAgg) {
     const cardsStr = isHero ? (window.state?.sel?.hand?.join('') || '') : (player?.cards || '');
     const hcHtml   = holeCardsInlineHTML(cardsStr);
     const row = document.createElement('div');
-    row.className = `rec-feed-row${isHero ? ' rec-feed-hero' : ''}`;
+    row.className = `rec-feed-row${isHero ? ' rec-feed-hero' : ''}${isHero && a === 'fold' ? ' rec-feed-hero-fold' : ''}`;
     row.innerHTML = `
         <span class="rec-fr-pos${isHero ? ' rec-fr-hero-pos' : ''}">${pos}</span>
         <span class="rec-fr-name">${name || (isHero ? '● Hero' : '')}</span>
