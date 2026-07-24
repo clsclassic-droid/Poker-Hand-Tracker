@@ -4,7 +4,7 @@
 
 /* ── Player Setup Panel ────────────────────────────────────────────────────── */
 #recorder-setup {
-    margin: 6px 0 0;
+    margin: 6px 0 10px;
 }
 .rec-setup-box {
     background: #162032;
@@ -150,6 +150,8 @@
 }
 .rec-cards-slot:hover  { border-color: #7c3aed; }
 .rec-cards-slot.active { border-color: #7c3aed; background: rgba(124,58,237,.08); }
+.rec-cards-hero-slot { border-color: rgba(167,139,250,.35); cursor: default; }
+.rec-cards-hero-slot:hover { border-color: rgba(167,139,250,.6); }
 
 /* Collapse button */
 .rec-collapse-btn {

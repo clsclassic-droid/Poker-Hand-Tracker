@@ -100,11 +100,18 @@ function _refreshAllCardSlots() {
     cfg?.players?.forEach((_, i) => updateCardsSlot(i));
 }
 
+function getHeroIdx() {
+    if (!cfg?.players) return -1;
+    return cfg.players.findIndex(p => p.name === (cfg.heroName || 'Hero'));
+}
+
 function _addRecorderUsedCards() {
     // Called by rebuildUsed() in app.js — adds all recorder hole cards (except active picker player) to usedCards
+    // Hero's cards come from state.sel.hand and are already added by the main rebuildUsed(); skip them here.
     if (!window.state?.usedCards || !cfg?.players) return;
+    const heroIdx = getHeroIdx();
     cfg.players.forEach((p, i) => {
-        if (i !== recActivePlayer) parseCards(p.cards).forEach(c => window.state.usedCards.add(c));
+        if (i !== recActivePlayer && i !== heroIdx) parseCards(p.cards).forEach(c => window.state.usedCards.add(c));
     });
 }
 
@@ -147,6 +154,12 @@ function _applyRecPickerToGrid() {
 }
 
 function _activatePlayerPicker(playerIdx) {
+    if (playerIdx === getHeroIdx()) {
+        // Hero's cards come from the HAND field — redirect to main card picker
+        if (recActivePlayer >= 0) _deactivatePlayerPicker();
+        if (typeof setActive === 'function') setActive('hand');
+        return;
+    }
     if (recActivePlayer === playerIdx) { _deactivatePlayerPicker(); return; }
     _deactivatePlayerPicker(); // clean up previous if any
     recActivePlayer = playerIdx;
@@ -260,13 +273,18 @@ function renderSetup() {
         .join('');
 
     const heroPos = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
-    const rows = players.map((p, i) => `
+    const heroIdx = players.findIndex(p => p.name === (cfg?.heroName || 'Hero'));
+    const rows = players.map((p, i) => {
+        const isHero  = i === heroIdx;
+        const cardStr = isHero ? (window.state?.sel?.hand?.join('') || '') : (p.cards || '');
+        return `
         <tr>
-            <td><input class="rec-pos-in${p.pos === heroPos ? ' selected' : ''}"  data-i="${i}" value="${p.pos}" maxlength="6"></td>
+            <td><input class="rec-pos-in${p.pos === heroPos ? ' selected' : ''}" data-i="${i}" value="${p.pos}" maxlength="6"></td>
             <td><input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12"></td>
             <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"></td>
-            <td><button class="rec-cards-slot" data-i="${i}">${renderCardSlotHTML(p.cards || '')}</button></td>
-        </tr>`).join('');
+            <td><button class="rec-cards-slot${isHero ? ' rec-cards-hero-slot' : ''}" data-i="${i}"${isHero ? ' title="ไพ่ Hero = ช่อง HAND"' : ''}>${renderCardSlotHTML(cardStr)}</button></td>
+        </tr>`;
+    }).join('');
 
     el.innerHTML = `
         <div class="rec-setup-box">
@@ -854,12 +872,17 @@ function _nextStreet(street) {
 // ── Save to Sheet (column X = r[23]) ─────────────────────────────────────────
 function buildJson() {
     if (!rec || !cfg) return null;
+    const heroIdx = getHeroIdx();
     const boards = {
         flop:  [...(window.state?.sel?.flop  || [])],
         turn:  [...(window.state?.sel?.turn  || [])],
         river: [...(window.state?.sel?.river || [])],
     };
-    return JSON.stringify({ players: cfg.players, actions: rec.streets, sb: cfg.sb, bb: cfg.bb, boards });
+    // Hero's cards come from HAND field, not from p.cards
+    const players = cfg.players.map((p, i) =>
+        i === heroIdx ? { ...p, cards: (window.state?.sel?.hand || []).join('') } : p
+    );
+    return JSON.stringify({ players, actions: rec.streets, sb: cfg.sb, bb: cfg.bb, boards });
 }
 
 async function _saveLog() {
@@ -997,6 +1020,15 @@ function _toggleSetup() {
     el.style.display = el.style.display === 'none' ? '' : 'none';
 }
 
+// Called by app.js after HAND field changes — updates the hero's card slot in the setup table
+function _updateHeroSlot() {
+    if (!cfg?.players) return;
+    const heroIdx = getHeroIdx();
+    if (heroIdx < 0) return;
+    const el = document.querySelector(`.rec-cards-slot[data-i="${heroIdx}"]`);
+    if (el) el.innerHTML = renderCardSlotHTML(window.state?.sel?.hand?.join('') || '');
+}
+
 // ── Auto-fill hero bet into main bet row ──────────────────────────────────────
 const STREET_BET_ID = { preflop: 'bet-pf', flop: 'bet-flop', turn: 'bet-turn', river: 'bet-river' };
 
@@ -1021,7 +1053,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _overrideCardGrid };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _overrideCardGrid, _updateHeroSlot };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
