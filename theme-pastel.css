@@ -1,0 +1,408 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Pastel Theme — body[data-theme="pastel"]
+   Overrides dark defaults from styles.css + recorder.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Root Variables ─────────────────────────────────────────────────────── */
+body[data-theme="pastel"] {
+    --bg:          #f5f0e8;
+    --surface:     #ffffff;
+    --surface2:    #faf7f2;
+    --surface3:    #f0ebe0;
+    --border:      rgba(0,0,0,.09);
+    --border2:     rgba(0,0,0,.16);
+    --accent:      #36b05a;
+    --accent-dim:  rgba(54,176,90,.14);
+    --blue:        #2290d0;
+    --blue-dim:    rgba(34,144,208,.12);
+    --text:        #2d1f0e;
+    --text-dim:    #6b5940;
+    --text-muted:  #a09080;
+    --red:         #cc3333;
+    --red-card:    #cc2222;
+    --selected-bg: #d4eeff;
+    --used-bg:     #ede8e0;
+    font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ─── Global / Layout ────────────────────────────────────────────────────── */
+body[data-theme="pastel"] { background: var(--bg); color: var(--text); }
+
+body[data-theme="pastel"] header {
+    background: #FFCC3E;
+    border-bottom: 1px solid rgba(255,180,0,.25);
+    box-shadow: 0 2px 10px rgba(255,170,0,.15);
+}
+body[data-theme="pastel"] header h1 { color: #5a3200; }
+body[data-theme="pastel"] #auth-btn {
+    background: #ff8c42;
+    color: #fff;
+}
+body[data-theme="pastel"] #auth-btn:hover:not(:disabled) { background: #e07030; }
+body[data-theme="pastel"] #signout-btn { color: #7a5830; border-color: rgba(90,50,0,.25); }
+body[data-theme="pastel"] #user-name { color: #5a3200; }
+body[data-theme="pastel"] .icon-btn { color: #5a3200; border-color: rgba(90,50,0,.2); }
+body[data-theme="pastel"] .icon-btn:hover { border-color: rgba(90,50,0,.4); background: rgba(255,180,0,.1); }
+body[data-theme="pastel"] #sheet-link { color: #0066aa; border-color: rgba(0,102,170,.35); }
+body[data-theme="pastel"] #sheet-link:hover { background: rgba(0,102,170,.06); }
+
+body[data-theme="pastel"] .date-input { color-scheme: light; }
+body[data-theme="pastel"] .date-lbl { color: var(--text-dim); }
+
+/* position chips */
+body[data-theme="pastel"] .pos-chip.selected {
+    background: #FFE4CC;
+    border-color: #FF8C42;
+    color: #cc5500;
+}
+
+/* result */
+body[data-theme="pastel"] .result-preview.rp-win  { color: #1a8040; }
+body[data-theme="pastel"] .result-preview.rp-loss { color: #cc3333; }
+
+/* settings overlay */
+body[data-theme="pastel"] #settings-overlay { background: rgba(80,50,20,.35); }
+body[data-theme="pastel"] #settings-panel { border-color: rgba(0,0,0,.12); }
+body[data-theme="pastel"] #settings-header { border-bottom-color: rgba(0,0,0,.08); color: var(--text); }
+body[data-theme="pastel"] .setting-title { color: var(--text); }
+body[data-theme="pastel"] .setting-desc  { color: var(--text-muted); }
+body[data-theme="pastel"] .setting-row + .setting-row { border-top-color: rgba(0,0,0,.06); }
+
+/* hand modal */
+body[data-theme="pastel"] #hand-modal { border-color: rgba(0,0,0,.1); }
+body[data-theme="pastel"] #hand-modal-header { border-bottom-color: rgba(0,0,0,.08); }
+body[data-theme="pastel"] .hm-field-row + .hm-field-row { border-top-color: rgba(0,0,0,.06); }
+body[data-theme="pastel"] .hm-field-label { /* inline color kept */ }
+body[data-theme="pastel"] .hm-note { color: var(--text-dim); border-top-color: rgba(0,0,0,.06); }
+body[data-theme="pastel"] .hm-bet  { color: #cc7700; }
+body[data-theme="pastel"] .hm-pot  { color: var(--text-muted); }
+body[data-theme="pastel"] .hm-pos-badge { background: rgba(255,140,66,.15); color: #cc5500; }
+body[data-theme="pastel"] .result-win  { color: #1a8040; }
+body[data-theme="pastel"] .result-loss { color: #cc3333; }
+
+/* history table */
+body[data-theme="pastel"] #history-section h2 { color: var(--text); }
+body[data-theme="pastel"] #history-table thead tr { background: #f0ebe0; }
+body[data-theme="pastel"] #history-table th { color: var(--text-muted); border-bottom-color: rgba(0,0,0,.1); }
+body[data-theme="pastel"] #history-table td { border-bottom-color: rgba(0,0,0,.05); }
+body[data-theme="pastel"] #history-table tbody tr:hover { background: rgba(255,180,0,.06); }
+body[data-theme="pastel"] .date-group-hdr { background: #f0ebe0; color: var(--text-dim); border-color: rgba(0,0,0,.08); }
+body[data-theme="pastel"] .edit-btn { color: var(--text-muted); }
+body[data-theme="pastel"] .del-btn  { color: #cc3333; }
+body[data-theme="pastel"] .win-row  { background: rgba(54,176,90,.04); }
+body[data-theme="pastel"] .loss-row { background: rgba(204,51,51,.04); }
+
+/* card grid */
+body[data-theme="pastel"] .card-btn { border-color: rgba(0,0,0,.1); }
+body[data-theme="pastel"] .card-btn:hover { border-color: rgba(0,0,0,.25); }
+body[data-theme="pastel"] .card-btn.selected { background: var(--selected-bg); border-color: #2290d0; }
+body[data-theme="pastel"] .card-btn.used     { background: var(--used-bg); opacity: .55; }
+body[data-theme="pastel"] #picker-label { color: var(--text-muted); }
+body[data-theme="pastel"] .count-badge { color: var(--text-dim); }
+body[data-theme="pastel"] .count-badge.full { border-color: var(--accent); color: var(--accent); }
+
+/* field bar */
+body[data-theme="pastel"] .field-item { background: var(--surface2); }
+body[data-theme="pastel"] .field-label { color: var(--text-muted); }
+
+/* pot odds badge */
+body[data-theme="pastel"] .pot-odds-badge { background: rgba(34,144,208,.12); color: #0066aa; border-color: rgba(34,144,208,.2); }
+
+/* toast */
+body[data-theme="pastel"] #toast { background: #333; color: #fff; }
+body[data-theme="pastel"] #toast.success { background: #1a8040; }
+body[data-theme="pastel"] #toast.error   { background: #cc3333; }
+
+/* mini cards — always white bg, keep dark text */
+body[data-theme="pastel"] .mini-card {
+    background: #fff;
+    border-color: rgba(0,0,0,.15);
+    color: #111;
+}
+
+
+/* ─── Recorder: Setup Box ────────────────────────────────────────────────── */
+body[data-theme="pastel"] .rec-setup-box {
+    background: #ffffff;
+    border-color: rgba(0,0,0,.1);
+}
+body[data-theme="pastel"] .rec-setup-header {
+    background: #FFCC3E;
+    border-bottom-color: rgba(0,0,0,.08);
+}
+body[data-theme="pastel"] .rec-setup-title { color: #5a3200; }
+
+body[data-theme="pastel"] .rec-pos-in {
+    background: #fff;
+    border-color: rgba(0,0,0,.14);
+    color: var(--text);
+}
+body[data-theme="pastel"] .rec-pos-in:hover { border-color: rgba(0,0,0,.3); }
+body[data-theme="pastel"] .rec-pos-in.selected {
+    background: #FFE4CC;
+    border-color: #FF8C42;
+    color: #cc5500;
+}
+body[data-theme="pastel"] .rec-stack-in,
+body[data-theme="pastel"] .rec-name-in {
+    background: #fff;
+    border-color: rgba(0,0,0,.14);
+    color: var(--text);
+}
+body[data-theme="pastel"] .rec-stack-in:focus,
+body[data-theme="pastel"] .rec-name-in:focus { border-color: #FF8C42; }
+body[data-theme="pastel"] .rec-dd-wrap select {
+    background: #fff;
+    border-color: rgba(0,0,0,.14);
+    color: var(--text);
+}
+body[data-theme="pastel"] .rec-player-table thead td { color: var(--text-muted); }
+body[data-theme="pastel"] .rec-player-table tbody tr { border-top-color: rgba(0,0,0,.06); }
+body[data-theme="pastel"] .rec-player-table tbody tr:hover { background: rgba(0,0,0,.02); }
+body[data-theme="pastel"] .rec-player-table td { color: var(--text); }
+body[data-theme="pastel"] .rec-player-table .rec-hero-tag { background: rgba(54,176,90,.15); color: #1a6e3a; }
+
+body[data-theme="pastel"] .rec-btn-primary {
+    background: rgba(54,176,90,.12);
+    border-color: #36b05a;
+    color: #1a6e3a;
+}
+body[data-theme="pastel"] .rec-btn-primary:hover { background: rgba(54,176,90,.22); }
+body[data-theme="pastel"] .rec-btn-secondary { border-color: rgba(0,0,0,.18); color: var(--text-dim); }
+body[data-theme="pastel"] .rec-btn-secondary:hover { border-color: rgba(0,0,0,.35); }
+body[data-theme="pastel"] .rec-btn-danger { background: rgba(204,51,51,.1); border-color: #cc3333; color: #cc3333; }
+
+body[data-theme="pastel"] .rec-small-lbl { color: var(--text-muted); }
+body[data-theme="pastel"] .rec-setup-lbl { color: var(--text-muted); }
+
+body[data-theme="pastel"] .rec-cards-slot {
+    background: #faf7f2;
+    border-color: rgba(0,0,0,.14);
+}
+body[data-theme="pastel"] .rec-cards-slot:hover { border-color: #FF8C42; }
+body[data-theme="pastel"] .rec-cards-slot.active { border-color: #FF8C42; background: #fff8f0; }
+
+
+/* ─── Recorder: Panel Box ────────────────────────────────────────────────── */
+body[data-theme="pastel"] .rec-panel-box {
+    background: #ffffff;
+    border-color: rgba(0,0,0,.1);
+}
+body[data-theme="pastel"] .rec-panel-header {
+    background: #FFCC3E;
+    border-bottom-color: rgba(0,0,0,.08);
+}
+body[data-theme="pastel"] .rec-pot-display { color: #5a3200; }
+body[data-theme="pastel"] .rec-pot-display b { color: #cc5500; }
+
+body[data-theme="pastel"] .rec-undo-btn {
+    background: rgba(255,255,255,.7);
+    border-color: rgba(90,50,0,.22);
+    color: #5a3200;
+}
+body[data-theme="pastel"] .rec-undo-btn:hover { border-color: rgba(90,50,0,.45); }
+
+/* street tabs */
+body[data-theme="pastel"] .rec-st-tab {
+    color: rgba(45,31,14,.25);
+    border-color: rgba(0,0,0,.06);
+}
+body[data-theme="pastel"] .rec-st-done { color: rgba(45,31,14,.35); background: rgba(0,0,0,.04); }
+body[data-theme="pastel"] .rec-st-active { font-weight: 800; }
+body[data-theme="pastel"] .rec-st-active[class*="preflop"] { background: #FFE4CC; color: #cc5500; border-color: #FF8C42; }
+body[data-theme="pastel"] .rec-st-active[class*="flop"]    { background: #C5EEFF; color: #0066aa; border-color: #2EA8E0; }
+body[data-theme="pastel"] .rec-st-active[class*="turn"]    { background: #C8F7DC; color: #1a6e3a; border-color: #36B05A; }
+body[data-theme="pastel"] .rec-st-active[class*="river"]   { background: #E8DAFF; color: #5b3db8; border-color: #7B5CE8; }
+
+/* bet bar */
+body[data-theme="pastel"] .rec-bet-bar {
+    background: rgba(255,180,20,.07);
+    border-bottom-color: rgba(255,180,20,.18);
+}
+body[data-theme="pastel"] .rec-bet-lbl { color: var(--text-muted); }
+body[data-theme="pastel"] .rec-bet-val { color: #cc7700; font-weight: 800; }
+body[data-theme="pastel"] .rec-raise-badge {
+    background: rgba(255,180,20,.14);
+    color: #cc7700;
+    border-color: rgba(255,180,20,.28);
+}
+
+/* ─── Recorder: Feed Rows ────────────────────────────────────────────────── */
+body[data-theme="pastel"] .rec-feed-row { border-top-color: rgba(0,0,0,.04); }
+body[data-theme="pastel"] .rec-feed-hero {
+    background: rgba(54,176,90,.06) !important;
+    border-left-color: rgba(54,176,90,.4) !important;
+}
+body[data-theme="pastel"] .rec-feed-hero-fold {
+    background: rgba(204,51,51,.07) !important;
+    border-left-color: rgba(204,51,51,.4) !important;
+}
+body[data-theme="pastel"] .rec-fr-pos      { color: #2ea8e0; }
+body[data-theme="pastel"] .rec-fr-hero-pos { color: #36b05a; }
+body[data-theme="pastel"] .rec-fr-name     { color: #7a6550; }
+body[data-theme="pastel"] .rec-act-fold    { color: #cc3333; }
+body[data-theme="pastel"] .rec-act-call    { color: #0066aa; }
+body[data-theme="pastel"] .rec-act-raise   { color: #cc7700; }
+body[data-theme="pastel"] .rec-act-check   { color: #9a8870; }
+body[data-theme="pastel"] .rec-act-post    { color: #b0a090; }
+body[data-theme="pastel"] .rec-act-reraise { color: #9933cc; }
+body[data-theme="pastel"] .rec-act-bet     { color: #cc7700; }
+
+/* raise divider */
+body[data-theme="pastel"] .rec-div-line { background: rgba(255,180,20,.2); }
+body[data-theme="pastel"] .rec-div-lbl  { color: rgba(204,119,0,.55); }
+
+/* ─── Recorder: Actor Block ──────────────────────────────────────────────── */
+body[data-theme="pastel"] .rec-actor-block {
+    background: #fff8f0;
+    border-top-color: #ff8c42;
+}
+body[data-theme="pastel"] .rec-actor-who  { color: #cc5500; }
+body[data-theme="pastel"] .rec-actor-hero { color: #1a6e3a; }
+body[data-theme="pastel"] .rec-actor-pos  { color: #ff8c42; }
+body[data-theme="pastel"] .rec-hero-tag   { background: rgba(54,176,90,.16); color: #1a6e3a; }
+body[data-theme="pastel"] .rec-actor-stack-inline { color: #c0a080; }
+
+body[data-theme="pastel"] .rec-to-call {
+    background: rgba(34,144,208,.09);
+    border-color: rgba(34,144,208,.2);
+    color: #0055aa;
+}
+
+/* action buttons */
+body[data-theme="pastel"] .rec-ab-fold {
+    background: #ffe0e0;
+    color: #cc3333;
+    border-color: rgba(204,51,51,.28);
+}
+body[data-theme="pastel"] .rec-ab-fold:hover { background: #ffc8c8; }
+body[data-theme="pastel"] .rec-ab-call {
+    background: #ccf0ff;
+    color: #0066aa;
+    border-color: rgba(0,102,170,.28);
+}
+body[data-theme="pastel"] .rec-ab-call:hover { background: #b0e4ff; }
+body[data-theme="pastel"] .rec-ab-raise {
+    background: #ffeccc;
+    color: #cc7700;
+    border-color: rgba(204,119,0,.28);
+}
+body[data-theme="pastel"] .rec-ab-raise:hover { background: #ffdfa0; }
+body[data-theme="pastel"] .rec-ab-check {
+    background: #f0ebe0;
+    color: #9a8870;
+    border-color: rgba(0,0,0,.14);
+}
+body[data-theme="pastel"] .rec-ab-check:hover { background: #e8e2d8; }
+
+/* amount input row */
+body[data-theme="pastel"] .rec-amount-row { border-top-color: rgba(0,0,0,.07); }
+body[data-theme="pastel"] .rec-amt-lbl { color: var(--text-muted); }
+body[data-theme="pastel"] .rec-amt-in {
+    background: #fff;
+    border-color: rgba(0,0,0,.14);
+    color: var(--text);
+}
+body[data-theme="pastel"] .rec-amt-in:focus { border-color: #FF8C42; outline: none; }
+body[data-theme="pastel"] .rec-qb {
+    background: #faf7f2;
+    border-color: rgba(0,0,0,.12);
+    color: var(--text-muted);
+}
+body[data-theme="pastel"] .rec-qb:hover { border-color: #FF8C42; color: #cc5500; background: #fff4e8; }
+
+/* street complete footer */
+body[data-theme="pastel"] .rec-street-footer { border-top-color: rgba(0,0,0,.07); }
+body[data-theme="pastel"] .rec-done-lbl  { color: var(--text-muted); }
+body[data-theme="pastel"] .rec-done-hint { color: #c0b0a0; }
+body[data-theme="pastel"] .rec-btn-next {
+    background: rgba(34,144,208,.1);
+    border-color: #2290d0;
+    color: #0066aa;
+}
+body[data-theme="pastel"] .rec-btn-next:hover { background: rgba(34,144,208,.2); }
+
+/* ─── Recorder: Street Cards ─────────────────────────────────────────────── */
+body[data-theme="pastel"] .rec-street-card {
+    background: #faf7f2;
+    border-color: rgba(0,0,0,.09);
+}
+body[data-theme="pastel"] .rec-sc-label { color: var(--text-muted); }
+
+/* PREFLOP */
+body[data-theme="pastel"] .rec-sc-preflop.rec-sc-active,
+body[data-theme="pastel"] .rec-sc-preflop.rec-sc-done {
+    background: #FFF5ED;
+    border-color: #FF8C42;
+}
+body[data-theme="pastel"] .rec-sc-preflop .rec-sc-label { color: #cc5500; }
+
+/* FLOP */
+body[data-theme="pastel"] .rec-sc-flop.rec-sc-active,
+body[data-theme="pastel"] .rec-sc-flop.rec-sc-done {
+    background: #EDF7FF;
+    border-color: #2EA8E0;
+}
+body[data-theme="pastel"] .rec-sc-flop .rec-sc-label { color: #0066aa; }
+
+/* TURN */
+body[data-theme="pastel"] .rec-sc-turn.rec-sc-active,
+body[data-theme="pastel"] .rec-sc-turn.rec-sc-done {
+    background: #EDFBF3;
+    border-color: #36B05A;
+}
+body[data-theme="pastel"] .rec-sc-turn .rec-sc-label { color: #1a6e3a; }
+
+/* RIVER */
+body[data-theme="pastel"] .rec-sc-river.rec-sc-active,
+body[data-theme="pastel"] .rec-sc-river.rec-sc-done {
+    background: #F5F0FF;
+    border-color: #7B5CE8;
+}
+body[data-theme="pastel"] .rec-sc-river .rec-sc-label { color: #5b3db8; }
+
+/* street card internal elements */
+body[data-theme="pastel"] .rec-sc-board-cards { border-bottom-color: rgba(0,0,0,.06); }
+body[data-theme="pastel"] .rec-sc-pot { color: #1a6e3a; border-top-color: rgba(0,0,0,.07); }
+body[data-theme="pastel"] .rec-sc-feed .rec-fr-pos  { color: #2ea8e0; }
+body[data-theme="pastel"] .rec-sc-feed .rec-fr-name { color: #a09080; }
+
+/* street-specific pos colors in feed */
+body[data-theme="pastel"] .rec-sc-preflop .rec-sc-feed .rec-fr-pos { color: #cc5500; }
+body[data-theme="pastel"] .rec-sc-flop    .rec-sc-feed .rec-fr-pos { color: #0066aa; }
+body[data-theme="pastel"] .rec-sc-turn    .rec-sc-feed .rec-fr-pos { color: #1a6e3a; }
+body[data-theme="pastel"] .rec-sc-river   .rec-sc-feed .rec-fr-pos { color: #5b3db8; }
+
+/* future/inactive street cards */
+body[data-theme="pastel"] .rec-sc-future { opacity: .55; }
+
+/* ─── Recorder: Action Log (in hand modal) ───────────────────────────────── */
+body[data-theme="pastel"] .rec-modal-log { border-top-color: rgba(0,0,0,.09); }
+body[data-theme="pastel"] .rec-modal-log-title { color: var(--text-muted); }
+body[data-theme="pastel"] .rec-log-col { background: #faf7f2; border-color: rgba(0,0,0,.08); border-radius: 10px; }
+body[data-theme="pastel"] .rec-log-col-preflop .rec-log-col-hd { color: #cc5500; background: rgba(255,140,66,.1); border-bottom-color: rgba(255,140,66,.15); }
+body[data-theme="pastel"] .rec-log-col-flop    .rec-log-col-hd { color: #0066aa; background: rgba(46,168,224,.1);  border-bottom-color: rgba(46,168,224,.15); }
+body[data-theme="pastel"] .rec-log-col-turn    .rec-log-col-hd { color: #1a6e3a; background: rgba(54,176,90,.1);   border-bottom-color: rgba(54,176,90,.15); }
+body[data-theme="pastel"] .rec-log-col-river   .rec-log-col-hd { color: #5b3db8; background: rgba(123,92,232,.1);  border-bottom-color: rgba(123,92,232,.15); }
+body[data-theme="pastel"] .rec-log-pos    { color: var(--text-muted); }
+body[data-theme="pastel"] .rec-log-row    { border-top-color: rgba(0,0,0,.05); }
+body[data-theme="pastel"] .rec-log-row-hero { background: rgba(255,140,66,.09); }
+body[data-theme="pastel"] .rec-log-col-pot { color: #1a6e3a; border-top-color: rgba(0,0,0,.07); }
+body[data-theme="pastel"] .rec-log-fold  { color: #cc3333; }
+body[data-theme="pastel"] .rec-log-call  { color: #0066aa; }
+body[data-theme="pastel"] .rec-log-raise { color: #cc7700; }
+body[data-theme="pastel"] .rec-log-check { color: #9a8870; }
+body[data-theme="pastel"] .rec-log-post  { color: #b0a090; }
+body[data-theme="pastel"] .rec-log-reraise { color: #9933cc; }
+body[data-theme="pastel"] .rec-log-bet   { color: #cc7700; }
+
+/* ─── Recorder: misc buttons ─────────────────────────────────────────────── */
+body[data-theme="pastel"] .rec-collapse-btn { border-color: rgba(0,0,0,.14); color: var(--text-muted); }
+body[data-theme="pastel"] .rec-collapse-btn:hover { border-color: rgba(0,0,0,.3); }
+body[data-theme="pastel"] .rec-rotate-btn {
+    background: #fff;
+    border-color: rgba(0,0,0,.14);
+    color: var(--text-dim);
+}
+body[data-theme="pastel"] .rec-rotate-btn:hover { border-color: #2290d0; color: #0066aa; }
+body[data-theme="pastel"] .rec-rotate-btn.active { background: rgba(34,144,208,.1); border-color: #2290d0; color: #0066aa; }

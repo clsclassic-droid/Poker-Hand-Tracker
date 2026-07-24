@@ -215,7 +215,7 @@ const state = {
     sheetId:       0,
     editing:       null,
     expandedDays:  new Set(),
-    settings:      { fourColor: false, textCards: false, cardSmall: false },
+    settings:      { fourColor: false, textCards: false, cardSmall: false, theme: 'default' },
 };
 window.state = state;
 
@@ -973,10 +973,25 @@ function loadSettings() {
         state.settings.fourColor  = !!s.fourColor;
         state.settings.textCards  = !!s.textCards;
         state.settings.cardSmall  = !!s.cardSmall;
+        state.settings.theme      = s.theme || 'default';
     } catch(e) {}
     document.getElementById('toggle-fourcolor').checked  = state.settings.fourColor;
     document.getElementById('toggle-textcards').checked  = state.settings.textCards;
     document.getElementById('toggle-cardsmall').checked  = state.settings.cardSmall;
+    applyTheme(state.settings.theme, false);
+}
+
+function applyTheme(theme, save = true) {
+    state.settings.theme = theme;
+    if (theme === 'pastel') {
+        document.body.dataset.theme = 'pastel';
+    } else {
+        delete document.body.dataset.theme;
+    }
+    document.querySelectorAll('#theme-picker .theme-opt').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === theme);
+    });
+    if (save) saveSettings();
 }
 
 function saveSettings() {
@@ -1366,6 +1381,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('toggle-cardsmall').addEventListener('change', e => {
         applyCardSmallToggle(e.target.checked);
+    });
+    document.getElementById('theme-picker').addEventListener('click', e => {
+        const btn = e.target.closest('.theme-opt');
+        if (btn) applyTheme(btn.dataset.theme);
     });
     document.getElementById('hide-hand-btn').addEventListener('click', toggleHideHand);
     document.getElementById('comment-toggle-btn').addEventListener('click', toggleCommentArea);

@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poker Hand Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="recorder.css">
+    <link rel="stylesheet" href="theme-pastel.css">
 </head>
 <body>
     <div id="app">
@@ -215,6 +219,22 @@
                         <span class="toggle-track"></span>
                     </div>
                 </label>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <span class="setting-title">ธีม UI</span>
+                        <span class="setting-desc">เปลี่ยนรูปลักษณ์ของแอป</span>
+                    </div>
+                    <div class="theme-picker" id="theme-picker">
+                        <button class="theme-opt active" data-theme="default" title="Default (Dark)">
+                            <span class="theme-swatch" style="background:linear-gradient(135deg,#0d1b2a 50%,#22c55e 50%)"></span>
+                            <span class="theme-opt-lbl">Default</span>
+                        </button>
+                        <button class="theme-opt" data-theme="pastel" title="Pastel">
+                            <span class="theme-swatch" style="background:linear-gradient(135deg,#FFCC3E 50%,#C5EEFF 50%)"></span>
+                            <span class="theme-opt-lbl">Pastel</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

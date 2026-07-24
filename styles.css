@@ -1206,6 +1206,32 @@ header h1 {
 .toggle-input:checked + .toggle-track { background: var(--accent); }
 .toggle-input:checked + .toggle-track::after { transform: translateX(18px); }
 
+/* ─── Theme Picker ───────────────────────────────────────────────────────── */
+.theme-picker { display: flex; gap: 8px; flex-shrink: 0; }
+.theme-opt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: 2px solid var(--border2);
+    border-radius: 10px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: border-color .18s;
+}
+.theme-opt:hover { border-color: var(--accent); }
+.theme-opt.active { border-color: var(--accent); }
+.theme-swatch {
+    width: 36px;
+    height: 22px;
+    border-radius: 5px;
+    display: block;
+    border: 1px solid rgba(0,0,0,.12);
+}
+.theme-opt-lbl { font-size: 10px; font-weight: 700; color: var(--text-dim); white-space: nowrap; }
+.theme-opt.active .theme-opt-lbl { color: var(--accent); }
+
 /* ─── 4-color deck classes ───────────────────────────────────────────────── */
 .cv-blue  { color: #60a5fa; }
 .cv-green { color: #4ade80; }
