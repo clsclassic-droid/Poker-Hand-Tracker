@@ -42,16 +42,17 @@ function _cardTextSpan(rank, suit) {
     return `<span style="color:${col}">${rank}${_SUIT_SYM[suit]}</span>`;
 }
 
-// Tiny inline hole cards for feed rows (always mini-card-sm)
+// Tiny inline hole cards for feed rows — respects card size setting
 function holeCardsInlineHTML(cardsStr) {
     const cards = parseCards(cardsStr);
     if (!cards.length) return '';
     const useCards = !window.state?.settings?.textCards;
+    const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
     return cards.map(c => {
         const rank = c[0], suit = c[1];
         if (useCards) {
             const cls = typeof suitCvClass === 'function' ? suitCvClass(suit) : (suit==='h'||suit==='d' ? 'cv-red' : 'cv-black');
-            return `<span class="mini-card mini-card-sm"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
+            return `<span class="mini-card${smCls}"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
         }
         return _cardTextSpan(rank, suit);
     }).join('');
@@ -62,11 +63,12 @@ function boardCardsHTML(street) {
     const cards = window.state?.sel?.[street];
     if (!cards || !cards.length) return '';
     const useCards = !window.state?.settings?.textCards;
+    const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
     return cards.map(c => {
         const rank = c[0], suit = c[1];
         if (useCards) {
             const cls = typeof suitCvClass === 'function' ? suitCvClass(suit) : (suit==='h'||suit==='d' ? 'cv-red' : 'cv-black');
-            return `<span class="mini-card mini-card-sm"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
+            return `<span class="mini-card${smCls}"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
         }
         return _cardTextSpan(rank, suit);
     }).join('');
@@ -778,7 +780,8 @@ function renderActorBlock() {
 
     const pot      = rec.pot;
     const snap10   = v => Math.ceil(v / 10) * 10;
-    const cap      = v => Math.min(v, stack); // never exceed remaining stack
+    const maxRaise = alreadyIn + stack; // all-in total commitment level
+    const cap      = v => Math.min(v, maxRaise);
     const minRaise  = cap(snap10(rec.currentBet > 0 ? rec.currentBet * 2 : (cfg.bb || 20)));
     const thirdPot  = cap(Math.max(minRaise, snap10(pot / 3)));
     const halfPot   = cap(Math.max(minRaise, snap10(pot / 2)));
@@ -812,7 +815,7 @@ function renderActorBlock() {
         </div>
         <div class="rec-amount-row">
             <span class="rec-amt-lbl">${raiseLabel.toLowerCase()}</span>
-            <input class="rec-amt-in" id="rec-raise-amt" type="number" value="${minRaise}" min="${minRaise}" step="10">
+            <input class="rec-amt-in" id="rec-raise-amt" type="number" value="${minRaise}" min="${minRaise}" max="${maxRaise}" step="10">
             <span class="rec-amt-lbl">฿</span>
             <div class="rec-quick-btns">
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${minRaise}">Min</button>
@@ -820,7 +823,7 @@ function renderActorBlock() {
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${halfPot}">½P</button>
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${threeQPot}">¾P</button>
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${fullPot}">Pot</button>
-                <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${stack}">All-in</button>
+                <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${maxRaise}">All-in</button>
             </div>
         </div>`;
 }
@@ -862,8 +865,11 @@ function _act(pos, action, amount) {
 
 function _doRaise(pos) {
     if (!rec) return;
-    const amt = parseFloat(document.getElementById('rec-raise-amt')?.value) || 0;
+    let amt = parseFloat(document.getElementById('rec-raise-amt')?.value) || 0;
     if (amt <= 0) { toast('กรุณาใส่จำนวนเงิน', 'error'); return; }
+    const alreadyIn = rec.potContrib[pos] || 0;
+    const stack     = Math.round(rec.stackByPos[pos] || 0);
+    amt = Math.min(amt, alreadyIn + stack); // clamp to all-in
     const hasOpened  = rec.streets[rec.currentStreet].some(e => e.a === 'raise' || e.a === 'bet' || e.a === 'reraise');
     const actionType = !hasOpened && rec.currentBet === 0 ? 'bet' : hasOpened ? 'reraise' : 'raise';
     recordAction(pos, actionType, amt);
