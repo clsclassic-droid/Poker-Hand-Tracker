@@ -56,8 +56,8 @@ body[data-theme="comic"] header h1 {
     font-size: 0;
     color: transparent;
     background: url('Picture/9acd835a-da0a-4ed7-8b79-73e25b3852c9.png') no-repeat left center / contain;
-    width: 240px;
-    height: 60px;
+    width: 320px;
+    height: 88px;
     display: block;
     flex-shrink: 0;
 }
@@ -423,6 +423,11 @@ body[data-theme="comic"] #recorder-setup {
     border: 2.5px solid var(--ink);
     border-radius: 14px 4px 12px 4px / 4px 12px 4px 14px;
     box-shadow: 4px 4px 0 var(--ink);
+}
+body[data-theme="comic"] .rec-setup-box {
+    background: #fff8d6;
+    border-color: rgba(20,14,40,.15);
+    border-radius: 10px;
 }
 body[data-theme="comic"] .rec-setup-header {
     background: #ffe600;
