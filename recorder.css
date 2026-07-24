@@ -326,6 +326,7 @@
 .rec-act-check { color: #7a9ab8; }
 .rec-act-post  { color: #344d6e; }
 .rec-pos-tag   { font-size: 9px; color: #4a6580; font-weight: 400; }
+.rec-actor-pos { font-size: 15px; font-weight: 800; color: #7dd3fc; }
 
 /* Raise divider */
 .rec-feed-divider {

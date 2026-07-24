@@ -668,13 +668,15 @@ function appendFeedRow(feed, entry, isAgg) {
                  : a === 'post'    ? `post ${v ? Number(v).toLocaleString() : ''}`
                  : v ? `${a} ${Number(v).toLocaleString()}` : a;
 
-    const hcHtml = holeCardsInlineHTML(player?.cards || '');
+    // Hero cards come from HAND field; other players from p.cards
+    const cardsStr = isHero ? (window.state?.sel?.hand?.join('') || '') : (player?.cards || '');
+    const hcHtml   = holeCardsInlineHTML(cardsStr);
     const row = document.createElement('div');
     row.className = `rec-feed-row${isHero ? ' rec-feed-hero' : ''}`;
     row.innerHTML = `
         <span class="rec-fr-pos${isHero ? ' rec-fr-hero-pos' : ''}">${pos}</span>
-        ${hcHtml ? `<span class="rec-fr-cards">${hcHtml}</span>` : ''}
         <span class="rec-fr-name">${name || (isHero ? '● Hero' : '')}</span>
+        ${hcHtml ? `<span class="rec-fr-cards">${hcHtml}</span>` : ''}
         <span class="rec-fr-act ${actCls}">${label}</span>`;
     feed.appendChild(row);
 }
@@ -766,8 +768,8 @@ function renderActorBlock() {
                      : 'RE-RAISE';
 
     const nameHtml = name
-        ? `${isHero ? '● ' : ''}${name} <span class="rec-pos-tag">${pos}</span>${isHero ? ' <span class="rec-hero-tag">คุณ</span>' : ''}`
-        : `${isHero ? '● ' : ''}${pos}${isHero ? ' <span class="rec-hero-tag">คุณ</span>' : ''}`;
+        ? `${isHero ? '● ' : ''}<span class="rec-actor-pos">${pos}</span> ${name}${isHero ? ' <span class="rec-hero-tag">คุณ</span>' : ''}`
+        : `${isHero ? '● ' : ''}<span class="rec-actor-pos">${pos}</span>${isHero ? ' <span class="rec-hero-tag">คุณ</span>' : ''}`;
 
     el.innerHTML = `
         <div class="rec-actor-header">
