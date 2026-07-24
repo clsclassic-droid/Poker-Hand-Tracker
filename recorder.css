@@ -4,7 +4,7 @@
 
 /* ── Player Setup Panel ────────────────────────────────────────────────────── */
 #recorder-setup {
-    margin: 0 0 6px;
+    margin: 6px 0 0;
 }
 .rec-setup-box {
     background: #162032;

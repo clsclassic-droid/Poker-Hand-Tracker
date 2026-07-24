@@ -884,7 +884,9 @@ async function _saveLog() {
         if (window.state?.history?.[histLen - 1]) window.state.history[histLen - 1][23] = json;
         toast('✓ บันทึก Action Log แล้ว');
         if (btn) { btn.textContent = '✓ บันทึกแล้ว'; }
-        rec = null; // prevent the same log from being saved again on next hand
+        rec = null;
+        const panelEl = document.getElementById('recorder-panel');
+        if (panelEl) panelEl.style.display = 'none';
         if (cfg?.autoRotate) setTimeout(_rotatePositions, 300);
     } catch (err) {
         console.error('recorder save:', err);
