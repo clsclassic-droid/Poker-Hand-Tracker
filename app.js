@@ -526,6 +526,42 @@ function renderHistory() {
             const sd1WinTag = sdWins(sd1) ? ' ' + wb : '';
             const sd2WinTag = sdWins(sd2) ? ' ' + wb : '';
 
+            // Build showdown cell(s): recorder hands show all players at SD, old hands show SD1/SD2
+            let recJson = null;
+            try { if (r[23]) recJson = JSON.parse(r[23]); } catch (e) {}
+
+            let sdCells;
+            if (recJson?.players) {
+                const heroPlayer = recJson.players.find(p => p.isHero);
+                const heroPos = heroPlayer?.pos;
+                let sdPositions;
+                if (recJson.showdown) {
+                    sdPositions = recJson.showdown.filter(pos => pos !== heroPos);
+                } else {
+                    const folded = new Set();
+                    Object.values(recJson.actions || {}).forEach(acts =>
+                        acts.forEach(a => { if (a.a === 'fold') folded.add(a.pos); })
+                    );
+                    sdPositions = recJson.players
+                        .filter(p => !p.isHero && !folded.has(p.pos))
+                        .map(p => p.pos);
+                }
+                const parts = sdPositions.map(pos => {
+                    const p = recJson.players.find(pl => pl.pos === pos);
+                    const cardsStr = p?.cards || '';
+                    const cardArr = (cardsStr.match(/[AKQJT2-9][hdcs]/gi) || [])
+                        .map(c => c[0].toUpperCase() + c[1].toLowerCase());
+                    if (cardArr.length < 2) return '';
+                    const displayStr = cardArr.join(' ');
+                    const win = sdWins(displayStr);
+                    return `<span class="pos-badge">${pos}</span>${cardHtml(displayStr)}${win ? ' ' + wb : ''}`;
+                }).filter(Boolean);
+                const content = parts.length ? parts.join(' ') : '<span class="cv-empty">—</span>';
+                sdCells = `<td colspan="2">${content}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>`;
+            } else {
+                sdCells = `<td>${cardHtml(sd1)}${sd1WinTag}</td><td>${cardHtml(sd2)}${sd2WinTag}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>`;
+            }
+
             const histIdx = state.history.indexOf(r);
             const tr = document.createElement('tr');
             tr.className = 'history-row clickable-row';
@@ -538,8 +574,7 @@ function renderHistory() {
                 <td>${riverDisplay}</td>
                 <td>${fcDisplay}</td>
                 <td>${hitDisplay}</td>
-                <td>${cardHtml(sd1)}${sd1WinTag}</td>
-                <td>${cardHtml(sd2)}${sd2WinTag}${hasNotes ? '<span class="note-dot">💬</span>' : ''}</td>
+                ${sdCells}
                 <td>${resultDisplay}</td>
                 <td class="row-actions">
                     <button class="row-action-btn edit-btn" title="แก้ไข">✏️</button>
@@ -578,6 +613,14 @@ function cardHtml(str) {
 
 // ─── Save ─────────────────────────────────────────────────────────────────────
 async function saveHand() {
+    // When recorder is active: auto-fill SD1/SD2 for sheet compat, collect all showdown opponents
+    let recSdCards = null;
+    if (window.recorderModule?._isRecording?.()) {
+        const recSd = window.recorderModule._getShowdownCards();
+        state.sel.sd1 = recSd[0]?.cards || [];
+        state.sel.sd2 = recSd[1]?.cards || [];
+        recSdCards = recSd.map(item => item.cards).filter(c => c.length >= 2);
+    }
     const { hand, flop, turn, river, sd1, sd2 } = state.sel;
     if (hand.length < 2) {
         showToast('กรุณาเลือกไพ่ HAND ให้ครบ 2 ใบก่อน', 'error');
@@ -608,7 +651,7 @@ async function saveHand() {
         if (totalBet > 0) resultVal = String(-totalBet);
     } else if (totalBet > 0) {
         const effectivePot = potAmt > 0 ? potAmt : totalBet;
-        const opponents = [sd1, sd2].filter(h => h.length >= 2);
+        const opponents = recSdCards ?? [sd1, sd2].filter(h => h.length >= 2);
         let weWin = opponents.length === 0 ? true : null;
         let tied = false;
         if (opponents.length > 0) {

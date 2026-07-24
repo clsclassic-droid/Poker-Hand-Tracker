@@ -303,6 +303,10 @@ function applyToggle() {
     if (panelEl && !on) panelEl.style.display = 'none';
     if (on) { cfg = loadConfig(); renderSetup(); }
     syncPositionChips();
+    ['fi-sd1', 'fi-sd2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = on ? 'none' : '';
+    });
 }
 
 // ── Player Setup UI ───────────────────────────────────────────────────────────
@@ -956,8 +960,23 @@ function buildJson() {
     const players = cfg.players.map((p, i) =>
         i === heroIdx ? { ...p, cards: (window.state?.sel?.hand || []).join('') } : p
     );
-    return JSON.stringify({ players, actions: rec.streets, sb: cfg.sb, bb: cfg.bb, boards });
+    return JSON.stringify({ players, actions: rec.streets, sb: cfg.sb, bb: cfg.bb, boards, showdown: rec.playersInHand });
 }
+
+function _getShowdownCards() {
+    if (!rec || !cfg) return [];
+    const heroIdx = getHeroIdx();
+    const heroPos = heroIdx >= 0 ? cfg.players[heroIdx].pos : null;
+    return rec.playersInHand
+        .filter(pos => pos !== heroPos)
+        .map(pos => {
+            const p = cfg.players.find(pl => pl.pos === pos);
+            return { pos, cards: parseCards(p?.cards || '') };
+        })
+        .filter(item => item.cards.length >= 2);
+}
+
+function _isRecording() { return rec !== null; }
 
 async function _saveLog() {
     const json = buildJson();
@@ -1138,7 +1157,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
