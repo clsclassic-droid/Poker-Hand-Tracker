@@ -1054,8 +1054,8 @@ function loadSettings() {
 
 function applyTheme(theme, save = true) {
     state.settings.theme = theme;
-    if (theme === 'pastel') {
-        document.body.dataset.theme = 'pastel';
+    if (theme === 'pastel' || theme === 'comic') {
+        document.body.dataset.theme = theme;
     } else {
         delete document.body.dataset.theme;
     }
