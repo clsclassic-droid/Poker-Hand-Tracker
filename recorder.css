@@ -592,7 +592,7 @@
 /* Action rows */
 .rec-log-row {
     display: grid;
-    grid-template-columns: 34px 56px 1fr;
+    grid-template-columns: 60px 72px 1fr;
     align-items: center;
     gap: 0 3px;
     padding: 1.5px 0;
@@ -611,6 +611,19 @@
     color: #4a6580;
     overflow: hidden;
     white-space: nowrap;
+}
+.rec-log-name {
+    font-size: 8px;
+    font-weight: 400;
+    color: #3a5570;
+    letter-spacing: 0;
+}
+/* Smaller W badge inside popup action log */
+.rec-modal-log .w-badge {
+    width: 12px;
+    height: 12px;
+    font-size: 6px;
+    flex-shrink: 0;
 }
 .rec-log-act {
     font-size: 9.5px;

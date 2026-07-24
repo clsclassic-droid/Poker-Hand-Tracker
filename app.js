@@ -1204,7 +1204,7 @@ function openHandDetail(r) {
     }).join('');
 
     if (r[23] && window.recorderModule) {
-        const logHtml = window.recorderModule.renderActionLog(r[23]);
+        const logHtml = window.recorderModule.renderActionLog(r[23], r[1]);
         if (logHtml) body.innerHTML += logHtml;
     }
 

@@ -1063,7 +1063,7 @@ async function _saveLog() {
 }
 
 // ── Render Action Log for Hand Detail Modal ───────────────────────────────────
-function renderActionLog(jsonStr) {
+function renderActionLog(jsonStr, heroCardsStr) {
     // Render a card string (e.g. "AhKd") as mini-cards or coloured text per settings
     function _actionLogCardHtml(cardsStr) {
         const cards = parseCards(cardsStr);
@@ -1091,6 +1091,43 @@ function renderActionLog(jsonStr) {
         let hasAny     = false;
         let colsHtml   = '';
 
+        // Determine winner positions for W badge
+        const showdownPositions = data.showdown || [];
+        let winners = new Set();
+        if (showdownPositions.length === 1) {
+            winners.add(showdownPositions[0]);
+        } else if (showdownPositions.length >= 2) {
+            const evalFn = window.evaluatePokerHand;
+            const cmpFn  = window._cmpScore;
+            if (evalFn && cmpFn) {
+                const boardCards = [
+                    ...(boards.flop  || []),
+                    ...(boards.turn  || []),
+                    ...(boards.river || []),
+                ];
+                if (boardCards.length >= 3) {
+                    const entries = showdownPositions.map(pos => {
+                        const pd = data.players?.find(p => p.pos === pos);
+                        const cardsStr = (pos === heroPos)
+                            ? (pd?.cards || heroCardsStr || '')
+                            : (pd?.cards || '');
+                        const cards = parseCards(cardsStr);
+                        if (cards.length < 2) return null;
+                        const result = evalFn(cards, boardCards);
+                        return result ? { pos, score: result.score } : null;
+                    }).filter(Boolean);
+                    if (entries.length >= 1) {
+                        let best = entries[0].score;
+                        for (const e of entries) { if (cmpFn(e.score, best) > 0) best = e.score; }
+                        entries.filter(e => cmpFn(e.score, best) === 0).forEach(e => winners.add(e.pos));
+                    }
+                }
+            }
+        }
+
+        // Last street with actions — where W badge will appear
+        const lastStreetWithActs = [...STREET_SEQ].reverse().find(s => data.actions[s]?.length > 0);
+
         STREET_SEQ.forEach(street => {
             const acts = data.actions[street];
             const hasActs = acts && acts.length > 0;
@@ -1111,6 +1148,8 @@ function renderActionLog(jsonStr) {
                     streetBoard.length ? _actionLogCardHtml(streetBoard.join('')) : ''
                 }</div>`;
 
+                const isLastStreet = street === lastStreetWithActs;
+
                 let rows = '';
                 acts.forEach(e => {
                     const isAgg        = e.a === 'raise' || e.a === 'reraise' || e.a === 'bet';
@@ -1123,13 +1162,17 @@ function renderActionLog(jsonStr) {
                                       : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
                     const heroRow      = heroPos && e.pos === heroPos ? ' rec-log-row-hero' : '';
                     const playerInData = data.players?.find(p => p.pos === e.pos);
+                    const wBadge       = (isLastStreet && winners.has(e.pos))
+                                      ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                     // Always emit .rec-log-hc span to keep grid column occupied even when empty
                     const hcHtml       = `<span class="rec-log-hc">${
                         playerInData?.cards ? _actionLogCardHtml(playerInData.cards) : ''
-                    }</span>`;
+                    }${wBadge}</span>`;
+                    const nameHtml = playerInData?.name
+                        ? `<span class="rec-log-name"> ${playerInData.name}</span>` : '';
                     rows += `
                         <div class="rec-log-row${heroRow}">
-                            <span class="rec-log-pos">${e.pos}</span>
+                            <span class="rec-log-pos">${e.pos}${nameHtml}</span>
                             ${hcHtml}
                             <span class="rec-log-act ${cls}">${lbl}</span>
                         </div>`;
