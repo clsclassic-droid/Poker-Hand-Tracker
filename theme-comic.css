@@ -162,7 +162,7 @@ body[data-theme="comic"] .field-item.active .field-label  { color: var(--text); 
 body[data-theme="comic"] .field-item.complete .field-label { color: var(--text-dim); }
 
 /* Per-field vivid backgrounds — override generic white */
-body[data-theme="comic"] .field-item[data-field="hand"]  { background: linear-gradient(150deg,#6d28d9,#9333ea); border-color:var(--ink); }
+body[data-theme="comic"] .field-item[data-field="hand"]  { background: url('Picture/%E2%80%94Pngtree%E2%80%94pure%20watercolor%20purple%20background_928012.jpg') center/cover; border-color:var(--ink); }
 body[data-theme="comic"] .field-item[data-field="flop"]  { background: linear-gradient(150deg,#1d4ed8,#3b82f6); border-color:var(--ink); }
 body[data-theme="comic"] .field-item[data-field="turn"]  { background: linear-gradient(150deg,#c2410c,#f97316); border-color:var(--ink); }
 body[data-theme="comic"] .field-item[data-field="river"] { background: linear-gradient(150deg,#be123c,#f43f5e); border-color:var(--ink); }
@@ -198,7 +198,7 @@ body[data-theme="comic"] .bet-input {
     color: var(--text);
 }
 /* Per-street coloured bet inputs */
-body[data-theme="comic"] #bet-pf    { background:linear-gradient(135deg,#6d28d9,#9333ea); color:#fff; border-color:var(--ink); font-weight:700; }
+body[data-theme="comic"] #bet-pf    { background:url('Picture/%E2%80%94Pngtree%E2%80%94pure%20watercolor%20purple%20background_928012.jpg') center/cover; color:#fff; border-color:var(--ink); font-weight:700; }
 body[data-theme="comic"] #bet-flop  { background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff; border-color:var(--ink); font-weight:700; }
 body[data-theme="comic"] #bet-turn  { background:linear-gradient(135deg,#c2410c,#f97316); color:#fff; border-color:var(--ink); font-weight:700; }
 body[data-theme="comic"] #bet-river { background:linear-gradient(135deg,#be123c,#f43f5e); color:#fff; border-color:var(--ink); font-weight:700; }
