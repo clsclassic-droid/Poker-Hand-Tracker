@@ -866,6 +866,52 @@ function renderActorBlock() {
         </div>` : ''}`;
 }
 
+function _markWinners() {
+    const evalFn = window.evaluatePokerHand;
+    const cmpFn  = window._cmpScore;
+    if (!rec || !cfg || !evalFn || !cmpFn || rec.playersInHand.length < 2) return;
+
+    const heroIdx = getHeroIdx();
+    const board = [
+        ...(window.state?.sel?.flop  || []),
+        ...(window.state?.sel?.turn  || []),
+        ...(window.state?.sel?.river || []),
+    ];
+    if (board.length < 3) return;
+
+    const entries = rec.playersInHand.map(pos => {
+        const pIdx = cfg.players.findIndex(pl => pl.pos === pos);
+        const p    = cfg.players[pIdx];
+        const cardsStr = (pIdx === heroIdx)
+            ? (window.state?.sel?.hand?.join('') || '')
+            : (p?.cards || '');
+        const cards = parseCards(cardsStr);
+        if (cards.length < 2) return null;
+        const result = evalFn(cards, board);
+        return result ? { pos, score: result.score } : null;
+    }).filter(Boolean);
+
+    if (entries.length < 2) return;
+
+    let best = entries[0].score;
+    for (const e of entries) { if (cmpFn(e.score, best) > 0) best = e.score; }
+    const winners = new Set(entries.filter(e => cmpFn(e.score, best) === 0).map(e => e.pos));
+
+    const feed = document.getElementById(`rec-feed-${rec.currentStreet}`);
+    if (!feed) return;
+    feed.querySelectorAll('.rec-feed-row').forEach(row => {
+        const posEl = row.querySelector('.rec-fr-pos');
+        if (!posEl || !winners.has(posEl.textContent.trim())) return;
+        const cardsEl = row.querySelector('.rec-fr-cards');
+        if (!cardsEl || cardsEl.querySelector('.w-badge')) return;
+        const badge = document.createElement('span');
+        badge.className = 'w-badge';
+        badge.title = 'ผู้ชนะ';
+        badge.textContent = 'W';
+        cardsEl.appendChild(badge);
+    });
+}
+
 function showStreetComplete() {
     const actorEl = document.getElementById('rec-actor-block');
     if (actorEl) actorEl.innerHTML = '';
@@ -892,6 +938,7 @@ function showStreetComplete() {
                 <span class="rec-done-lbl">${endLbl}</span>
                 <span class="rec-done-hint">กด บันทึก Hand เพื่อเซฟทั้ง hand + action log</span>
             </div>`;
+        if (rec.playersInHand.length > 1) _markWinners();
     }
 }
 

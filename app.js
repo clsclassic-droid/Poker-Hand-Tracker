@@ -1391,6 +1391,10 @@ function toggleCommentArea() {
     }
 }
 
+// Expose hand evaluation for recorder winner detection
+window.evaluatePokerHand = evaluatePokerHand;
+window._cmpScore = _cmpScore;
+
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     buildFieldsBar();
