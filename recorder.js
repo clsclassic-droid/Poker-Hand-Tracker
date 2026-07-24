@@ -221,16 +221,10 @@ function buildDefaultPlayers(n) {
     return positions.map(pos => ({ pos, name: '', stack: 1000, isHero: false }));
 }
 
-// Show only positions configured in recorder setup; restore all when recorder is off
+// Hide the entire position-row when recorder is on (redundant with setup table); restore when off
 function syncPositionChips() {
-    const chips     = document.querySelectorAll('#position-chips .pos-chip');
-    const configPos = (cfg?.players || []).map(p => p.pos);
-    const filterOn  = isOn() && configPos.length > 0;
-    chips.forEach(ch => {
-        const hide = filterOn && !configPos.includes(ch.dataset.pos);
-        ch.style.display = hide ? 'none' : '';
-        if (hide) ch.classList.remove('selected');
-    });
+    const row = document.getElementById('position-row');
+    if (row) row.style.display = isOn() ? 'none' : '';
 }
 
 function sortByOrder(posArr, order) {
