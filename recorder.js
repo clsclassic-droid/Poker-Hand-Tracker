@@ -341,8 +341,12 @@ function bindSetupEvents() {
             document.querySelectorAll('#position-chips .pos-chip').forEach(b => {
                 b.classList.toggle('selected', b.dataset.pos === pos);
             });
-            // Remove heroName from any other player, then set on selected player
             if (cfg?.players?.[idx]) {
+                // Sync whatever the user has typed in name inputs → cfg before modifying
+                document.querySelectorAll('.rec-name-in').forEach((el, i) => {
+                    if (cfg.players[i]) cfg.players[i].name = el.value.trim();
+                });
+                // Clear heroName from any other row; set it on the clicked row
                 cfg.players.forEach((p, i) => { if (i !== idx && p.name === heroName) p.name = ''; });
                 cfg.players[idx].name = heroName;
                 saveConfig(cfg);
