@@ -28,39 +28,54 @@ body[data-theme="comic"] {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-/* ─── Background — halftone dot pattern ─────────────────────────────────── */
+/* ─── Background — comic illustration ───────────────────────────────────── */
 body[data-theme="comic"] {
-    background-color: #fffbe6;
-    background-image:
-        radial-gradient(circle, rgba(160,130,0,.22) 1.4px, transparent 1.4px);
-    background-size: 18px 18px;
+    background-color: #1a1040;
+    background-image: url('Picture/193a6127-c01b-4e70-8f44-51dba8cc8ca9.png');
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
 }
 
-/* ─── Header ─────────────────────────────────────────────────────────────── */
+/* App content centred over the illustration's cream paper area */
+body[data-theme="comic"] #app {
+    background: transparent;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+/* ─── Header — transparent, logo image replaces text ─────────────────────── */
 body[data-theme="comic"] header {
-    background: #e63030;
-    border-bottom: 3px solid var(--ink);
-    box-shadow: 0 3px 0 var(--ink);
+    background: transparent;
+    border-bottom: none;
+    box-shadow: none;
+    padding: 10px 20px;
 }
 body[data-theme="comic"] header h1 {
-    color: #ffe600;
-    font-weight: 900;
-    text-shadow: 2px 2px 0 var(--ink), -1px -1px 0 var(--ink),
-                 1px -1px 0 var(--ink), -1px 1px 0 var(--ink);
-    letter-spacing: .5px;
+    font-size: 0;
+    color: transparent;
+    background: url('Picture/9acd835a-da0a-4ed7-8b79-73e25b3852c9.png') no-repeat left center / contain;
+    width: 240px;
+    height: 60px;
+    display: block;
+    flex-shrink: 0;
 }
 body[data-theme="comic"] #auth-btn {
     background: #ffe600;
     color: var(--ink);
     border: 2px solid var(--ink);
     font-weight: 700;
+    box-shadow: 2px 2px 0 var(--ink);
 }
 body[data-theme="comic"] #auth-btn:hover:not(:disabled) { background: #ffd000; }
 body[data-theme="comic"] #signout-btn {
     color: #fff;
-    border-color: rgba(255,255,255,.5);
+    border-color: rgba(255,255,255,.6);
+    background: rgba(255,255,255,.15);
 }
-body[data-theme="comic"] #user-name { color: #ffe600; }
+body[data-theme="comic"] #signout-btn:hover { background: rgba(255,255,255,.28); }
+body[data-theme="comic"] #user-name { color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
 
 /* ─── Top bar ────────────────────────────────────────────────────────────── */
 body[data-theme="comic"] #top-bar {
@@ -146,12 +161,51 @@ body[data-theme="comic"] .field-label { color: var(--text-muted); }
 body[data-theme="comic"] .field-item.active .field-label  { color: var(--text); }
 body[data-theme="comic"] .field-item.complete .field-label { color: var(--text-dim); }
 
+/* Per-field vivid backgrounds — override generic white */
+body[data-theme="comic"] .field-item[data-field="hand"]  { background: linear-gradient(150deg,#6d28d9,#9333ea); border-color:var(--ink); }
+body[data-theme="comic"] .field-item[data-field="flop"]  { background: linear-gradient(150deg,#1d4ed8,#3b82f6); border-color:var(--ink); }
+body[data-theme="comic"] .field-item[data-field="turn"]  { background: linear-gradient(150deg,#c2410c,#f97316); border-color:var(--ink); }
+body[data-theme="comic"] .field-item[data-field="river"] { background: linear-gradient(150deg,#be123c,#f43f5e); border-color:var(--ink); }
+body[data-theme="comic"] .field-item[data-field="sd1"]   { background: linear-gradient(150deg,#7e22ce,#a855f7); border-color:var(--ink); }
+body[data-theme="comic"] .field-item[data-field="sd2"]   { background: linear-gradient(150deg,#6d28d9,#8b5cf6); border-color:var(--ink); }
+body[data-theme="comic"] #fi-fivecard { background: linear-gradient(150deg,#15803d,#22c55e); border-color:var(--ink); }
+body[data-theme="comic"] #fi-hit      { background: linear-gradient(150deg,#0e7490,#06b6d4); border-color:var(--ink); }
+
+/* White text on coloured field items */
+body[data-theme="comic"] .field-item[data-field] .field-label,
+body[data-theme="comic"] #fi-fivecard .field-label,
+body[data-theme="comic"] #fi-hit .field-label  { color: rgba(255,255,255,.75); }
+body[data-theme="comic"] .field-item[data-field] .field-cards,
+body[data-theme="comic"] #fi-fivecard .field-cards,
+body[data-theme="comic"] #fi-hit .field-cards  { color: #fff; }
+body[data-theme="comic"] .field-item[data-field].active .field-label,
+body[data-theme="comic"] #fi-fivecard.active .field-label,
+body[data-theme="comic"] #fi-hit.active .field-label  { color: #fff; }
+body[data-theme="comic"] .field-item[data-field].active {
+    filter: brightness(1.15) saturate(1.1);
+    box-shadow: 0 0 0 2px #ffe600, 4px 4px 0 var(--ink);
+}
+body[data-theme="comic"] .field-item[data-field]:hover {
+    filter: brightness(1.08);
+    transform: translate(-1px,-1px);
+    box-shadow: 4px 4px 0 var(--ink);
+}
+
 /* ─── Bet row ────────────────────────────────────────────────────────────── */
 body[data-theme="comic"] .bet-input {
     background: #fff;
     border-color: rgba(20,14,40,.2);
     color: var(--text);
 }
+/* Per-street coloured bet inputs */
+body[data-theme="comic"] #bet-pf    { background:linear-gradient(135deg,#6d28d9,#9333ea); color:#fff; border-color:var(--ink); font-weight:700; }
+body[data-theme="comic"] #bet-flop  { background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff; border-color:var(--ink); font-weight:700; }
+body[data-theme="comic"] #bet-turn  { background:linear-gradient(135deg,#c2410c,#f97316); color:#fff; border-color:var(--ink); font-weight:700; }
+body[data-theme="comic"] #bet-river { background:linear-gradient(135deg,#be123c,#f43f5e); color:#fff; border-color:var(--ink); font-weight:700; }
+body[data-theme="comic"] #bet-pf::placeholder,
+body[data-theme="comic"] #bet-flop::placeholder,
+body[data-theme="comic"] #bet-turn::placeholder,
+body[data-theme="comic"] #bet-river::placeholder { color:rgba(255,255,255,.55); }
 body[data-theme="comic"] .pot-odds-badge {
     background: rgba(26,108,196,.1);
     color: #1a6cc4;
