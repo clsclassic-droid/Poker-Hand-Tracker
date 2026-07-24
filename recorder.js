@@ -261,6 +261,8 @@ function _interceptCard(cardId) {
     if (countEl) { countEl.textContent = `${sel.length} / 2`; countEl.classList.toggle('full', sel.length >= 2); }
 
     _applyRecPickerToGrid(); // rebuilds usedCards + refreshCardGrid → _overrideCardGrid auto-applies
+
+    if (sel.length >= 2) setTimeout(() => _deactivatePlayerPicker(), 160);
     return true;
 }
 
