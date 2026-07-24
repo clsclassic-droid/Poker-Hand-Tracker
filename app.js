@@ -783,9 +783,13 @@ function onCardClick(cardId) {
     if (sel.length === cfg.max) {
         const recOn = document.getElementById('toggle-recorder')?.checked || false;
         const avail = recOn ? FIELDS.filter(fl => fl !== 'sd1' && fl !== 'sd2') : FIELDS;
-        // After last available field, wrap to first (HAND) so board cards dim to "used"
-        const next  = avail[avail.indexOf(f) + 1] ?? (recOn ? avail[0] : null);
-        if (next && next !== f) setTimeout(() => setActive(next), 160);
+        const next  = avail[avail.indexOf(f) + 1];
+        if (next) {
+            setTimeout(() => setActive(next), 160);
+        } else if (recOn) {
+            // Last field in recorder mode: deactivate so no card stays blue
+            setTimeout(() => clearActiveField(), 160);
+        }
     }
 }
 
@@ -797,7 +801,7 @@ function rebuildUsed() {
 
 function setActive(field) {
     window.recorderModule?._deactivatePlayerPicker?.();
-    syncCommentInput();  // save current field's comment before switching
+    syncCommentInput();
     state.activeField = field;
     document.querySelectorAll('.field-item').forEach(el => {
         el.classList.toggle('active', el.dataset.field === field);
@@ -805,6 +809,15 @@ function setActive(field) {
     refreshPickerHeader();
     refreshCardGrid();
     refreshCommentInput();
+}
+
+function clearActiveField() {
+    window.recorderModule?._deactivatePlayerPicker?.();
+    syncCommentInput();
+    state.activeField = null;
+    document.querySelectorAll('.field-item').forEach(el => el.classList.remove('active'));
+    refreshPickerHeader();
+    refreshCardGrid();
 }
 
 function undoLast() {
@@ -870,6 +883,7 @@ function refreshCommentInput() {
 function refreshPickerHeader() {
     const f   = state.activeField;
     const cfg = FIELD_CFG[f];
+    if (!f || !cfg) return;
     const cnt = state.sel[f].length;
     const nameEl = document.getElementById('picker-field-name');
     nameEl.textContent = cfg.label;
@@ -959,8 +973,8 @@ function refreshHitDisplay() {
 
 function refreshCardGrid() {
     const f    = state.activeField;
-    const sel  = state.sel[f];
-    const full = sel.length >= FIELD_CFG[f].max;
+    const sel  = f ? state.sel[f] : [];
+    const full = f ? sel.length >= FIELD_CFG[f].max : false;
     // When hiding hand and not on HAND field, don't expose hand cards via the grid
     const concealHand = state.hideHand && f !== 'hand';
 
