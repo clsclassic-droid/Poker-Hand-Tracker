@@ -620,9 +620,7 @@ function renderPanel() {
         const cls    = idx === curIdx ? 'rec-sc-active'
                      : idx < curIdx   ? 'rec-sc-done'
                      : 'rec-sc-future';
-        const boardDiv = s !== 'preflop'
-            ? `<div class="rec-sc-board-cards" id="rec-sc-board-${s}">${boardCardsHTML(s)}</div>`
-            : '';
+        const boardDiv = `<div class="rec-sc-board-cards" id="rec-sc-board-${s}">${s !== 'preflop' ? boardCardsHTML(s) : ''}</div>`;
         return `
             <div class="rec-street-card rec-sc-${s} ${cls}" id="rec-card-${s}">
                 <div class="rec-sc-label">${STREET_LBL[s]}</div>
