@@ -307,6 +307,10 @@ function applyToggle() {
         const el = document.getElementById(id);
         if (el) el.style.display = on ? 'none' : '';
     });
+    if (on) {
+        const af = document.querySelector('.field-item.active')?.dataset?.field;
+        if (af === 'sd1' || af === 'sd2') document.getElementById('fi-river')?.click();
+    }
     if (typeof updateShowdownHeader === 'function') updateShowdownHeader();
 }
 

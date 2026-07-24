@@ -781,7 +781,9 @@ function onCardClick(cardId) {
     refreshCardGrid();
 
     if (sel.length === cfg.max) {
-        const next = FIELDS[FIELDS.indexOf(f) + 1];
+        const recOn = document.getElementById('toggle-recorder')?.checked || false;
+        const avail = recOn ? FIELDS.filter(fl => fl !== 'sd1' && fl !== 'sd2') : FIELDS;
+        const next  = avail[avail.indexOf(f) + 1];
         if (next) setTimeout(() => setActive(next), 160);
     }
 }
