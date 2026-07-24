@@ -341,8 +341,9 @@ function bindSetupEvents() {
             document.querySelectorAll('#position-chips .pos-chip').forEach(b => {
                 b.classList.toggle('selected', b.dataset.pos === pos);
             });
-            // Set this player's name to heroName and re-render
+            // Remove heroName from any other player, then set on selected player
             if (cfg?.players?.[idx]) {
+                cfg.players.forEach((p, i) => { if (i !== idx && p.name === heroName) p.name = ''; });
                 cfg.players[idx].name = heroName;
                 saveConfig(cfg);
                 renderSetup();
