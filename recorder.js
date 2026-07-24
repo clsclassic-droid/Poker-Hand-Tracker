@@ -823,7 +823,7 @@ function renderActorBlock() {
 
     const pot      = rec.pot;
     const snap10   = v => Math.ceil(v / 10) * 10;
-    const maxRaise = alreadyIn + stack; // all-in total commitment level
+    const maxRaise = stack; // max ADDITIONAL chips = remaining stack
     const cap      = v => Math.min(v, maxRaise);
     const minRaise  = cap(snap10(rec.currentBet > 0 ? rec.currentBet * 2 : (cfg.bb || 20)));
     const thirdPot  = cap(Math.max(minRaise, snap10(pot / 3)));
@@ -959,7 +959,7 @@ function _doRaise(pos) {
     if (amt <= 0) { toast('กรุณาใส่จำนวนเงิน', 'error'); return; }
     const alreadyIn = rec.potContrib[pos] || 0;
     const stack     = Math.round(rec.stackByPos[pos] || 0);
-    amt = Math.min(amt, alreadyIn + stack); // clamp to all-in
+    amt = Math.min(amt, stack); // clamp to remaining stack
     const hasOpened  = rec.streets[rec.currentStreet].some(e => e.a === 'raise' || e.a === 'bet' || e.a === 'reraise');
     const actionType = !hasOpened && rec.currentBet === 0 ? 'bet' : hasOpened ? 'reraise' : 'raise';
     recordAction(pos, actionType, amt);
