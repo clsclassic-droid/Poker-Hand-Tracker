@@ -312,6 +312,18 @@ function applyToggle() {
         if (af === 'sd1' || af === 'sd2') document.getElementById('fi-river')?.click();
     }
     if (typeof updateShowdownHeader === 'function') updateShowdownHeader();
+
+    // In recorder mode, move fields bar just above card picker so it stays visible while picking
+    const fieldsBar  = document.getElementById('fields-bar');
+    const betRow     = document.getElementById('bet-row');
+    const cardPicker = document.getElementById('card-picker-section');
+    if (fieldsBar && betRow && cardPicker) {
+        if (on) {
+            cardPicker.parentNode.insertBefore(fieldsBar, cardPicker);
+        } else {
+            betRow.parentNode.insertBefore(fieldsBar, betRow);
+        }
+    }
 }
 
 // ── Player Setup UI ───────────────────────────────────────────────────────────
