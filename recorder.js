@@ -100,6 +100,40 @@ function _refreshAllCardSlots() {
     cfg?.players?.forEach((_, i) => updateCardsSlot(i));
 }
 
+// Live-update hole-card spans in all recorded street feed rows for one player.
+// Called whenever p.cards changes (picker or hero slot) so rows reflect current data.
+function _updateFeedCards(playerIdx) {
+    if (!cfg?.players?.[playerIdx] || !rec) return;
+    const p        = cfg.players[playerIdx];
+    const cardsStr = p.isHero
+        ? (window.state?.sel?.hand?.join('') || '')
+        : (p.cards || '');
+    const hcHtml = holeCardsInlineHTML(cardsStr);
+
+    STREET_SEQ.forEach(street => {
+        const feed = document.getElementById(`rec-feed-${street}`);
+        if (!feed) return;
+        feed.querySelectorAll('.rec-feed-row').forEach(row => {
+            const posEl = row.querySelector('.rec-fr-pos');
+            if (!posEl || posEl.textContent.trim() !== p.pos) return;
+            let cardsEl = row.querySelector('.rec-fr-cards');
+            if (hcHtml) {
+                if (cardsEl) {
+                    cardsEl.innerHTML = hcHtml;
+                } else {
+                    const span = document.createElement('span');
+                    span.className = 'rec-fr-cards';
+                    span.innerHTML = hcHtml;
+                    const nameEl = row.querySelector('.rec-fr-name');
+                    if (nameEl) nameEl.insertAdjacentElement('afterend', span);
+                }
+            } else if (cardsEl) {
+                cardsEl.remove();
+            }
+        });
+    });
+}
+
 function getHeroIdx() {
     if (!cfg?.players) return -1;
     return cfg.players.findIndex(p => p.name === (cfg.heroName || 'Hero'));
@@ -214,6 +248,7 @@ function _interceptCard(cardId) {
     p.cards = sel.join('');
 
     updateCardsSlot(recActivePlayer);
+    _updateFeedCards(recActivePlayer); // retroactively update any already-rendered feed rows
 
     // Update header count badge
     const countEl = document.getElementById('picker-count');
@@ -1032,6 +1067,7 @@ function _updateHeroSlot() {
     if (heroIdx < 0) return;
     const el = document.querySelector(`.rec-cards-slot[data-i="${heroIdx}"]`);
     if (el) el.innerHTML = renderCardSlotHTML(window.state?.sel?.hand?.join('') || '');
+    _updateFeedCards(heroIdx);
 }
 
 // Called by app.js after FLOP/TURN/RIVER cards change — updates board cards in the recorder panel
