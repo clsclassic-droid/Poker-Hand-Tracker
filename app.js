@@ -1015,6 +1015,7 @@ function applyTextCardsToggle(enabled) {
     renderHistory();
     window.recorderModule?._refreshAllCardSlots?.();
     window.recorderModule?._refreshAllFeedCards?.();
+    window.recorderModule?._refreshBoardCards?.();
 }
 
 function applyCardSmallToggle(enabled) {
@@ -1024,6 +1025,7 @@ function applyCardSmallToggle(enabled) {
     renderHistory();
     window.recorderModule?._refreshAllCardSlots?.();
     window.recorderModule?._refreshAllFeedCards?.();
+    window.recorderModule?._refreshBoardCards?.();
 }
 
 function buildCardGrid() {

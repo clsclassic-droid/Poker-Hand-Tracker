@@ -63,16 +63,17 @@ function holeCardsInlineHTML(cardsStr) {
     }).join('');
 }
 
-// Board cards for street header — always mini-card-sm (compact panel)
+// Board cards for street header — size follows cardSmall setting
 function boardCardsHTML(street) {
     const cards = window.state?.sel?.[street];
     if (!cards || !cards.length) return '';
     const useCards = !window.state?.settings?.textCards;
+    const smCls = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
     return cards.map(c => {
         const rank = c[0], suit = c[1];
         if (useCards) {
             const cls = typeof suitCvClass === 'function' ? suitCvClass(suit) : (suit==='h'||suit==='d' ? 'cv-red' : 'cv-black');
-            return `<span class="mini-card mini-card-sm"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
+            return `<span class="mini-card${smCls}"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
         }
         return _cardTextSpan(rank, suit);
     }).join('');
@@ -1109,6 +1110,10 @@ function _updateBoardCards(field) {
     if (el) el.innerHTML = boardCardsHTML(field);
 }
 
+function _refreshBoardCards() {
+    ['flop','turn','river'].forEach(s => _updateBoardCards(s));
+}
+
 // ── Auto-fill hero bet into main bet row ──────────────────────────────────────
 const STREET_BET_ID = { preflop: 'bet-pf', flop: 'bet-flop', turn: 'bet-turn', river: 'bet-river' };
 
@@ -1133,7 +1138,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
