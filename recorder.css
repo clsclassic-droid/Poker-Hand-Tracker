@@ -575,9 +575,12 @@
     font-weight: 700;
     letter-spacing: 0.5px;
     text-align: center;
-    padding: 4px 2px;
+    padding: 4px 2px 0;
     text-transform: uppercase;
     border-bottom: 1px solid rgba(255,255,255,.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .rec-log-col-preflop .rec-log-col-hd { color: #a78bfa; background: rgba(124,58,237,.08); }
 .rec-log-col-flop    .rec-log-col-hd { color: #67e8f9; background: rgba(8,145,178,.08); }
@@ -588,9 +591,10 @@
 
 /* Action rows */
 .rec-log-row {
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
+    display: grid;
+    grid-template-columns: 34px 56px 1fr;
+    align-items: center;
+    gap: 0 3px;
     padding: 1.5px 0;
     border-top: 1px solid rgba(255,255,255,.03);
 }
@@ -605,13 +609,16 @@
     font-size: 9px;
     font-weight: 700;
     color: #4a6580;
-    min-width: 22px;
-    flex-shrink: 0;
+    overflow: hidden;
+    white-space: nowrap;
 }
 .rec-log-act {
     font-size: 9.5px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 /* Action colors (shared with recorder feed) */
@@ -669,18 +676,18 @@
 .rec-log-col-board {
     display: flex;
     justify-content: center;
-    gap: 3px;
-    padding: 2px 0 1px;
-    font-size: 9.5px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
+    align-items: center;
+    gap: 2px;
+    height: 36px;
+    padding: 2px 0;
 }
 
 /* Hole cards inline in action log modal rows */
 .rec-log-hc {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    overflow: hidden;
     font-size: 8.5px;
-    font-weight: 700;
-    flex-shrink: 0;
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.2px;
 }

@@ -697,6 +697,12 @@ header h1 {
     overflow: hidden;
     animation: modal-in .15s ease;
 }
+#hand-modal.hm-recorder-mode {
+    max-width: 900px;
+}
+#hand-modal.hm-recorder-mode #hand-modal-body {
+    max-height: 80vh;
+}
 
 @keyframes modal-in {
     from { transform: scale(.95); opacity: 0; }

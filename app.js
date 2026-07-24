@@ -1133,8 +1133,14 @@ function openHandDetail(r) {
         { key:'sd2',     label:'SD2',   cards: r[6]||'', note: r[13]||'' },
     ];
 
+    const isRecorderHand = !!(r[23]);
+    document.getElementById('hand-modal').classList.toggle('hm-recorder-mode', isRecorderHand);
+
     const body = document.getElementById('hand-modal-body');
-    body.innerHTML = fields.map(f => {
+    const fieldsToShow = isRecorderHand
+        ? fields.filter(f => f.isFiveCard || f.isHit || f.isResult)
+        : fields;
+    body.innerHTML = fieldsToShow.map(f => {
         if (f.isFiveCard) {
             if (state.hideHand) return '';
             const holeArr  = r[1] ? r[1].split(' ').filter(Boolean) : [];

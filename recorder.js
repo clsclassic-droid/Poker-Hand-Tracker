@@ -1064,6 +1064,23 @@ async function _saveLog() {
 
 // ── Render Action Log for Hand Detail Modal ───────────────────────────────────
 function renderActionLog(jsonStr) {
+    // Render a card string (e.g. "AhKd") as mini-cards or coloured text per settings
+    function _actionLogCardHtml(cardsStr) {
+        const cards = parseCards(cardsStr);
+        if (!cards.length) return '';
+        const useCards = !window.state?.settings?.textCards;
+        const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
+        return cards.map(c => {
+            const rank = c[0], suit = c[1];
+            if (useCards) {
+                const cls = typeof suitCvClass === 'function' ? suitCvClass(suit) : (suit==='h'||suit==='d' ? 'cv-red' : 'cv-black');
+                return `<span class="mini-card${smCls}"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${_SUIT_SYM[suit]}</span></span>`;
+            }
+            const col = typeof suitInlineCol === 'function' ? suitInlineCol(suit) : (suit==='h'||suit==='d' ? '#f87171' : '#e2e8f0');
+            return `<span style="color:${col}">${rank}${_SUIT_SYM[suit]}</span>`;
+        }).join(useCards ? '' : ' ');
+    }
+
     try {
         const data = JSON.parse(jsonStr);
         if (!data?.actions) return '';
@@ -1088,14 +1105,11 @@ function renderActionLog(jsonStr) {
                 });
                 runningPot += Object.values(contrib).reduce((s, v) => s + v, 0);
 
-                // Board cards in column header
+                // Board cards in column header — always emit div for fixed height alignment
                 const streetBoard = boards[street] || [];
-                const boardHtml   = streetBoard.length
-                    ? `<div class="rec-log-col-board">${streetBoard.map(c => {
-                        const col = typeof suitInlineCol === 'function' ? suitInlineCol(c[1]) : (c[1]==='h'||c[1]==='d' ? '#f87171' : '#e2e8f0');
-                        return `<span style="color:${col}">${c[0]}${_SUIT_SYM[c[1]]}</span>`;
-                      }).join(' ')}</div>`
-                    : '';
+                const boardHtml   = `<div class="rec-log-col-board">${
+                    streetBoard.length ? _actionLogCardHtml(streetBoard.join('')) : ''
+                }</div>`;
 
                 let rows = '';
                 acts.forEach(e => {
@@ -1109,13 +1123,10 @@ function renderActionLog(jsonStr) {
                                       : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
                     const heroRow      = heroPos && e.pos === heroPos ? ' rec-log-row-hero' : '';
                     const playerInData = data.players?.find(p => p.pos === e.pos);
-                    const hcCards      = parseCards(playerInData?.cards || '');
-                    const hcHtml       = hcCards.length
-                        ? `<span class="rec-log-hc">${hcCards.map(c => {
-                            const col = typeof suitInlineCol === 'function' ? suitInlineCol(c[1]) : (c[1]==='h'||c[1]==='d' ? '#f87171' : '#e2e8f0');
-                            return `<span style="color:${col}">${c[0]}${_SUIT_SYM[c[1]]}</span>`;
-                          }).join('')}</span>`
-                        : '';
+                    // Always emit .rec-log-hc span to keep grid column occupied even when empty
+                    const hcHtml       = `<span class="rec-log-hc">${
+                        playerInData?.cards ? _actionLogCardHtml(playerInData.cards) : ''
+                    }</span>`;
                     rows += `
                         <div class="rec-log-row${heroRow}">
                             <span class="rec-log-pos">${e.pos}</span>
@@ -1126,14 +1137,20 @@ function renderActionLog(jsonStr) {
 
                 colsHtml += `
                     <div class="rec-log-col rec-log-col-${street}">
-                        <div class="rec-log-col-hd">${STREET_LBL[street]}${boardHtml}</div>
+                        <div class="rec-log-col-hd">
+                            <span>${STREET_LBL[street]}</span>
+                            ${boardHtml}
+                        </div>
                         <div class="rec-log-col-body">${rows}</div>
                         <div class="rec-log-col-pot">Pot ${runningPot.toLocaleString()} ฿</div>
                     </div>`;
             } else {
                 colsHtml += `
                     <div class="rec-log-col rec-log-col-${street} rec-log-col-empty">
-                        <div class="rec-log-col-hd">${STREET_LBL[street]}</div>
+                        <div class="rec-log-col-hd">
+                            <span>${STREET_LBL[street]}</span>
+                            <div class="rec-log-col-board"></div>
+                        </div>
                         <div class="rec-log-col-body"></div>
                     </div>`;
             }
