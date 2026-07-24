@@ -291,6 +291,9 @@ function renderSetup() {
                     <tbody>${rows}</tbody>
                 </table>
                 <div class="rec-setup-footer">
+                    <span class="rec-small-lbl">ชื่อ Hero:</span>
+                    <input class="rec-stack-in rec-hero-name-in" id="rec-hero-name" value="${cfg?.heroName || 'Hero'}" maxlength="12" placeholder="Hero">
+                    <button class="rec-rotate-btn${cfg?.autoRotate ? ' active' : ''}" id="rec-rotate-btn" title="เลื่อนตำแหน่งอัตโนมัติหลังบันทึก Hand">🔄 เลื่อนอัตโนมัติ</button>
                     <button id="rec-start-btn" class="rec-btn-primary">🎯 เริ่มบันทึก Action</button>
                 </div>
             </div>
@@ -309,6 +312,8 @@ function collectConfig() {
     return {
         players: poses.map((pos, i) => ({ pos, name: names[i] || '', stack: stacks[i], isHero: pos === heroPos, cards: cfg?.players?.[i]?.cards || '' })),
         sb, bb,
+        heroName:   cfg?.heroName   || 'Hero',
+        autoRotate: cfg?.autoRotate || false,
     };
 }
 
@@ -329,19 +334,32 @@ function bindSetupEvents() {
     document.querySelector('.rec-player-table')?.addEventListener('click', e => {
         const posInput = e.target.closest('.rec-pos-in');
         if (posInput) {
-            const pos = posInput.value;
-            // Update hidden pos-chips so saveHand picks up correct position
+            const idx      = parseInt(posInput.dataset.i);
+            const pos      = posInput.value;
+            const heroName = cfg?.heroName || 'Hero';
+            // Update pos-chip selection first (renderSetup reads from this)
             document.querySelectorAll('#position-chips .pos-chip').forEach(b => {
                 b.classList.toggle('selected', b.dataset.pos === pos);
             });
-            // Update visual selection on pos inputs
-            document.querySelectorAll('.rec-pos-in').forEach(inp => {
-                inp.classList.toggle('selected', inp === posInput);
-            });
+            // Set this player's name to heroName and re-render
+            if (cfg?.players?.[idx]) {
+                cfg.players[idx].name = heroName;
+                saveConfig(cfg);
+                renderSetup();
+            }
             return;
         }
         const slot = e.target.closest('.rec-cards-slot');
         if (slot) _activatePlayerPicker(parseInt(slot.dataset.i));
+    });
+
+    document.getElementById('rec-hero-name')?.addEventListener('input', e => {
+        if (cfg) { cfg.heroName = e.target.value.trim() || 'Hero'; saveConfig(cfg); }
+    });
+
+    document.getElementById('rec-rotate-btn')?.addEventListener('click', () => {
+        if (cfg) { cfg.autoRotate = !cfg.autoRotate; saveConfig(cfg); }
+        renderSetup();
     });
 
     document.getElementById('rec-collapse-btn')?.addEventListener('click', () => {
@@ -357,6 +375,27 @@ function bindSetupEvents() {
         if (!cfg.players || cfg.players.length < 2) { toast('กรุณาตั้งค่าผู้เล่นก่อน', 'error'); return; }
         startRecording();
     });
+}
+
+// Rotate player names left by 1 seat after saving a hand (keeping positions fixed)
+function _rotatePositions() {
+    if (!cfg?.players?.length) return;
+    const heroName = cfg.heroName || 'Hero';
+    const names    = cfg.players.map(p => p.name || '');
+    names.push(names.shift()); // [A,B,C,D,E] → [B,C,D,E,A]
+    cfg.players.forEach((p, i) => { p.name = names[i]; p.cards = ''; });
+    saveConfig(cfg);
+
+    // Update pos-chip selection to follow the hero name
+    const heroIdx = cfg.players.findIndex(p => p.name === heroName);
+    if (heroIdx >= 0) {
+        const heroPos = cfg.players[heroIdx].pos;
+        document.querySelectorAll('#position-chips .pos-chip').forEach(b => {
+            b.classList.toggle('selected', b.dataset.pos === heroPos);
+        });
+    }
+    renderSetup();
+    _refreshAllCardSlots();
 }
 
 // ── Recording — state machine ─────────────────────────────────────────────────
@@ -845,6 +884,7 @@ async function _saveLog() {
         toast('✓ บันทึก Action Log แล้ว');
         if (btn) { btn.textContent = '✓ บันทึกแล้ว'; }
         rec = null; // prevent the same log from being saved again on next hand
+        if (cfg?.autoRotate) setTimeout(_rotatePositions, 300);
     } catch (err) {
         console.error('recorder save:', err);
         toast('บันทึกไม่สำเร็จ', 'error');
