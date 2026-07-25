@@ -877,6 +877,16 @@ header h1 {
 .fc-sep { color: var(--border2); margin: 0 1px; font-size: .85em; vertical-align: middle; }
 
 .mini-card.rec-card-placeholder { opacity: .45; border-style: dashed; }
+.mini-card.mc-hidden {
+    background: #1e3a5f;
+    border-color: #2d5a8e;
+}
+.mini-card.mc-hidden .mc-rank {
+    color: #93c5fd;
+    font-size: .75em;
+    font-weight: 800;
+}
+.mini-card.mc-hidden .mc-suit { display: none; }
 
 /* ─── HIT field tiers (fields bar) ──────────────────────────────────────── */
 #fi-hit { cursor: default !important; }

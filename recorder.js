@@ -43,15 +43,24 @@ function _cardTextSpan(rank, suit) {
 }
 
 // Tiny inline hole cards for feed rows — respects card size setting
+// Returns HTML for N hidden (face-down) cards — "?" card in graphic mode, blur in text mode.
+function _hiddenCardsHTML(count) {
+    const smCls = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
+    if (!window.state?.settings?.textCards) {
+        return Array(count).fill(
+            `<span class="mini-card${smCls} mc-hidden"><span class="mc-rank">?</span><span class="mc-suit"></span></span>`
+        ).join('');
+    }
+    return `<span style="filter:blur(3px)">●●</span>`;
+}
+
 function holeCardsInlineHTML(cardsStr, isHero = false) {
     const cards = parseCards(cardsStr);
     if (!cards.length) return '';
     const useCards = !window.state?.settings?.textCards;
     const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
     if (window.state?.hideHand && isHero) {
-        if (useCards)
-            return `<span class="mini-card${smCls}" style="filter:blur(3px)"><span class="mc-rank">●</span><span class="mc-suit"></span></span>`.repeat(cards.length);
-        return `<span style="filter:blur(3px)">●●</span>`;
+        return _hiddenCardsHTML(cards.length);
     }
     return cards.map(c => {
         const rank = c[0], suit = c[1];
@@ -84,9 +93,7 @@ function renderCardSlotHTML(cardsStr, isHero = false) {
     const useCards = !window.state?.settings?.textCards;
     const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
     if (window.state?.hideHand && isHero && cards.length > 0) {
-        if (useCards)
-            return Array(cards.length).fill(`<span class="mini-card${smCls}" style="filter:blur(3px)"><span class="mc-rank">●</span><span class="mc-suit"></span></span>`).join('');
-        return `<span style="filter:blur(3px)">●●</span>`;
+        return _hiddenCardsHTML(cards.length);
     }
     return [0, 1].map(i => {
         if (cards[i]) {
@@ -1069,10 +1076,12 @@ async function _saveLog() {
 
 // ── Render Action Log for Hand Detail Modal ───────────────────────────────────
 function renderActionLog(jsonStr, heroCardsStr) {
-    // Render a card string (e.g. "AhKd") as mini-cards or coloured text per settings
-    function _actionLogCardHtml(cardsStr) {
+    // Render a card string as mini-cards or coloured text per settings.
+    // Pass hidden=true for Hero cards when hideHand is on.
+    function _actionLogCardHtml(cardsStr, hidden = false) {
         const cards = parseCards(cardsStr);
-        if (!cards.length) return '';
+        if (!cards.length && !hidden) return '';
+        if (hidden) return _hiddenCardsHTML(cards.length || 2);
         const useCards = !window.state?.settings?.textCards;
         const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
         return cards.map(c => {
@@ -1170,8 +1179,9 @@ function renderActionLog(jsonStr, heroCardsStr) {
                     const wBadge       = (isLastStreet && winners.has(e.pos))
                                       ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                     // Always emit .rec-log-hc span to keep grid column occupied even when empty
+                    const isHeroHide   = heroPos && e.pos === heroPos && !!window.state?.hideHand;
                     const hcHtml       = `<span class="rec-log-hc">${
-                        playerInData?.cards ? _actionLogCardHtml(playerInData.cards) : ''
+                        playerInData?.cards ? _actionLogCardHtml(playerInData.cards, isHeroHide) : ''
                     }${wBadge}</span>`;
                     const nameHtml = playerInData?.name
                         ? `<span class="rec-log-name"> ${playerInData.name}</span>` : '';
@@ -1212,7 +1222,7 @@ function renderActionLog(jsonStr, heroCardsStr) {
                         const wBadge  = winners.has(pos) ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                         const nameLbl = pd?.name ? `<span class="rec-log-name"> ${pd.name}</span>` : '';
                         const cards   = isHero ? (pd?.cards || heroCardsStr || '') : (pd?.cards || '');
-                        const hcHtml  = `<span class="rec-log-hc">${cards ? _actionLogCardHtml(cards) : ''}${wBadge}</span>`;
+                        const hcHtml  = `<span class="rec-log-hc">${cards ? _actionLogCardHtml(cards, isHero && !!window.state?.hideHand) : ''}${wBadge}</span>`;
                         rows += `
                             <div class="rec-log-row${heroRow}">
                                 <span class="rec-log-pos">${pos}${nameLbl}</span>
