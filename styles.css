@@ -1146,13 +1146,13 @@ header h1 {
 #toast.error   { background: #7f1d1d; border-color: #991b1b; color: #fca5a5; }
 
 /* ─── Save icon button ───────────────────────────────────────────────────── */
-.save-icon-btn {
+.save-icon-btn, #rec-start-btn {
     background: var(--accent-dim);
     border-color: var(--accent);
     color: var(--accent);
     font-weight: 700;
 }
-.save-icon-btn:hover { background: rgba(34,197,94,.22); }
+.save-icon-btn:hover, #rec-start-btn:hover { background: rgba(34,197,94,.22); }
 
 /* ─── Settings overlay ───────────────────────────────────────────────────── */
 .settings-hidden { display: none; }
