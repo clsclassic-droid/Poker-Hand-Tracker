@@ -84,6 +84,7 @@ body[data-theme="comic"] #top-bar {
     border: 2.5px solid var(--ink);
     border-radius: 14px 5px 12px 5px / 5px 12px 5px 14px;
     box-shadow: 3px 3px 0 var(--ink);
+    padding: 5px 10px;
 }
 body[data-theme="comic"] .icon-btn {
     color: var(--ink);
