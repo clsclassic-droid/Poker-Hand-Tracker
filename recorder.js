@@ -558,9 +558,8 @@ function recordAction(pos, action, amount) {
 
     if (action !== 'fold' && action !== 'check' && amount > 0) {
         const prev = rec.potContrib[pos] || 0;
-        // Aggressive: amount = ADDITIONAL (raise size); total = prev + amount
-        // Call: amount = total commitment level; add = difference
-        const newTotal = isAggressive ? prev + amount : amount;
+        // amount is always TOTAL pot contribution (raise: total to, call: total)
+        const newTotal = amount;
         const add      = newTotal - prev;
         rec.pot            += add;
         rec.potContrib[pos] = newTotal;
@@ -825,13 +824,13 @@ function renderActorBlock() {
 
     const pot      = rec.pot;
     const snap10   = v => Math.ceil(v / 10) * 10;
-    const maxRaise = stack; // max ADDITIONAL chips = remaining stack
-    const cap      = v => Math.min(v, maxRaise);
+    const maxRaise  = alreadyIn + stack; // total all-in
+    const cap       = v => Math.min(v, maxRaise);
     const minRaise  = cap(snap10(rec.currentBet > 0 ? rec.currentBet * 2 : (cfg.bb || 20)));
-    const thirdPot  = cap(Math.max(minRaise, snap10(pot / 3)));
-    const halfPot   = cap(Math.max(minRaise, snap10(pot / 2)));
-    const threeQPot = cap(Math.max(minRaise, snap10(pot * 0.75)));
-    const fullPot   = cap(Math.max(minRaise, snap10(pot)));
+    const thirdPot  = cap(Math.max(minRaise, snap10(alreadyIn + pot / 3)));
+    const halfPot   = cap(Math.max(minRaise, snap10(alreadyIn + pot / 2)));
+    const threeQPot = cap(Math.max(minRaise, snap10(alreadyIn + pot * 0.75)));
+    const fullPot   = cap(Math.max(minRaise, snap10(alreadyIn + pot)));
 
     const callAmt  = Math.min(rec.currentBet, alreadyIn + stack); // cap call at all-in amount
     const callDisp = Math.min(toCall, stack);
@@ -961,7 +960,7 @@ function _doRaise(pos) {
     if (amt <= 0) { toast('กรุณาใส่จำนวนเงิน', 'error'); return; }
     const alreadyIn = rec.potContrib[pos] || 0;
     const stack     = Math.round(rec.stackByPos[pos] || 0);
-    amt = Math.min(amt, stack); // clamp to remaining stack
+    amt = Math.min(amt, alreadyIn + stack); // clamp to total all-in
     const hasOpened  = rec.streets[rec.currentStreet].some(e => e.a === 'raise' || e.a === 'bet' || e.a === 'reraise');
     const actionType = !hasOpened && rec.currentBet === 0 ? 'bet' : hasOpened ? 'reraise' : 'raise';
     recordAction(pos, actionType, amt);
