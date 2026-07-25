@@ -766,7 +766,7 @@ body[data-theme="comic"] .rec-log-col {
     background: #fdf8ef;
     border: 1.5px solid rgba(20,14,40,.18);
 }
-body[data-theme="comic"] .rec-log-col-hd { font-size: 11px; border-bottom-color: rgba(20,14,40,.12); }
+body[data-theme="comic"] .rec-log-col-hd { font-size: 13px; border-bottom-color: rgba(20,14,40,.12); }
 body[data-theme="comic"] .rec-log-col-preflop .rec-log-col-hd { color: #6d28d9; background: rgba(109,40,217,.12); border-bottom-color: rgba(109,40,217,.2); }
 body[data-theme="comic"] .rec-log-col-flop    .rec-log-col-hd { color: #0369a1; background: rgba(3,105,161,.12);  border-bottom-color: rgba(3,105,161,.2); }
 body[data-theme="comic"] .rec-log-col-turn    .rec-log-col-hd { color: #92400e; background: rgba(146,64,14,.12);  border-bottom-color: rgba(146,64,14,.2); }
@@ -774,16 +774,16 @@ body[data-theme="comic"] .rec-log-col-river   .rec-log-col-hd { color: #991b1b; 
 body[data-theme="comic"] .rec-log-row { border-top-color: rgba(20,14,40,.08); }
 body[data-theme="comic"] .rec-log-row-hero { background: rgba(109,40,217,.08); }
 body[data-theme="comic"] .rec-log-row-hero .rec-log-pos { color: #6d28d9; }
-body[data-theme="comic"] .rec-log-pos   { color: #374151; font-size: 11px; }
-body[data-theme="comic"] .rec-log-name  { color: #374151; font-size: 9px; }
-body[data-theme="comic"] .rec-log-act   { font-size: 11px; }
+body[data-theme="comic"] .rec-log-pos   { color: #374151; font-size: 13px; }
+body[data-theme="comic"] .rec-log-name  { color: #374151; font-size: 11px; }
+body[data-theme="comic"] .rec-log-act   { font-size: 13px; }
 body[data-theme="comic"] .rec-log-call  { color: #1d4ed8; }
 body[data-theme="comic"] .rec-log-raise { color: #b45309; }
 body[data-theme="comic"] .rec-log-check { color: #374151; }
 body[data-theme="comic"] .rec-log-post  { color: #374151; }
 body[data-theme="comic"] .rec-log-fold  { color: #b91c1c; }
 body[data-theme="comic"] .rec-log-allin { color: #92400e; font-weight: 700; }
-body[data-theme="comic"] .rec-log-col-pot { color: #166534; border-top-color: rgba(20,14,40,.10); }
+body[data-theme="comic"] .rec-log-col-pot { color: #166534; border-top-color: rgba(20,14,40,.10); font-size: 12px; }
 
 body[data-theme="comic"] .rec-street-footer { border-top-color: rgba(20,14,40,.15); }
 body[data-theme="comic"] .rec-done-lbl  { color: var(--text-dim); font-size: 13px; font-weight: 700; }
