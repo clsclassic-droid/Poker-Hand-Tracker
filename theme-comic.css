@@ -51,6 +51,7 @@ body[data-theme="comic"] header {
     border-bottom: none;
     box-shadow: none;
     padding: 10px 20px;
+    position: static;
 }
 body[data-theme="comic"] header h1 {
     font-size: 0;
