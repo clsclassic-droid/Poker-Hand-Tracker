@@ -655,7 +655,7 @@ body[data-theme="comic"] .rec-rotate-btn {
     font-weight: 700;
 }
 body[data-theme="comic"] .rec-rotate-btn:hover { border-color: var(--blue); color: var(--blue); }
-body[data-theme="comic"] .rec-rotate-btn.active { background: rgba(34,197,94,.2); border-color: #16a34a; color: #166534; box-shadow: 2px 2px 0 #166534; }
+body[data-theme="comic"] .rec-rotate-btn.active { background: #22c55e; color: #fff; border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); font-weight: 700; }
 
 /* ─── Recorder action panel ──────────────────────────────────────────────── */
 body[data-theme="comic"] .rec-panel-box {
