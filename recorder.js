@@ -1139,7 +1139,24 @@ function renderActionLog(jsonStr, heroCardsStr) {
             }
         }
 
-        // Last street with actions — where W badge will appear
+        // Detect last-player-standing: when no showdown, the one player who never folded wins
+        if (winners.size === 0) {
+            const allPlayerPos = (data.players || []).map(p => p.pos);
+            const foldedPos    = new Set();
+            STREET_SEQ.forEach(s => {
+                (data.actions[s] || []).forEach(e => { if (e.a === 'fold') foldedPos.add(e.pos); });
+            });
+            const remaining = allPlayerPos.filter(pos => !foldedPos.has(pos));
+            if (remaining.length === 1) winners.add(remaining[0]);
+        }
+
+        // Track each player's last-action street so W badge lands on that row
+        const lastActStreet = {};
+        STREET_SEQ.forEach(s => {
+            (data.actions[s] || []).forEach(e => { lastActStreet[e.pos] = s; });
+        });
+
+        // Last street with actions (still needed for all-in showdown detection below)
         const lastStreetWithActs = [...STREET_SEQ].reverse().find(s => data.actions[s]?.length > 0);
 
         STREET_SEQ.forEach(street => {
@@ -1162,8 +1179,6 @@ function renderActionLog(jsonStr, heroCardsStr) {
                     streetBoard.length ? _actionLogCardHtml(streetBoard.join('')) : ''
                 }</div>`;
 
-                const isLastStreet = street === lastStreetWithActs;
-
                 let rows = '';
                 acts.forEach(e => {
                     const isAgg        = e.a === 'raise' || e.a === 'reraise' || e.a === 'bet';
@@ -1176,7 +1191,7 @@ function renderActionLog(jsonStr, heroCardsStr) {
                                       : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
                     const heroRow      = heroPos && e.pos === heroPos ? ' rec-log-row-hero' : '';
                     const playerInData = data.players?.find(p => p.pos === e.pos);
-                    const wBadge       = (isLastStreet && winners.has(e.pos))
+                    const wBadge       = (winners.has(e.pos) && lastActStreet[e.pos] === street)
                                       ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                     // Always emit .rec-log-hc span to keep grid column occupied even when empty
                     const isHeroHide   = heroPos && e.pos === heroPos && !!window.state?.hideHand;
