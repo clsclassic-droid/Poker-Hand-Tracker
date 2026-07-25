@@ -25,7 +25,23 @@ body[data-theme="comic"] {
     --radius:      6px;
     --radius-lg:   10px;
     --ink:         #140e28;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Fredoka', 'Nunito', system-ui, sans-serif;
+    letter-spacing: 0.01em;
+}
+
+/* ─── Table & data text: Nunito for readability ─────────────────────────── */
+body[data-theme="comic"] #history-table th,
+body[data-theme="comic"] #history-table td,
+body[data-theme="comic"] .rec-log-pos,
+body[data-theme="comic"] .rec-log-name,
+body[data-theme="comic"] .rec-log-act,
+body[data-theme="comic"] .rec-log-col-pot,
+body[data-theme="comic"] .bet-input,
+body[data-theme="comic"] .rec-stack-in,
+body[data-theme="comic"] .rec-name-in,
+body[data-theme="comic"] #bet-total,
+body[data-theme="comic"] #pot-odds-badge {
+    font-family: 'Nunito', sans-serif;
 }
 
 /* ─── Background — comic illustration ───────────────────────────────────── */
