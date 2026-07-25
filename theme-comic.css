@@ -519,6 +519,12 @@ body[data-theme="comic"] .hm-pos-badge { background: rgba(230,48,48,.12); color:
 body[data-theme="comic"] .result-win  { color: #166534; font-weight: 700; }
 body[data-theme="comic"] .result-loss { color: #991b1b; font-weight: 700; }
 
+/* ─── Section card spacing — uniform 16px gap between all cards ──────────── */
+body[data-theme="comic"] #recorder-setup      { margin-bottom: 16px !important; }
+body[data-theme="comic"] #card-picker-section { margin-bottom: 0 !important; }
+body[data-theme="comic"] #recorder-panel      { margin-top: 0 !important; margin-bottom: 16px !important; }
+body[data-theme="comic"] #history-section     { margin-top: 0; }
+
 /* ─── Recorder setup ─────────────────────────────────────────────────────── */
 body[data-theme="comic"] #recorder-setup {
     background: #fff8d6;
