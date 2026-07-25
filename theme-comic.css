@@ -587,7 +587,7 @@ body[data-theme="comic"] .rec-pos-in {
     font-weight: 700;
 }
 body[data-theme="comic"] .rec-pos-in:focus         { border-color: var(--blue); }
-body[data-theme="comic"] .rec-pos-in.selected      { background: #dbeafe; border-color: var(--blue); color: #1e3a8a; }
+body[data-theme="comic"] .rec-pos-in.selected      { background: #e63030; border-color: var(--ink); color: #fff; font-weight: 800; }
 body[data-theme="comic"] .rec-stack-in {
     background: #fff;
     border: 2px solid var(--ink);
