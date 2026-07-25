@@ -360,7 +360,7 @@ function renderSetup() {
                     <span class="rec-setup-title">ตั้งค่าโต๊ะ</span>
                     <span class="rec-small-lbl rec-hdr-sep">Hero</span>
                     <input class="rec-stack-in rec-hero-name-in" id="rec-hero-name" value="${cfg?.heroName || 'Hero'}" maxlength="12" placeholder="Hero">
-                    <button class="rec-rotate-btn${cfg?.autoRotate ? ' active' : ''}" id="rec-rotate-btn" title="เลื่อนตำแหน่งอัตโนมัติหลังบันทึก Hand">🔄 เลื่อนอัตโนมัติ</button>
+                    <button class="rec-rotate-btn${cfg?.autoRotate ? ' active' : ''}" id="rec-rotate-btn" title="เลื่อนตำแหน่งอัตโนมัติหลังบันทึก Hand">เลื่อนอัตโนมัติ</button>
                 </div>
                 <div class="rec-header-right">
                     <span class="rec-small-lbl">SB</span>
