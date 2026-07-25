@@ -43,12 +43,12 @@ function _cardTextSpan(rank, suit) {
 }
 
 // Tiny inline hole cards for feed rows — respects card size setting
-function holeCardsInlineHTML(cardsStr) {
+function holeCardsInlineHTML(cardsStr, isHero = false) {
     const cards = parseCards(cardsStr);
     if (!cards.length) return '';
     const useCards = !window.state?.settings?.textCards;
     const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
-    if (window.state?.hideHand) {
+    if (window.state?.hideHand && isHero) {
         if (useCards)
             return `<span class="mini-card${smCls}" style="filter:blur(3px)"><span class="mc-rank">●</span><span class="mc-suit"></span></span>`.repeat(cards.length);
         return `<span style="filter:blur(3px)">●●</span>`;
@@ -79,11 +79,11 @@ function boardCardsHTML(street) {
     }).join('');
 }
 
-function renderCardSlotHTML(cardsStr) {
+function renderCardSlotHTML(cardsStr, isHero = false) {
     const cards    = parseCards(cardsStr);
     const useCards = !window.state?.settings?.textCards;
     const smCls    = window.state?.settings?.cardSmall ? ' mini-card-sm' : '';
-    if (window.state?.hideHand && cards.length > 0) {
+    if (window.state?.hideHand && isHero && cards.length > 0) {
         if (useCards)
             return Array(cards.length).fill(`<span class="mini-card${smCls}" style="filter:blur(3px)"><span class="mc-rank">●</span><span class="mc-suit"></span></span>`).join('');
         return `<span style="filter:blur(3px)">●●</span>`;
@@ -107,7 +107,7 @@ function renderCardSlotHTML(cardsStr) {
 
 function updateCardsSlot(playerIdx) {
     const el = document.querySelector(`.rec-cards-slot[data-i="${playerIdx}"]`);
-    if (el) el.innerHTML = renderCardSlotHTML(cfg?.players?.[playerIdx]?.cards || '');
+    if (el) el.innerHTML = renderCardSlotHTML(cfg?.players?.[playerIdx]?.cards || '', cfg?.players?.[playerIdx]?.isHero);
 }
 
 function _refreshAllCardSlots() {
@@ -126,7 +126,7 @@ function _updateFeedCards(playerIdx) {
     const cardsStr = p.isHero
         ? (window.state?.sel?.hand?.join('') || '')
         : (p.cards || '');
-    const hcHtml = holeCardsInlineHTML(cardsStr);
+    const hcHtml = holeCardsInlineHTML(cardsStr, p.isHero);
 
     STREET_SEQ.forEach(street => {
         const feed = document.getElementById(`rec-feed-${street}`);
@@ -342,7 +342,7 @@ function renderSetup() {
             <td><input class="rec-pos-in${p.pos === heroPos ? ' selected' : ''}" data-i="${i}" value="${p.pos}" maxlength="6"></td>
             <td><input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12"></td>
             <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"></td>
-            <td><button class="rec-cards-slot${isHero ? ' rec-cards-hero-slot' : ''}" data-i="${i}"${isHero ? ' title="ไพ่ Hero = ช่อง HAND"' : ''}>${renderCardSlotHTML(cardStr)}</button></td>
+            <td><button class="rec-cards-slot${isHero ? ' rec-cards-hero-slot' : ''}" data-i="${i}"${isHero ? ' title="ไพ่ Hero = ช่อง HAND"' : ''}>${renderCardSlotHTML(cardStr, isHero)}</button></td>
         </tr>`;
     }).join('');
 
@@ -742,7 +742,7 @@ function appendFeedRow(feed, entry, isAgg) {
 
     // Hero cards come from HAND field; other players from p.cards
     const cardsStr = isHero ? (window.state?.sel?.hand?.join('') || '') : (player?.cards || '');
-    const hcHtml   = holeCardsInlineHTML(cardsStr);
+    const hcHtml   = holeCardsInlineHTML(cardsStr, isHero);
     const row = document.createElement('div');
     row.className = `rec-feed-row${isHero ? ' rec-feed-hero' : ''}${isHero && a === 'fold' ? ' rec-feed-hero-fold' : ''}`;
     row.innerHTML = `
@@ -1269,7 +1269,7 @@ function _updateHeroSlot() {
     const heroIdx = getHeroIdx();
     if (heroIdx < 0) return;
     const el = document.querySelector(`.rec-cards-slot[data-i="${heroIdx}"]`);
-    if (el) el.innerHTML = renderCardSlotHTML(window.state?.sel?.hand?.join('') || '');
+    if (el) el.innerHTML = renderCardSlotHTML(window.state?.sel?.hand?.join('') || '', true);
     _updateFeedCards(heroIdx);
 }
 
