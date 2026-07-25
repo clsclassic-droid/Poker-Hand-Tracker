@@ -114,7 +114,10 @@ function renderCardSlotHTML(cardsStr, isHero = false) {
 
 function updateCardsSlot(playerIdx) {
     const el = document.querySelector(`.rec-cards-slot[data-i="${playerIdx}"]`);
-    if (el) el.innerHTML = renderCardSlotHTML(cfg?.players?.[playerIdx]?.cards || '', cfg?.players?.[playerIdx]?.isHero);
+    if (!el || !cfg?.players?.[playerIdx]) return;
+    const heroPos = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
+    const isHero  = heroPos ? cfg.players[playerIdx].pos === heroPos : !!cfg.players[playerIdx].isHero;
+    el.innerHTML = renderCardSlotHTML(cfg.players[playerIdx].cards || '', isHero);
 }
 
 function _refreshAllCardSlots() {
@@ -340,7 +343,7 @@ function renderSetup() {
         .join('');
 
     const heroPos = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
-    const heroIdx = players.findIndex(p => p.name === (cfg?.heroName || 'Hero'));
+    const heroIdx = heroPos ? players.findIndex(p => p.pos === heroPos) : players.findIndex(p => p.name === (cfg?.heroName || 'Hero'));
     const rows = players.map((p, i) => {
         const isHero  = i === heroIdx;
         const cardStr = isHero ? (window.state?.sel?.hand?.join('') || '') : (p.cards || '');
