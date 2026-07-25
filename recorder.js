@@ -304,6 +304,8 @@ function applyToggle() {
     if (setupEl) setupEl.style.display = on ? '' : 'none';
     if (panelEl && !on) panelEl.style.display = 'none';
     if (on) { cfg = loadConfig(); renderSetup(); }
+    const startBtn = document.getElementById('rec-start-btn');
+    if (startBtn) startBtn.style.display = on && !rec ? '' : 'none';
     syncPositionChips();
     ['fi-sd1', 'fi-sd2'].forEach(id => {
         const el = document.getElementById(id);
@@ -358,6 +360,9 @@ function renderSetup() {
                         <select id="rec-count">${countOpts}</select>
                         <span class="rec-dd-arr">▾</span>
                     </div>
+                    <span class="rec-small-lbl rec-hdr-sep">Hero</span>
+                    <input class="rec-stack-in rec-hero-name-in" id="rec-hero-name" value="${cfg?.heroName || 'Hero'}" maxlength="12" placeholder="Hero">
+                    <button class="rec-rotate-btn${cfg?.autoRotate ? ' active' : ''}" id="rec-rotate-btn" title="เลื่อนตำแหน่งอัตโนมัติหลังบันทึก Hand">🔄 เลื่อนอัตโนมัติ</button>
                     <button class="rec-collapse-btn" id="rec-collapse-btn" title="ซ่อน/แสดง">▲</button>
                 </div>
             </div>
@@ -366,12 +371,6 @@ function renderSetup() {
                     <thead><tr><td>ตำแหน่ง</td><td>ชื่อ</td><td>Stack</td><td>ไพ่ที่ถือ</td></tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
-                <div class="rec-setup-footer">
-                    <span class="rec-small-lbl">ชื่อ Hero:</span>
-                    <input class="rec-stack-in rec-hero-name-in" id="rec-hero-name" value="${cfg?.heroName || 'Hero'}" maxlength="12" placeholder="Hero">
-                    <button class="rec-rotate-btn${cfg?.autoRotate ? ' active' : ''}" id="rec-rotate-btn" title="เลื่อนตำแหน่งอัตโนมัติหลังบันทึก Hand">🔄 เลื่อนอัตโนมัติ</button>
-                    <button id="rec-start-btn" class="rec-btn-primary">🎯 เริ่มบันทึก Action</button>
-                </div>
             </div>
         </div>`;
 
@@ -451,12 +450,6 @@ function bindSetupEvents() {
         if (btn) btn.textContent = collapsed ? '▼' : '▲';
     });
 
-    document.getElementById('rec-start-btn')?.addEventListener('click', () => {
-        saveConfig(collectConfig());
-        if (!cfg.players || cfg.players.length < 2) { toast('กรุณาตั้งค่าผู้เล่นก่อน', 'error'); return; }
-        if (!cfg.players.some(p => p.isHero)) { toast('กรุณากดเลือกตำแหน่ง Hero ก่อนเริ่มบันทึก', 'error'); return; }
-        startRecording();
-    });
 }
 
 // Rotate player names left by 1 seat after saving a hand (keeping positions fixed)
@@ -492,8 +485,10 @@ function startRecording() {
     };
     cfg.players.forEach(p => { rec.stackByPos[p.pos] = p.stack; });
 
-    const panelEl = document.getElementById('recorder-panel');
-    if (panelEl) { panelEl.style.display = ''; panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    const panelEl  = document.getElementById('recorder-panel');
+    const startBtn = document.getElementById('rec-start-btn');
+    if (panelEl)  { panelEl.style.display = ''; panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    if (startBtn) startBtn.style.display = 'none';
 
     initStreet('preflop');
     renderPanel();
@@ -1058,8 +1053,10 @@ async function _saveLog() {
         toast('✓ บันทึก Action Log แล้ว');
         if (btn) { btn.textContent = '✓ บันทึกแล้ว'; }
         rec = null;
-        const panelEl = document.getElementById('recorder-panel');
-        if (panelEl) panelEl.style.display = 'none';
+        const panelEl  = document.getElementById('recorder-panel');
+        const startBtn = document.getElementById('rec-start-btn');
+        if (panelEl)  panelEl.style.display = 'none';
+        if (startBtn) startBtn.style.display = '';
         if (cfg?.autoRotate) setTimeout(_rotatePositions, 300);
     } catch (err) {
         console.error('recorder save:', err);
@@ -1305,6 +1302,14 @@ function init() {
         localStorage.setItem(LS_ENABLED, tog.checked ? '1' : '0');
         applyToggle();
     });
+
+    document.getElementById('rec-start-btn')?.addEventListener('click', () => {
+        saveConfig(collectConfig());
+        if (!cfg?.players || cfg.players.length < 2) { toast('กรุณาตั้งค่าผู้เล่นก่อน', 'error'); return; }
+        if (!cfg.players.some(p => p.isHero)) { toast('กรุณากดเลือกตำแหน่ง Hero ก่อนเริ่มบันทึก', 'error'); return; }
+        startRecording();
+    });
+
     applyToggle();
 }
 
