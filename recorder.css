@@ -28,7 +28,7 @@
     color: #7a9ab8;
     text-transform: uppercase;
 }
-.rec-count-wrap, .rec-header-right {
+.rec-count-wrap, .rec-header-right, .rec-header-left {
     display: flex;
     align-items: center;
     gap: 6px;

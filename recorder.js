@@ -349,7 +349,12 @@ function renderSetup() {
     el.innerHTML = `
         <div class="rec-setup-box">
             <div class="rec-setup-header">
-                <span class="rec-setup-title">ตั้งค่าโต๊ะ</span>
+                <div class="rec-header-left">
+                    <span class="rec-setup-title">ตั้งค่าโต๊ะ</span>
+                    <span class="rec-small-lbl rec-hdr-sep">Hero</span>
+                    <input class="rec-stack-in rec-hero-name-in" id="rec-hero-name" value="${cfg?.heroName || 'Hero'}" maxlength="12" placeholder="Hero">
+                    <button class="rec-rotate-btn${cfg?.autoRotate ? ' active' : ''}" id="rec-rotate-btn" title="เลื่อนตำแหน่งอัตโนมัติหลังบันทึก Hand">🔄 เลื่อนอัตโนมัติ</button>
+                </div>
                 <div class="rec-header-right">
                     <span class="rec-small-lbl">SB</span>
                     <input class="rec-stack-in rec-blind-in" id="rec-sb" type="number" value="${sb}" min="1" step="1">
@@ -360,9 +365,6 @@ function renderSetup() {
                         <select id="rec-count">${countOpts}</select>
                         <span class="rec-dd-arr">▾</span>
                     </div>
-                    <span class="rec-small-lbl rec-hdr-sep">Hero</span>
-                    <input class="rec-stack-in rec-hero-name-in" id="rec-hero-name" value="${cfg?.heroName || 'Hero'}" maxlength="12" placeholder="Hero">
-                    <button class="rec-rotate-btn${cfg?.autoRotate ? ' active' : ''}" id="rec-rotate-btn" title="เลื่อนตำแหน่งอัตโนมัติหลังบันทึก Hand">🔄 เลื่อนอัตโนมัติ</button>
                     <button class="rec-collapse-btn" id="rec-collapse-btn" title="ซ่อน/แสดง">▲</button>
                 </div>
             </div>
