@@ -640,6 +640,7 @@
 .rec-log-raise { color: #fbbf24; }
 .rec-log-check { color: #7a9ab8; }
 .rec-log-post  { color: #344d6e; }
+.rec-log-allin { color: #f59e0b; font-weight: 700; }
 
 /* Pot line at bottom of each column */
 .rec-log-col-pot {

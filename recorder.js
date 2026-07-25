@@ -1194,14 +1194,52 @@ function renderActionLog(jsonStr, heroCardsStr) {
                         <div class="rec-log-col-pot">Pot ${runningPot.toLocaleString()} ฿</div>
                     </div>`;
             } else {
-                colsHtml += `
-                    <div class="rec-log-col rec-log-col-${street} rec-log-col-empty">
-                        <div class="rec-log-col-hd">
-                            <span>${STREET_LBL[street]}</span>
-                            <div class="rec-log-col-board"></div>
-                        </div>
-                        <div class="rec-log-col-body"></div>
-                    </div>`;
+                // Detect all-in showdown: board cards dealt here, showdown players exist,
+                // and no later street has actions
+                const streetIdx    = STREET_SEQ.indexOf(street);
+                const hasLaterActs = STREET_SEQ.slice(streetIdx + 1).some(s => data.actions[s]?.length > 0);
+                const boardHere    = (boards[street] || []).length > 0;
+                const isShowdown   = showdownPositions.length > 0 && boardHere && !hasLaterActs;
+
+                if (isShowdown) {
+                    hasAny = true;
+                    const streetBoard = boards[street] || [];
+                    const boardHtml   = `<div class="rec-log-col-board">${_actionLogCardHtml(streetBoard.join(''))}</div>`;
+                    let rows = '';
+                    showdownPositions.forEach(pos => {
+                        const pd      = data.players?.find(p => p.pos === pos);
+                        const isHero  = pos === heroPos;
+                        const heroRow = isHero ? ' rec-log-row-hero' : '';
+                        const wBadge  = winners.has(pos) ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
+                        const nameLbl = pd?.name ? `<span class="rec-log-name"> ${pd.name}</span>` : '';
+                        const cards   = isHero ? (pd?.cards || heroCardsStr || '') : (pd?.cards || '');
+                        const hcHtml  = `<span class="rec-log-hc">${cards ? _actionLogCardHtml(cards) : ''}${wBadge}</span>`;
+                        rows += `
+                            <div class="rec-log-row${heroRow}">
+                                <span class="rec-log-pos">${pos}${nameLbl}</span>
+                                ${hcHtml}
+                                <span class="rec-log-act rec-log-allin">all-in ⚡</span>
+                            </div>`;
+                    });
+                    colsHtml += `
+                        <div class="rec-log-col rec-log-col-${street}">
+                            <div class="rec-log-col-hd">
+                                <span>${STREET_LBL[street]}</span>
+                                ${boardHtml}
+                            </div>
+                            <div class="rec-log-col-body">${rows}</div>
+                            <div class="rec-log-col-pot">Pot ${runningPot.toLocaleString()} ฿</div>
+                        </div>`;
+                } else {
+                    colsHtml += `
+                        <div class="rec-log-col rec-log-col-${street} rec-log-col-empty">
+                            <div class="rec-log-col-hd">
+                                <span>${STREET_LBL[street]}</span>
+                                <div class="rec-log-col-board"></div>
+                            </div>
+                            <div class="rec-log-col-body"></div>
+                        </div>`;
+                }
             }
         });
 
