@@ -156,6 +156,29 @@ header h1 {
 }
 #hand-num-display { color: var(--text); }
 
+#session-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.session-lbl {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+#session-display {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 3px 8px;
+    white-space: nowrap;
+}
+
 .date-lbl {
     font-size: .78rem;
     font-weight: 700;

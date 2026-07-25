@@ -169,8 +169,8 @@ function getHitTier(text) {
 // H:Position I:Hand Note J:Flop Note K:Turn Note L:River Note M:SD1 Note N:SD2 Note
 // O:HIT P:Fold Q:Result
 const SHEET_TAB    = 'Hands';
-const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result','Date'];
-const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result','Date'];
+const HEADER_ROW   = ['No.','Hand','Flop','Turn','River','SD1','SD2','Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result','Date','Action Log','Session'];
+const NEW_HEADERS  = ['Position','Hand Note','Flop Note','Turn Note','River Note','SD1 Note','SD2 Note','HIT','Fold','Bet PF','Bet Flop','Bet Turn','Bet River','Pot','Result','Date','Action Log','Session'];
 
 const THAI_MONTHS  = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 function todayISO() {
@@ -185,10 +185,51 @@ function formatDateThai(iso) {
     const label = `${parseInt(d,10)} ${THAI_MONTHS[parseInt(m,10)-1]} ${y}`;
     return iso === todayISO() ? `${label} (วันนี้)` : label;
 }
+
+function newSessionId() {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}T${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+}
+function formatSessionLabel(sessionId) {
+    if (!sessionId) return 'ไม่ระบุ';
+    const [datePart, timePart] = sessionId.split('T');
+    if (!datePart) return sessionId;
+    const parts = datePart.split('-');
+    if (parts.length !== 3) return sessionId;
+    const [y, m, d] = parts;
+    const time = timePart ? timePart.slice(0, 5) : '';
+    const dateLabel = `${parseInt(d,10)} ${THAI_MONTHS[parseInt(m,10)-1]} ${y}`;
+    const todaySuffix = datePart === todayISO() ? ' (วันนี้)' : '';
+    return `${dateLabel}${todaySuffix}${time ? ` · ${time} น.` : ''}`;
+}
+function formatGroupKey(key) {
+    if (!key) return 'ไม่ระบุ';
+    return key.includes('T') ? formatSessionLabel(key) : formatDateThai(key);
+}
+function updateSessionDisplay() {
+    const el = document.getElementById('session-display');
+    if (el) el.textContent = formatSessionLabel(state.currentSession);
+}
+function initSession() {
+    const saved = localStorage.getItem(LS_SESSION_KEY);
+    state.currentSession = saved || newSessionId();
+    if (!saved) localStorage.setItem(LS_SESSION_KEY, state.currentSession);
+    updateSessionDisplay();
+}
+function startNewSession() {
+    const id = newSessionId();
+    state.currentSession = id;
+    localStorage.setItem(LS_SESSION_KEY, id);
+    state.expandedDays = new Set([id]);
+    updateSessionDisplay();
+    renderHistory();
+    showToast('เริ่ม Session ใหม่', 'success');
+}
 const FOLDER_NAME  = 'Poker Hand Tracker';
 const SHEET_NAME   = 'Poker Hand Tracker';
 const LS_SHEET_KEY    = 'pht_sheet_id';
 const LS_SETTINGS_KEY = 'pht_settings';
+const LS_SESSION_KEY  = 'pht_session';
 
 const DISCOVERY_DOCS = [
     'https://sheets.googleapis.com/$discovery/rest?version=v4',
@@ -209,6 +250,7 @@ const state = {
     comments:      { hand:'',  flop:'',  turn:'',  river:'',  sd1:'',  sd2:'' },
     usedCards:     new Set(),
     history:       [],
+    currentSession: '',
     hideHand:      false,
     showComment:   false,
     foldStreet:    null,
@@ -338,7 +380,7 @@ async function ensureNewHeaders(id) {
     try {
         await gapi.client.sheets.spreadsheets.values.update({
             spreadsheetId: id,
-            range: `${SHEET_TAB}!H1:W1`,
+            range: `${SHEET_TAB}!H1:Y1`,
             valueInputOption: 'RAW',
             resource: { values: [NEW_HEADERS] },
         });
@@ -384,7 +426,7 @@ async function findOrCreate() {
 
     await gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: newId,
-        range: `${SHEET_TAB}!A1:W1`,
+        range: `${SHEET_TAB}!A1:Y1`,
         valueInputOption: 'RAW',
         resource: { values: [HEADER_ROW] },
     });
@@ -396,10 +438,10 @@ async function findOrCreate() {
 async function loadHistory() {
     const res = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: state.spreadsheetId,
-        range: `${SHEET_TAB}!A2:X`,
+        range: `${SHEET_TAB}!A2:Y`,
     });
     state.history = res.result.values || [];
-    state.expandedDays = new Set([todayISO()]);
+    state.expandedDays = new Set([state.currentSession]);
     renderHistory();
 }
 
@@ -431,7 +473,7 @@ function renderHistory() {
 
     const groups = new Map();
     for (const r of state.history) {
-        const key = r[22] || '';
+        const key = r[24] || r[22] || '';
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(r);
     }
@@ -457,7 +499,7 @@ function renderHistory() {
                 <div class="dg-inner">
                     <div class="dg-left">
                         <span class="dg-caret">▶</span>
-                        <span class="dg-title">${formatDateThai(key)}</span>
+                        <span class="dg-title">${formatGroupKey(key)}</span>
                         <span class="dg-count">${hands.length} hands</span>
                     </div>
                     <div class="dg-right">
@@ -689,6 +731,7 @@ async function saveHand() {
 
     const handNum = state.editing ? state.editing.handNum : state.handNumber;
     const dateVal = document.getElementById('date-input')?.value || todayISO();
+    const sessionVal = state.currentSession;
     const row = [
         handNum,
         hand.join(' '),
@@ -713,6 +756,8 @@ async function saveHand() {
         potAmt   || '',
         resultVal,
         dateVal,
+        '',         // index 23: Action Log — written later by _saveLog()
+        sessionVal, // index 24: Session
     ];
 
     const btn = document.getElementById('save-btn');
@@ -721,30 +766,32 @@ async function saveHand() {
         if (state.editing) {
             const { histIdx, handNum } = state.editing;
             const sheetRow = histIdx + 2;
+            row[23] = state.history[histIdx]?.[23] || '';
+            row[24] = state.history[histIdx]?.[24] || sessionVal;
             await gapi.client.sheets.spreadsheets.values.update({
                 spreadsheetId: state.spreadsheetId,
-                range: `${SHEET_TAB}!A${sheetRow}:W${sheetRow}`,
+                range: `${SHEET_TAB}!A${sheetRow}:Y${sheetRow}`,
                 valueInputOption: 'RAW',
                 resource: { values: [row] },
             });
             state.history[histIdx] = row;
             state.editing = null;
             btn.textContent = '💾 บันทึก Hand';
-            state.expandedDays.add(dateVal);
+            state.expandedDays.add(row[24]);
             showToast(`✓ อัปเดต Hand #${handNum} สำเร็จ!`, 'success');
             renderHistory();
             clearAll();
         } else {
             await gapi.client.sheets.spreadsheets.values.append({
                 spreadsheetId: state.spreadsheetId,
-                range: `${SHEET_TAB}!A:W`,
+                range: `${SHEET_TAB}!A:Y`,
                 valueInputOption: 'RAW',
                 insertDataOption: 'INSERT_ROWS',
                 resource: { values: [row] },
             });
             showToast(`✓ บันทึก Hand #${state.handNumber} สำเร็จ!`, 'success');
             state.history.push(row);
-            state.expandedDays.add(dateVal);
+            state.expandedDays.add(sessionVal);
             renderHistory();
             state.handNumber++;
             document.getElementById('hand-num-display').textContent = state.handNumber;
@@ -1496,4 +1543,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeHandDetail();
     });
+
+    initSession();
+    document.getElementById('new-session-btn').addEventListener('click', startNewSession);
 });
