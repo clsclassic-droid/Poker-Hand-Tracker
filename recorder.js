@@ -694,6 +694,7 @@ function renderPanel() {
         <div class="rec-panel-box">
             <div class="rec-panel-header">
                 <div class="rec-pot-display">Pot <b>${rec.pot.toLocaleString()}</b>฿</div>
+                <div class="rec-pos-chips" id="rec-pos-chips"></div>
                 <div class="rec-panel-header-right">
                     <button class="rec-undo-btn" onclick="window.recorderModule._toggleSetup()" title="ตั้งค่าโต๊ะ">⚙</button>
                     <button class="rec-undo-btn" onclick="window.recorderModule._undo()">↩ ย้อน</button>
@@ -714,6 +715,23 @@ function renderPanel() {
     const initPotEl = document.getElementById(`rec-sc-pot-${street}`);
     if (initPotEl && rec.pot > 0) initPotEl.textContent = `Pot ${rec.pot.toLocaleString()} ฿`;
     _syncPotInput();
+    renderPosChips();
+}
+
+function renderPosChips() {
+    const el = document.getElementById('rec-pos-chips');
+    if (!el || !cfg?.players) return;
+    const currentActor = rec?.needToAct?.[0] || null;
+    const inHand = new Set(rec?.playersInHand || []);
+    el.innerHTML = cfg.players.map(p => {
+        const isActive = p.pos === currentActor;
+        const isFolded = !inHand.has(p.pos);
+        const cls = isActive ? 'rec-pc-active'
+                  : isFolded ? 'rec-pc-fold'
+                  : p.isHero ? 'rec-pc-hero'
+                  : 'rec-pc-neutral';
+        return `<span class="rec-pos-chip ${cls}">${p.pos}${isActive ? ' ●' : ''}</span>`;
+    }).join('');
 }
 
 function updatePotBar() {
@@ -723,6 +741,7 @@ function updatePotBar() {
     const potEl = document.getElementById(`rec-sc-pot-${rec.currentStreet}`);
     if (potEl) potEl.textContent = `Pot ${rec.pot.toLocaleString()} ฿`;
     _syncPotInput();
+    renderPosChips();
 }
 
 function _syncPotInput() {
