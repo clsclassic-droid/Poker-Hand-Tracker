@@ -626,6 +626,7 @@ function recordAction(pos, action, amount) {
     } else {
         renderActorBlock();
     }
+    updateStreetActorLabel();
 }
 
 // ── Undo ──────────────────────────────────────────────────────────────────────
@@ -684,6 +685,7 @@ function renderPanel() {
         return `
             <div class="rec-street-card rec-sc-${s} ${cls}" id="rec-card-${s}">
                 <div class="rec-sc-label">${STREET_LBL[s]}</div>
+                <div class="rec-sc-actor" id="rec-sc-actor-${s}"></div>
                 ${boardDiv}
                 <div class="rec-sc-feed" id="rec-feed-${s}"></div>
                 <div class="rec-sc-pot" id="rec-sc-pot-${s}"></div>
@@ -716,6 +718,19 @@ function renderPanel() {
     if (initPotEl && rec.pot > 0) initPotEl.textContent = `Pot ${rec.pot.toLocaleString()} ฿`;
     _syncPotInput();
     renderPosChips();
+    updateStreetActorLabel();
+}
+
+function updateStreetActorLabel() {
+    const street = rec?.currentStreet;
+    if (!street) return;
+    const el = document.getElementById(`rec-sc-actor-${street}`);
+    if (!el) return;
+    const pos = rec?.needToAct?.[0];
+    if (!pos) { el.innerHTML = ''; return; }
+    const player = cfg?.players?.find(p => p.pos === pos);
+    const name = player?.name || '';
+    el.innerHTML = `<span class="rec-sc-actor-lbl">${pos}${name ? ` · ${name}` : ''}</span>`;
 }
 
 function renderPosChips() {
@@ -968,6 +983,7 @@ function _markWinners() {
 function showStreetComplete() {
     const actorEl = document.getElementById('rec-actor-block');
     if (actorEl) actorEl.innerHTML = '';
+    updateStreetActorLabel();
 
     const footer  = document.getElementById('rec-street-footer');
     if (!footer) return;

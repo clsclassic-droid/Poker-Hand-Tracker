@@ -697,6 +697,25 @@
     text-align: right;
 }
 
+/* Current actor label inside active street card */
+.rec-sc-actor {
+    min-height: 16px;
+    text-align: center;
+    padding: 2px 3px 0;
+}
+.rec-sc-actor-lbl {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 800;
+    color: #4ade80;
+    background: rgba(16,185,129,.12);
+    border: 1px solid rgba(22,163,74,.35);
+    border-radius: 3px;
+    padding: 1px 5px;
+    letter-spacing: .02em;
+    white-space: nowrap;
+}
+
 /* Board cards in street card header (live recorder) */
 .rec-sc-board-cards {
     display: flex;
