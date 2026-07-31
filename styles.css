@@ -1025,7 +1025,7 @@ header h1 {
 .btn-cancel:hover { background: rgba(239,68,68,.1); }
 
 /* ─── History ────────────────────────────────────────────────────────────── */
-#history-section {}
+#history-section { margin-top: 20px; }
 
 #history-header {
     display: flex;

@@ -956,7 +956,9 @@ function refreshFieldDisplay(field) {
             const suit = card.slice(-1);
             const rank = card.slice(0, -1);
             if (field === 'hand' && state.hideHand) {
-                html += `<span style="filter:blur(4px);display:inline-block">●</span>`;
+                html += useCards
+                    ? `<span class="mini-card${smCls} mc-hidden"><span class="mc-rank">?</span><span class="mc-suit"></span></span>`
+                    : `<span style="filter:blur(4px);display:inline-block">●</span>`;
             } else if (useCards) {
                 const cls = suitCvClass(suit);
                 html += `<span class="mini-card${smCls}"><span class="mc-rank ${cls}">${rank}</span><span class="mc-suit ${cls}">${SUIT_SYM[suit]}</span></span>`;

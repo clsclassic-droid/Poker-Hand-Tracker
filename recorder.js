@@ -436,6 +436,7 @@ function bindSetupEvents() {
                 // Clear heroName from any other row; set it on the clicked row
                 cfg.players.forEach((p, i) => { if (i !== idx && p.name === heroName) p.name = ''; });
                 cfg.players[idx].name = heroName;
+                cfg.players.forEach((p, i) => { p.isHero = (i === idx); });
                 saveConfig(cfg);
                 renderSetup();
             }
