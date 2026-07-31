@@ -685,6 +685,7 @@ function renderPanel() {
         return `
             <div class="rec-street-card rec-sc-${s} ${cls}" id="rec-card-${s}">
                 <div class="rec-sc-label">${STREET_LBL[s]}</div>
+                <div class="rec-sc-actor" id="rec-sc-actor-${s}"></div>
                 ${boardDiv}
                 <div class="rec-sc-feed" id="rec-feed-${s}"></div>
                 <div class="rec-sc-pot" id="rec-sc-pot-${s}"></div>
