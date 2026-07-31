@@ -699,8 +699,9 @@ async function saveHand() {
     const potAmt   = parseFloat(document.getElementById('pot-input')?.value) || 0;
     const totalBet = betPF + betFLOP + betTURN + betRIVER;
 
+    const heroFolded = !!state.foldStreet || (window.recorderModule?._heroFolded?.() ?? false);
     let resultVal = '';
-    if (state.foldStreet) {
+    if (heroFolded) {
         if (totalBet > 0) resultVal = String(-totalBet);
     } else if (totalBet > 0) {
         const effectivePot = potAmt > 0 ? potAmt : totalBet;
@@ -1448,7 +1449,8 @@ function refreshResultDisplay() {
     const rp = document.getElementById('result-preview');
     if (!rp) return;
 
-    if (state.foldStreet) {
+    const recFolded = window.recorderModule?._heroFolded?.() ?? false;
+    if (state.foldStreet || recFolded) {
         if (total > 0) {
             rp.textContent = '−' + total.toLocaleString() + ' ฿';
             rp.className = 'result-preview rp-loss';

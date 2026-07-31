@@ -728,6 +728,7 @@ function updatePotBar() {
 function _syncPotInput() {
     const pi = document.getElementById('pot-input');
     if (pi && !pi.disabled) pi.value = rec.pot > 0 ? rec.pot : '';
+    if (typeof refreshResultDisplay === 'function') refreshResultDisplay();
 }
 
 function renderBetBar() {
@@ -1495,7 +1496,13 @@ function _getLogForHand(histIdx) {
     return buildJson();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand };
+function _heroFolded() {
+    if (!rec || !cfg) return false;
+    const hero = cfg.players.find(p => p.isHero);
+    return hero ? !rec.playersInHand.includes(hero.pos) : false;
+}
+
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
