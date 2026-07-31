@@ -1048,11 +1048,19 @@ async function _saveLog() {
         toast('ไม่พบ spreadsheet', 'error'); return;
     }
 
-    const histLen = window.state?.history?.length || 0;
-    if (histLen === 0) { toast('ยังไม่มีมือที่บันทึก', 'error'); return; }
+    const isEdit = rec.editMode && rec.editHistIdx !== undefined;
+    let rowIdx, sheetRow;
+    if (isEdit) {
+        rowIdx   = rec.editHistIdx;
+        sheetRow = rowIdx + 2;
+    } else {
+        const histLen = window.state?.history?.length || 0;
+        if (histLen === 0) { toast('ยังไม่มีมือที่บันทึก', 'error'); return; }
+        rowIdx   = histLen - 1;
+        sheetRow = histLen + 1;
+    }
 
-    const sheetRow = histLen + 1;
-    const btn      = document.getElementById('rec-save-btn');
+    const btn = document.getElementById('rec-save-btn');
     if (btn) { btn.disabled = true; btn.textContent = 'กำลังบันทึก...'; }
 
     try {
@@ -1062,20 +1070,120 @@ async function _saveLog() {
             valueInputOption: 'RAW',
             resource: { values: [[json]] },
         });
-        if (window.state?.history?.[histLen - 1]) window.state.history[histLen - 1][23] = json;
-        toast('✓ บันทึก Action Log แล้ว');
+        if (window.state?.history?.[rowIdx]) window.state.history[rowIdx][23] = json;
+        toast(isEdit ? '✓ อัปเดต Action Log แล้ว' : '✓ บันทึก Action Log แล้ว');
         if (btn) { btn.textContent = '✓ บันทึกแล้ว'; }
         rec = null;
         const panelEl  = document.getElementById('recorder-panel');
         const startBtn = document.getElementById('rec-start-btn');
         if (panelEl)  panelEl.style.display = 'none';
         if (startBtn) startBtn.style.display = '';
-        if (cfg?.autoRotate) setTimeout(_rotatePositions, 300);
+        if (!isEdit && cfg?.autoRotate) setTimeout(_rotatePositions, 300);
     } catch (err) {
         console.error('recorder save:', err);
         toast('บันทึกไม่สำเร็จ', 'error');
         if (btn) { btn.disabled = false; btn.textContent = '💾 Save Action Log'; }
     }
+}
+
+// ── Edit-mode: load a saved action log back into the panel ───────────────────
+function _loadLogForEdit(jsonStr, histIdx) {
+    if (!jsonStr) return;
+    let data;
+    try { data = JSON.parse(jsonStr); } catch(e) { return; }
+    if (!data.actions) return;
+
+    // Bootstrap cfg from JSON snapshot when no config exists yet
+    if (!cfg) {
+        if (!Array.isArray(data.players) || data.players.length === 0) return;
+        cfg = { players: [], sb: data.sb || 10, bb: data.bb || 20, heroName: '', autoRotate: false };
+    }
+
+    // Restore player snapshot so feed rows show correct names/isHero
+    if (Array.isArray(data.players) && data.players.length > 0) {
+        cfg.players = data.players.map(p => ({ ...p }));
+    }
+    if (data.sb !== undefined) cfg.sb = data.sb;
+    if (data.bb !== undefined) cfg.bb = data.bb;
+
+    const lastStreet = [...STREET_SEQ].reverse().find(s => (data.actions[s]?.length > 0)) || 'preflop';
+
+    rec = {
+        streets:       Object.assign({ preflop: [], flop: [], turn: [], river: [] },
+                                     JSON.parse(JSON.stringify(data.actions))),
+        playersInHand: Array.isArray(data.showdown) ? [...data.showdown] : cfg.players.map(p => p.pos),
+        stackByPos:    {},
+        pot:           0,
+        potContrib:    {},
+        currentStreet: lastStreet,
+        currentBet:    0,
+        raisingRound:  0,
+        needToAct:     [],
+        actionOrder:   [],
+        undoStack:     [],
+        editMode:      true,
+        editHistIdx:   histIdx,
+    };
+    (data.players || []).forEach(p => { rec.stackByPos[p.pos] = p.stack || 0; });
+
+    const panelEl  = document.getElementById('recorder-panel');
+    const startBtn = document.getElementById('rec-start-btn');
+    if (panelEl)  panelEl.style.display = '';
+    if (startBtn) startBtn.style.display = 'none';
+
+    renderPanel();  // builds DOM, renders lastStreet feed (will be cleared below)
+
+    // Re-render ALL street feeds with correct isAgg + divider logic
+    STREET_SEQ.forEach(s => {
+        const feed = document.getElementById(`rec-feed-${s}`);
+        if (!feed) return;
+        feed.innerHTML = '';
+        const actions = rec.streets[s] || [];
+        let rr = 0;
+        actions.forEach((entry, idx) => {
+            const isAgg = entry.a === 'raise' || entry.a === 'reraise' || entry.a === 'bet';
+            appendFeedRow(feed, entry, isAgg);
+            if (isAgg) { rr++; if (actions[idx + 1]) appendDividerRow(feed, rr); }
+        });
+    });
+
+    // Show read-only footer with re-record and update buttons
+    const actorEl = document.getElementById('rec-actor-block');
+    if (actorEl) actorEl.innerHTML = '';
+    const footer = document.getElementById('rec-street-footer');
+    if (footer) {
+        footer.innerHTML = `
+            <div class="rec-street-done">
+                <span class="rec-done-lbl">📋 Action Log ของ Hand นี้</span>
+                <div style="display:flex;gap:8px;margin-top:6px">
+                    <button class="rec-btn-next" onclick="window.recorderModule._rerecordLog()">🔄 บันทึกใหม่</button>
+                    <button class="rec-btn-save" id="rec-save-btn" onclick="window.recorderModule._saveLog()">💾 อัปเดต Action Log</button>
+                </div>
+            </div>`;
+    }
+
+    if (panelEl) panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function _rerecordLog() {
+    if (!rec?.editMode || !cfg) return;
+    const editMode    = true;
+    const editHistIdx = rec.editHistIdx;
+
+    rec = {
+        streets:       { preflop: [], flop: [], turn: [], river: [] },
+        playersInHand: cfg.players.map(p => p.pos),
+        stackByPos:    {},
+        pot:           0,
+        currentStreet: null,
+        undoStack:     [],
+        editMode,
+        editHistIdx,
+    };
+    cfg.players.forEach(p => { rec.stackByPos[p.pos] = p.stack || 0; });
+
+    initStreet('preflop');
+    renderPanel();
 }
 
 // ── Render Action Log for Hand Detail Modal ───────────────────────────────────
@@ -1344,7 +1452,7 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog };
 document.addEventListener('DOMContentLoaded', init);
 
 })();

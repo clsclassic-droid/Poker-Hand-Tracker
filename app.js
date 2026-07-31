@@ -1364,6 +1364,10 @@ function editHand(r, histIdx) {
     document.getElementById('hand-num-display').textContent = r[0] || state.handNumber;
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (r[23] && document.getElementById('toggle-recorder')?.checked) {
+        window.recorderModule?._loadLogForEdit?.(r[23], histIdx);
+    }
 }
 
 // ─── Hide Hand toggle ─────────────────────────────────────────────────────────
