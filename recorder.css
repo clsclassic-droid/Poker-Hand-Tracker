@@ -330,7 +330,7 @@
 .rec-act-check { color: #7a9ab8; }
 .rec-act-post  { color: #344d6e; }
 .rec-pos-tag   { font-size: 9px; color: #4a6580; font-weight: 400; }
-.rec-actor-pos { font-size: 15px; font-weight: 800; color: #7dd3fc; }
+.rec-actor-pos { font-size: 20px; font-weight: 800; color: #7dd3fc; }
 
 /* Raise divider */
 .rec-feed-divider {
@@ -350,9 +350,9 @@
 
 /* Current actor block */
 .rec-actor-block {
-    padding: 10px 14px;
-    background: #0f2237;
-    border-top: 2px solid #3b82f6;
+    padding: 12px 14px;
+    background: rgba(59,130,246,0.18);
+    border-top: 3px solid #3b82f6;
 }
 .rec-actor-header {
     display: flex;
@@ -361,7 +361,7 @@
     margin-bottom: 7px;
 }
 .rec-actor-who {
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 700;
     color: #60a5fa;
     display: flex;
@@ -380,9 +380,9 @@
 }
 .rec-actor-stack { display: none; }
 .rec-actor-stack-inline {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
-    color: #4a6580;
+    color: #7a9ab8;
     font-variant-numeric: tabular-nums;
 }
 .rec-to-call {

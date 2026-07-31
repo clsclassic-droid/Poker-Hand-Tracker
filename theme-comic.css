@@ -655,14 +655,14 @@ body[data-theme="comic"] .rec-div-line  { background: rgba(180,80,0,.2); }
 body[data-theme="comic"] .rec-div-lbl   { color: rgba(180,80,0,.7); font-size: 11px; }
 /* Actor block */
 body[data-theme="comic"] .rec-actor-block {
-    background: #fffbf0;
-    border-top: 2.5px solid #ffe600;
+    background: #fff8c0;
+    border-top: 3px solid #ffe600;
 }
-body[data-theme="comic"] .rec-actor-who          { color: #1a6cc4; font-size: 17px; }
-body[data-theme="comic"] .rec-actor-pos          { color: #1a6cc4; font-size: 17px; }
+body[data-theme="comic"] .rec-actor-who          { color: #1a6cc4; font-size: 20px; }
+body[data-theme="comic"] .rec-actor-pos          { color: #1a6cc4; font-size: 22px; }
 body[data-theme="comic"] .rec-actor-hero         { color: #166534; }
 body[data-theme="comic"] .rec-hero-tag           { background: rgba(34,197,94,.15); color: #166534; font-size: 11px; }
-body[data-theme="comic"] .rec-actor-stack-inline { color: var(--text-dim); font-size: 14px; font-weight: 700; }
+body[data-theme="comic"] .rec-actor-stack-inline { color: #555; font-size: 15px; font-weight: 700; }
 /* To-call info bar */
 body[data-theme="comic"] .rec-to-call { background: rgba(26,108,196,.08); border-color: rgba(26,108,196,.2); color: #1a6cc4; font-size: 13px; font-weight: 700; }
 /* FOLD/CALL/RAISE buttons */
