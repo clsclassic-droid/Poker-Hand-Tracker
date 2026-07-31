@@ -697,26 +697,22 @@
     text-align: right;
 }
 
-/* Current actor label inside active street card */
-.rec-sc-actor {
-    min-height: 18px;
-    padding: 3px 4px 2px;
-}
+/* Current actor label inside active street card — sits below the feed */
+.rec-sc-actor { border-top: 1px solid rgba(16,185,129,.2); }
 .rec-sc-actor-bar {
-    display: flex;
+    display: grid;
+    grid-template-columns: 24px 34px 26px 1fr;
     align-items: center;
-    gap: 3px;
-    flex-wrap: wrap;
-    background: rgba(16,185,129,.1);
-    border: 1px solid rgba(22,163,74,.3);
-    border-radius: 4px;
-    padding: 2px 5px;
+    column-gap: 1px;
+    padding: 3px 3px;
+    background: rgba(16,185,129,.07);
 }
 .rec-sc-actor-pos {
-    font-size: 9.5px;
+    font-size: 10px;
     font-weight: 800;
     color: #4ade80;
     white-space: nowrap;
+    overflow: hidden;
 }
 .rec-sc-actor-name {
     font-size: 9px;
@@ -725,7 +721,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 36px;
 }
 .rec-sc-actor-cards {
     display: inline-flex;
@@ -733,9 +728,10 @@
     align-items: center;
 }
 .rec-sc-acting-dot {
-    font-size: 7px;
+    font-size: 8px;
     color: #4ade80;
-    margin-left: auto;
+    text-align: right;
+    padding-right: 2px;
     animation: rec-pulse 1.2s ease-in-out infinite;
 }
 @keyframes rec-pulse {
