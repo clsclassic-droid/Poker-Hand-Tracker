@@ -730,7 +730,11 @@ function renderPosChips() {
                   : isFolded ? 'rec-pc-fold'
                   : p.isHero ? 'rec-pc-hero'
                   : 'rec-pc-neutral';
-        return `<span class="rec-pos-chip ${cls}">${p.pos}${isActive ? ' ●' : ''}</span>`;
+        const name = p.name || '';
+        return `<div class="rec-pc-col ${cls}">
+            <span class="rec-pc-pos">${p.pos}${isActive ? ' ●' : ''}</span>
+            ${name ? `<span class="rec-pc-name">${name}</span>` : ''}
+        </div>`;
     }).join('');
 }
 
