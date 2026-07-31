@@ -133,6 +133,23 @@
 .rec-name-in:focus { outline: none; border-color: #3b82f6; }
 
 .rec-blind-in { width: 54px !important; }
+.rec-name-cell { display: flex; align-items: center; gap: 4px; }
+.rec-mv-btn {
+    background: #162032;
+    border: 1px solid #2a3f5f;
+    color: #7a9ab8;
+    font-size: 11px;
+    font-weight: 700;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    font-family: inherit;
+    flex-shrink: 0;
+}
+.rec-mv-btn:hover { border-color: #3b82f6; color: #93c5fd; }
 
 /* Hole cards slot button — looks like field bar items */
 .rec-cards-slot {

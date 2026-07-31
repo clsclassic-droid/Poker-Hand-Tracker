@@ -595,6 +595,8 @@ body[data-theme="comic"] .rec-rotate-btn {
     font-weight: 700;
 }
 body[data-theme="comic"] .rec-rotate-btn:hover { border-color: var(--blue); color: var(--blue); }
+body[data-theme="comic"] .rec-mv-btn { background: #fff; border-color: rgba(20,14,40,.25); color: var(--text-dim); font-size: 12px; }
+body[data-theme="comic"] .rec-mv-btn:hover { border-color: var(--blue); color: var(--blue); }
 body[data-theme="comic"] .rec-rotate-btn.active { background: #22c55e; color: #fff; border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); font-weight: 700; }
 
 /* ─── Recorder action panel ──────────────────────────────────────────────── */

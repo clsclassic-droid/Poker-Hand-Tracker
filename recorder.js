@@ -350,7 +350,10 @@ function renderSetup() {
         return `
         <tr>
             <td><input class="rec-pos-in${p.pos === heroPos ? ' selected' : ''}" data-i="${i}" value="${p.pos}" maxlength="6"${rec ? ' disabled' : ''}></td>
-            <td><input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12"></td>
+            <td><div class="rec-name-cell">
+                <input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12">
+                ${isHero ? `<button class="rec-mv-btn" onclick="window.recorderModule._moveHero(-1)" title="เลื่อนขึ้น">↑</button><button class="rec-mv-btn" onclick="window.recorderModule._moveHero(1)" title="เลื่อนลง">↓</button>` : ''}
+            </div></td>
             <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"></td>
             <td><button class="rec-cards-slot${isHero ? ' rec-cards-hero-slot' : ''}" data-i="${i}"${isHero ? ' title="ไพ่ Hero = ช่อง HAND"' : ''}>${renderCardSlotHTML(cardStr, isHero)}</button></td>
         </tr>`;
@@ -1539,6 +1542,31 @@ function init() {
     applyToggle();
 }
 
+function _moveHero(dir) {
+    if (!cfg?.players) return;
+    const heroIdx = cfg.players.findIndex(p => p.isHero);
+    if (heroIdx < 0) return;
+    const newIdx = heroIdx + dir;
+    if (newIdx < 0 || newIdx >= cfg.players.length) return;
+
+    const a = cfg.players[heroIdx];
+    const b = cfg.players[newIdx];
+    // Swap name, stack, cards, isHero between the two rows (pos stays fixed)
+    [a.name, b.name]   = [b.name, a.name];
+    [a.stack, b.stack] = [b.stack, a.stack];
+    [a.cards, b.cards] = [b.cards, a.cards];
+    [a.isHero, b.isHero] = [b.isHero, a.isHero];
+
+    // Sync pos-chip selection to the new Hero's position
+    const newHeroPos = cfg.players[newIdx].pos;
+    document.querySelectorAll('#position-chips .pos-chip').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.pos === newHeroPos);
+    });
+
+    saveConfig(cfg);
+    renderSetup();
+}
+
 function _getLogForHand(histIdx) {
     if (!rec?.editMode || rec.editHistIdx !== histIdx) return null;
     return buildJson();
@@ -1550,7 +1578,7 @@ function _heroFolded() {
     return hero ? !rec.playersInHand.includes(hero.pos) : false;
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded, _moveHero };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
