@@ -880,7 +880,9 @@ function renderActorBlock() {
         </div>
         ${stack > 0 ? `<div class="rec-amount-row">
             <span class="rec-amt-lbl">${raiseLabel.toLowerCase()}</span>
+            <button class="rec-qb rec-bb-btn" onclick="(function(el){el.value=Math.max((parseFloat(el.value)||0)-${cfg.bb||20},${minRaise});})(document.getElementById('rec-raise-amt'))">−</button>
             <input class="rec-amt-in" id="rec-raise-amt" type="number" value="${minRaise}" min="${minRaise}" max="${maxRaise}" step="10">
+            <button class="rec-qb rec-bb-btn" onclick="(function(el){el.value=Math.min((parseFloat(el.value)||0)+${cfg.bb||20},${maxRaise});})(document.getElementById('rec-raise-amt'))">+</button>
             <span class="rec-amt-lbl">฿</span>
             <div class="rec-quick-btns">
                 <button class="rec-qb" onclick="document.getElementById('rec-raise-amt').value=${minRaise}">Min</button>

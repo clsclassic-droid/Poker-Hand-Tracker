@@ -450,6 +450,7 @@
     min-width: 0;
 }
 .rec-qb:hover { border-color: #344d6e; color: #e2e8f0; }
+.rec-bb-btn { flex: none; width: 30px; font-size: 15px; padding: 5px 0; }
 
 /* Street complete footer */
 .rec-street-footer { border-top: 1px solid #2a3f5f; }
