@@ -349,7 +349,7 @@ function renderSetup() {
         const cardStr = isHero ? (window.state?.sel?.hand?.join('') || '') : (p.cards || '');
         return `
         <tr>
-            <td><input class="rec-pos-in${p.pos === heroPos ? ' selected' : ''}" data-i="${i}" value="${p.pos}" maxlength="6"></td>
+            <td><input class="rec-pos-in${p.pos === heroPos ? ' selected' : ''}" data-i="${i}" value="${p.pos}" maxlength="6"${rec ? ' disabled' : ''}></td>
             <td><input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12"></td>
             <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"></td>
             <td><button class="rec-cards-slot${isHero ? ' rec-cards-hero-slot' : ''}" data-i="${i}"${isHero ? ' title="ไพ่ Hero = ช่อง HAND"' : ''}>${renderCardSlotHTML(cardStr, isHero)}</button></td>
@@ -421,6 +421,7 @@ function bindSetupEvents() {
     document.querySelector('.rec-player-table')?.addEventListener('click', e => {
         const posInput = e.target.closest('.rec-pos-in');
         if (posInput) {
+            if (rec) return; // lock position during recording
             const idx      = parseInt(posInput.dataset.i);
             const pos      = posInput.value;
             const heroName = cfg?.heroName || 'Hero';
@@ -503,8 +504,13 @@ function startRecording() {
     if (panelEl)  { panelEl.style.display = ''; panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
     if (startBtn) startBtn.style.display = 'none';
 
+    _setPosLock(true);
     initStreet('preflop');
     renderPanel();
+}
+
+function _setPosLock(locked) {
+    document.querySelectorAll('.rec-pos-in').forEach(el => { el.disabled = locked; });
 }
 
 function initStreet(street) {
@@ -1081,6 +1087,7 @@ async function _saveLog() {
         toast(isEdit ? '✓ อัปเดต Action Log แล้ว' : '✓ บันทึก Action Log แล้ว');
         if (btn) { btn.textContent = '✓ บันทึกแล้ว'; }
         rec = null;
+        _setPosLock(false);
         const panelEl  = document.getElementById('recorder-panel');
         const startBtn = document.getElementById('rec-start-btn');
         if (panelEl)  panelEl.style.display = 'none';
@@ -1183,6 +1190,8 @@ function _loadLogForEdit(jsonStr, histIdx) {
                 </div>
             </div>`;
     }
+
+    _setPosLock(true);
 
     // Hide undo in view mode — undoStack is empty; button reappears when _rerecordLog re-renders
     document.querySelectorAll('.rec-undo-btn').forEach(b => {
