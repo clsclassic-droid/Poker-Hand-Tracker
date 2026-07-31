@@ -699,21 +699,48 @@
 
 /* Current actor label inside active street card */
 .rec-sc-actor {
-    min-height: 16px;
-    text-align: center;
-    padding: 2px 3px 0;
+    min-height: 18px;
+    padding: 3px 4px 2px;
 }
-.rec-sc-actor-lbl {
-    display: inline-block;
-    font-size: 9px;
+.rec-sc-actor-bar {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-wrap: wrap;
+    background: rgba(16,185,129,.1);
+    border: 1px solid rgba(22,163,74,.3);
+    border-radius: 4px;
+    padding: 2px 5px;
+}
+.rec-sc-actor-pos {
+    font-size: 9.5px;
     font-weight: 800;
     color: #4ade80;
-    background: rgba(16,185,129,.12);
-    border: 1px solid rgba(22,163,74,.35);
-    border-radius: 3px;
-    padding: 1px 5px;
-    letter-spacing: .02em;
     white-space: nowrap;
+}
+.rec-sc-actor-name {
+    font-size: 9px;
+    font-weight: 700;
+    color: #86efac;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 36px;
+}
+.rec-sc-actor-cards {
+    display: inline-flex;
+    gap: 1px;
+    align-items: center;
+}
+.rec-sc-acting-dot {
+    font-size: 7px;
+    color: #4ade80;
+    margin-left: auto;
+    animation: rec-pulse 1.2s ease-in-out infinite;
+}
+@keyframes rec-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
 }
 
 /* Board cards in street card header (live recorder) */

@@ -730,7 +730,15 @@ function updateStreetActorLabel() {
     if (!pos) { el.innerHTML = ''; return; }
     const player = cfg?.players?.find(p => p.pos === pos);
     const name = player?.name || '';
-    el.innerHTML = `<span class="rec-sc-actor-lbl">${pos}${name ? ` · ${name}` : ''}</span>`;
+    const isHero = player?.isHero;
+    const cardsStr = isHero ? (window.state?.sel?.hand?.join('') || '') : (player?.cards || '');
+    const hcHtml = holeCardsInlineHTML(cardsStr, isHero);
+    el.innerHTML = `<div class="rec-sc-actor-bar">
+        <span class="rec-sc-actor-pos">${pos}</span>
+        ${name ? `<span class="rec-sc-actor-name">${name}</span>` : ''}
+        ${hcHtml ? `<span class="rec-sc-actor-cards">${hcHtml}</span>` : ''}
+        <span class="rec-sc-acting-dot">▶</span>
+    </div>`;
 }
 
 function renderPosChips() {
@@ -1061,6 +1069,7 @@ function _nextStreet(street) {
         return;
     }
     renderActorBlock();
+    updateStreetActorLabel();
 }
 
 // ── Save to Sheet (column X = r[23]) ─────────────────────────────────────────
