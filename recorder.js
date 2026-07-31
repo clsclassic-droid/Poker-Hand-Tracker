@@ -1184,6 +1184,11 @@ function _loadLogForEdit(jsonStr, histIdx) {
             </div>`;
     }
 
+    // Hide undo in view mode — undoStack is empty; button reappears when _rerecordLog re-renders
+    document.querySelectorAll('.rec-undo-btn').forEach(b => {
+        if (b.textContent.includes('ย้อน')) b.style.display = 'none';
+    });
+
     if (panelEl) panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
