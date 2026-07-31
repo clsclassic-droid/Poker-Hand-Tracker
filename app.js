@@ -766,7 +766,9 @@ async function saveHand() {
         if (state.editing) {
             const { histIdx, handNum } = state.editing;
             const sheetRow = histIdx + 2;
-            row[23] = state.history[histIdx]?.[23] || '';
+            row[23] = window.recorderModule?._getLogForHand?.(histIdx)
+                   || state.history[histIdx]?.[23]
+                   || '';
             row[24] = state.history[histIdx]?.[24] || sessionVal;
             await gapi.client.sheets.spreadsheets.values.update({
                 spreadsheetId: state.spreadsheetId,

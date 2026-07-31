@@ -1488,7 +1488,12 @@ function init() {
     applyToggle();
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog };
+function _getLogForHand(histIdx) {
+    if (!rec?.editMode || rec.editHistIdx !== histIdx) return null;
+    return buildJson();
+}
+
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
