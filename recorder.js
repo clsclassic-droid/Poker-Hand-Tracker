@@ -707,6 +707,7 @@ function renderPanel() {
     renderActorBlock();
     const initPotEl = document.getElementById(`rec-sc-pot-${street}`);
     if (initPotEl && rec.pot > 0) initPotEl.textContent = `Pot ${rec.pot.toLocaleString()} ฿`;
+    _syncPotInput();
 }
 
 function updatePotBar() {
@@ -715,6 +716,12 @@ function updatePotBar() {
     renderBetBar();
     const potEl = document.getElementById(`rec-sc-pot-${rec.currentStreet}`);
     if (potEl) potEl.textContent = `Pot ${rec.pot.toLocaleString()} ฿`;
+    _syncPotInput();
+}
+
+function _syncPotInput() {
+    const pi = document.getElementById('pot-input');
+    if (pi && !pi.disabled) pi.value = rec.pot > 0 ? rec.pot : '';
 }
 
 function renderBetBar() {
@@ -1125,6 +1132,21 @@ function _loadLogForEdit(jsonStr, histIdx) {
         editHistIdx:   histIdx,
     };
     (data.players || []).forEach(p => { rec.stackByPos[p.pos] = p.stack || 0; });
+
+    // Calculate final pot by replaying per-street contributions
+    // v = total commitment of that player in the street (not incremental)
+    let computedPot = 0;
+    STREET_SEQ.forEach(s => {
+        const contrib = {};
+        (rec.streets[s] || []).forEach(e => {
+            if ((e.v || 0) > 0 && e.a !== 'fold' && e.a !== 'check') {
+                const prev = contrib[e.pos] || 0;
+                computedPot += e.v - prev;
+                contrib[e.pos] = e.v;
+            }
+        });
+    });
+    rec.pot = computedPot;
 
     const panelEl  = document.getElementById('recorder-panel');
     const startBtn = document.getElementById('rec-start-btn');
