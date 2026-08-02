@@ -305,7 +305,10 @@ body[data-theme="comic"] .pot-odds-badge {
 
 /* ─── Card picker section ────────────────────────────────────────────────── */
 body[data-theme="comic"] #card-picker-section {
-    background: #fff;
+    background-color: #fdf6e8;
+    background-image: url('Picture/paper-texture.png');
+    background-size: cover;
+    background-position: center;
     border: 2.5px solid var(--ink);
     border-radius: 14px 4px 12px 6px / 6px 12px 4px 14px;
     box-shadow: 4px 4px 0 var(--ink);
