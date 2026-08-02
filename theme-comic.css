@@ -591,7 +591,7 @@ body[data-theme="comic"] .result-loss { color: #991b1b; font-weight: 700; }
 body[data-theme="comic"] #recorder-setup      { margin-bottom: 16px !important; }
 body[data-theme="comic"] #card-picker-section { margin-bottom: 0 !important; }
 body[data-theme="comic"] #recorder-panel      { margin-top: 0 !important; margin-bottom: 16px !important; }
-body[data-theme="comic"] #history-section     { margin-top: 0; }
+body[data-theme="comic"] #history-section     { margin-top: 20px; }
 
 /* ─── Recorder setup ─────────────────────────────────────────────────────── */
 body[data-theme="comic"] #recorder-setup {
