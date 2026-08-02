@@ -139,8 +139,8 @@ body[data-theme="comic"] .date-lbl   { color: var(--text-dim); }
 
 /* ─── Position chips ─────────────────────────────────────────────────────── */
 body[data-theme="comic"] .pos-chip {
-    width: 56px;
-    height: 36px;
+    width: 42px;
+    height: 46px;
     padding: 0;
     border: none;
     background-color: transparent;
@@ -158,7 +158,7 @@ body[data-theme="comic"] .pos-chip:hover {
 }
 body[data-theme="comic"] .pos-chip.selected {
     transform: translateY(-2px) scale(1.06);
-    filter: drop-shadow(0 0 0 3px gold) drop-shadow(2px 3px 0 rgba(20,14,40,.4));
+    filter: drop-shadow(2px 3px 0 rgba(20,14,40,.4));
 }
 
 body[data-theme="comic"] .pos-chip[data-pos="SB"]     { background-image: url('Picture/positions/pos-SB.png'); }
@@ -171,6 +171,17 @@ body[data-theme="comic"] .pos-chip[data-pos="HJ"]     { background-image: url('P
 body[data-theme="comic"] .pos-chip[data-pos="LJ"]     { background-image: url('Picture/positions/pos-LJ.png'); }
 body[data-theme="comic"] .pos-chip[data-pos="CO"]     { background-image: url('Picture/positions/pos-CO.png'); }
 body[data-theme="comic"] .pos-chip[data-pos="BT"]     { background-image: url('Picture/positions/pos-BT.png'); }
+
+body[data-theme="comic"] .pos-chip.selected[data-pos="SB"]     { background-image: url('Picture/positions/pos-SB-sel.png'); }
+body[data-theme="comic"] .pos-chip.selected[data-pos="BB"]     { background-image: url('Picture/positions/pos-BB-sel.png'); }
+body[data-theme="comic"] .pos-chip.selected[data-pos="UTG"]    { background-image: url('Picture/positions/pos-UTG-sel.png'); }
+body[data-theme="comic"] .pos-chip.selected[data-pos="UTG+1"]  { background-image: url('Picture/positions/pos-UTGplus1-sel.png'); }
+body[data-theme="comic"] .pos-chip.selected[data-pos="Mid"]    { background-image: url('Picture/positions/pos-Mid-sel.png'); }
+body[data-theme="comic"] .pos-chip.selected[data-pos="Mid+1"]  { background-image: url('Picture/positions/pos-Midplus1-sel.png'); }
+body[data-theme="comic"] .pos-chip.selected[data-pos="HJ"]     { background-image: url('Picture/positions/pos-HJ-sel.png'); }
+body[data-theme="comic"] .pos-chip.selected[data-pos="LJ"]     { background-image: url('Picture/positions/pos-LJ-sel.png'); }
+body[data-theme="comic"] .pos-chip.selected[data-pos="CO"]     { background-image: url('Picture/positions/pos-CO-sel.png'); }
+body[data-theme="comic"] .pos-chip.selected[data-pos="BT"]     { background-image: url('Picture/positions/pos-BT-sel.png'); }
 
 /* ─── Result preview ─────────────────────────────────────────────────────── */
 body[data-theme="comic"] .result-preview.rp-win  { color: #166534; }
