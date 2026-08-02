@@ -24,6 +24,11 @@ const STREET_SEQ = ['preflop','flop','turn','river'];
 const STREET_LBL = { preflop:'PREFLOP', flop:'FLOP', turn:'TURN', river:'RIVER' };
 const STREET_TAB_CLS = { preflop:'preflop-tab', flop:'flop-tab', turn:'turn-tab', river:'river-tab' };
 
+// Action-log modal: hide non-Hero showdown cards (per-session toggle, not persisted)
+let _hideVillainCards = false;
+let _lastLogJson  = null;
+let _lastHeroCards = null;
+
 let cfg = null;
 let rec = null;
 let recActivePlayer = -1;
@@ -1301,6 +1306,9 @@ function renderActionLog(jsonStr, heroCardsStr) {
         const data = JSON.parse(jsonStr);
         if (!data?.actions) return '';
 
+        _lastLogJson   = jsonStr;
+        _lastHeroCards = heroCardsStr;
+
         const heroPos  = data.players?.find(p => p.isHero)?.pos || '';
         const boards   = data.boards || {};
         let runningPot = 0;
@@ -1396,9 +1404,10 @@ function renderActionLog(jsonStr, heroCardsStr) {
                     const wBadge       = (winners.has(e.pos) && lastActStreet[e.pos] === street)
                                       ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                     // Always emit .rec-log-hc span to keep grid column occupied even when empty
-                    const isHeroHide   = heroPos && e.pos === heroPos && !!window.state?.hideHand;
+                    const isHero       = heroPos && e.pos === heroPos;
+                    const shouldHide   = isHero ? !!window.state?.hideHand : _hideVillainCards;
                     const hcHtml       = `<span class="rec-log-hc">${
-                        playerInData?.cards ? _actionLogCardHtml(playerInData.cards, isHeroHide) : ''
+                        playerInData?.cards ? _actionLogCardHtml(playerInData.cards, shouldHide) : ''
                     }${wBadge}</span>`;
                     const nameHtml = playerInData?.name
                         ? `<span class="rec-log-name"> ${playerInData.name}</span>` : '';
@@ -1438,8 +1447,9 @@ function renderActionLog(jsonStr, heroCardsStr) {
                         const heroRow = isHero ? ' rec-log-row-hero' : '';
                         const wBadge  = winners.has(pos) ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                         const nameLbl = pd?.name ? `<span class="rec-log-name"> ${pd.name}</span>` : '';
-                        const cards   = isHero ? (pd?.cards || heroCardsStr || '') : (pd?.cards || '');
-                        const hcHtml  = `<span class="rec-log-hc">${cards ? _actionLogCardHtml(cards, isHero && !!window.state?.hideHand) : ''}${wBadge}</span>`;
+                        const cards      = isHero ? (pd?.cards || heroCardsStr || '') : (pd?.cards || '');
+                        const shouldHide = isHero ? !!window.state?.hideHand : _hideVillainCards;
+                        const hcHtml     = `<span class="rec-log-hc">${cards ? _actionLogCardHtml(cards, shouldHide) : ''}${wBadge}</span>`;
                         rows += `
                             <div class="rec-log-row${heroRow}">
                                 <span class="rec-log-pos">${pos}${nameLbl}</span>
@@ -1475,12 +1485,25 @@ function renderActionLog(jsonStr, heroCardsStr) {
         const heroDisp = hero ? (hero.name ? `${hero.name} (${heroPos})` : heroPos) : '';
         const heroLine = heroDisp ? `<span class="rec-log-hero-tag">Hero: <b>${heroDisp}</b></span>` : '';
 
+        const hasVillainCards = (data.players || []).some(p => !p.isHero && p.cards);
+        const hideBtn = hasVillainCards
+            ? `<button class="rec-hide-villains-btn${_hideVillainCards ? ' active' : ''}" onclick="window.recorderModule._toggleHideVillains()">${_hideVillainCards ? '🙈' : '👁'} ไพ่คู่แข่ง</button>`
+            : '';
+
         return `
             <div class="rec-modal-log">
-                <div class="rec-modal-log-title">ACTION LOG ${heroLine}</div>
+                <div class="rec-modal-log-title">ACTION LOG ${heroLine}${hideBtn}</div>
                 <div class="rec-log-grid">${colsHtml}</div>
             </div>`;
     } catch (_) { return ''; }
+}
+
+function _toggleHideVillains() {
+    _hideVillainCards = !_hideVillainCards;
+    if (!_lastLogJson) return;
+    const html = renderActionLog(_lastLogJson, _lastHeroCards);
+    const old  = document.querySelector('.rec-modal-log');
+    if (old && html) old.outerHTML = html;
 }
 
 // ── Setup toggle (from panel gear button) ────────────────────────────────────
@@ -1578,7 +1601,7 @@ function _heroFolded() {
     return hero ? !rec.playersInHand.includes(hero.pos) : false;
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded, _moveHero };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded, _moveHero, _toggleHideVillains };
 document.addEventListener('DOMContentLoaded', init);
 
 })();

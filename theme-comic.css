@@ -593,7 +593,7 @@ body[data-theme="comic"] .result-loss { color: #991b1b; font-weight: 700; }
 /* ─── Section card spacing — uniform 16px gap between all cards ──────────── */
 body[data-theme="comic"] #recorder-setup      { margin-bottom: 16px !important; }
 body[data-theme="comic"] #card-picker-section { margin-bottom: 0 !important; }
-body[data-theme="comic"] #recorder-panel      { margin-top: 0 !important; margin-bottom: 16px !important; }
+body[data-theme="comic"] #recorder-panel      { margin-top: 20px !important; margin-bottom: 16px !important; }
 body[data-theme="comic"] #history-section     { margin-top: 20px; }
 
 /* ─── Recorder setup ─────────────────────────────────────────────────────── */
@@ -775,8 +775,8 @@ body[data-theme="comic"] .rec-pc-neutral .rec-pc-pos  { background: rgba(20,14,4
 body[data-theme="comic"] .rec-pc-neutral .rec-pc-name { color: #3a2e58; }
 body[data-theme="comic"] .rec-pc-active  .rec-pc-pos  { background: #d1fae5; color: #166534; border: 1.5px solid #6ee7b7; }
 body[data-theme="comic"] .rec-pc-active  .rec-pc-name { color: #166534; font-weight: 800; }
-body[data-theme="comic"] .rec-pc-fold    .rec-pc-pos  { background: #fee2e2; color: #991b1b; border: 1.5px solid #fca5a5; }
-body[data-theme="comic"] .rec-pc-fold    .rec-pc-name { color: #991b1b; }
+body[data-theme="comic"] .rec-pc-fold    .rec-pc-pos  { background: #e5e7eb; color: #6b7280; border: 1.5px solid #9ca3af; }
+body[data-theme="comic"] .rec-pc-fold    .rec-pc-name { color: #6b7280; }
 body[data-theme="comic"] .rec-pc-hero    .rec-pc-pos  { background: #dbeafe; color: #1d4ed8; border: 1.5px solid #93c5fd; }
 body[data-theme="comic"] .rec-pc-hero    .rec-pc-name { color: #1d4ed8; font-weight: 700; }
 /* Street tabs — larger, readable */

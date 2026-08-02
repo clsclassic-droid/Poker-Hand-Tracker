@@ -616,14 +616,33 @@
     text-transform: none;
 }
 .rec-log-hero-tag b { color: #22c55e; }
+.rec-hide-villains-btn {
+    margin-left: auto;
+    background: #1e2e44;
+    border: 1px solid #2a3f5f;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: background .15s, color .15s, border-color .15s;
+}
+.rec-hide-villains-btn:hover { border-color: #3b82f6; color: #93c5fd; }
+.rec-hide-villains-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); font-weight: 700; }
 
 /* 4-column grid */
 .rec-log-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 5px;
 }
 .rec-log-col {
+    min-width: 0;
     border-radius: 6px;
     overflow: hidden;
     background: #0f1e2e;
@@ -653,7 +672,7 @@
 /* Action rows */
 .rec-log-row {
     display: grid;
-    grid-template-columns: 60px 72px 1fr;
+    grid-template-columns: 60px 72px minmax(0, 1fr);
     align-items: center;
     gap: 0 3px;
     padding: 1.5px 0;
@@ -687,6 +706,7 @@
     flex-shrink: 0;
 }
 .rec-log-act {
+    min-width: 0;
     font-size: 9.5px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
@@ -807,4 +827,11 @@
     overflow: hidden;
     font-size: 8.5px;
     font-variant-numeric: tabular-nums;
+}
+
+/* Below ~820px (tablet portrait / phones) 4-across streets don't leave enough
+   room for action text (e.g. "raise 2,500") and it gets ellipsis-truncated
+   to a single character. Stack the streets instead so each gets full width. */
+@media (max-width: 820px) {
+    .rec-log-grid { grid-template-columns: 1fr; }
 }
