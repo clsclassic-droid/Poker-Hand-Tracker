@@ -314,55 +314,150 @@ body[data-theme="comic"] #picker-label { color: var(--ink); font-weight: 800; fo
 body[data-theme="comic"] .count-badge  { color: var(--text-dim); border-color: rgba(20,14,40,.2); }
 body[data-theme="comic"] .count-badge.full { border-color: var(--accent); color: var(--accent); }
 
-/* ─── Card buttons — HAND-DRAWN WOBBLY BORDERS ───────────────────────────── */
+/* ─── Card buttons — illustrated deck artwork ────────────────────────────── */
 body[data-theme="comic"] .card-btn {
-    background: #fff;
-    border: 2px solid var(--ink);
-    /* Primary wobbly shape — mimics a hand-drawn rectangle */
-    border-radius: 255px 18px 220px 18px / 18px 220px 18px 255px;
-    box-shadow: 2px 2px 0 var(--ink);
+    aspect-ratio: 116 / 180;
+    height: auto;
+    min-height: 0;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+    color: transparent;
     font-weight: 800;
-    transition: transform .1s, box-shadow .1s;
+    transition: transform .1s, filter .1s;
+    filter: drop-shadow(1px 2px 0 rgba(20,14,40,.3));
 }
-/* Alternate wobble variations per nth-child for natural randomness */
-body[data-theme="comic"] .card-btn:nth-child(3n+1) {
-    border-radius: 18px 240px 18px 230px / 240px 18px 230px 18px;
-}
-body[data-theme="comic"] .card-btn:nth-child(3n+2) {
-    border-radius: 200px 22px 180px 14px / 14px 200px 22px 180px;
-}
-
-body[data-theme="comic"] .card-btn.red-card   { color: #cc2222; }
-body[data-theme="comic"] .card-btn.black-card  { color: #140e28; }
 
 body[data-theme="comic"] .card-btn:hover:not(:disabled):not(.used) {
-    transform: translateY(-3px) rotate(-1deg);
-    box-shadow: 3px 5px 0 var(--ink);
+    transform: translateY(-3px);
+    filter: drop-shadow(2px 4px 0 rgba(20,14,40,.4));
 }
 
 body[data-theme="comic"] .card-btn.selected {
-    background: #1a6cc4;
-    border-color: var(--ink);
-    color: #fff !important;
-    box-shadow: 3px 3px 0 var(--ink);
     transform: translateY(-3px);
+    filter: drop-shadow(0 0 0 2px #1a6cc4) drop-shadow(2px 4px 0 rgba(20,14,40,.4));
 }
 
-body[data-theme="comic"] .card-btn.selected::after { color: #a5c8ff; }
+body[data-theme="comic"] .card-btn.selected::after { display: none; }
 
 body[data-theme="comic"] .card-btn.used {
-    background: #dcdae8;
-    border-color: rgba(20,14,40,.18);
-    color: rgba(20,14,40,.35);
-    box-shadow: none;
-    opacity: .65;
+    filter: grayscale(1) brightness(1.3);
+    opacity: .5;
 }
-body[data-theme="comic"] .card-btn.field-full {
-    background: #f0eef8;
-    border-color: rgba(20,14,40,.12);
-    color: rgba(20,14,40,.25);
-    box-shadow: 1px 1px 0 rgba(20,14,40,.15);
+body[data-theme="comic"] .card-btn.field-full:not(.selected):not(.used) {
+    filter: grayscale(.6);
+    opacity: .35;
 }
+
+/* ─── Card artwork per rank+suit ─────────────────────────────────────────── */
+body[data-theme="comic"] #cb-As { background-image: url('Picture/cards/card-As.png'); }
+body[data-theme="comic"] #cb-Ks { background-image: url('Picture/cards/card-Ks.png'); }
+body[data-theme="comic"] #cb-Qs { background-image: url('Picture/cards/card-Qs.png'); }
+body[data-theme="comic"] #cb-Js { background-image: url('Picture/cards/card-Js.png'); }
+body[data-theme="comic"] #cb-Ts { background-image: url('Picture/cards/card-Ts.png'); }
+body[data-theme="comic"] #cb-9s { background-image: url('Picture/cards/card-9s.png'); }
+body[data-theme="comic"] #cb-8s { background-image: url('Picture/cards/card-8s.png'); }
+body[data-theme="comic"] #cb-7s { background-image: url('Picture/cards/card-7s.png'); }
+body[data-theme="comic"] #cb-6s { background-image: url('Picture/cards/card-6s.png'); }
+body[data-theme="comic"] #cb-5s { background-image: url('Picture/cards/card-5s.png'); }
+body[data-theme="comic"] #cb-4s { background-image: url('Picture/cards/card-4s.png'); }
+body[data-theme="comic"] #cb-3s { background-image: url('Picture/cards/card-3s.png'); }
+body[data-theme="comic"] #cb-2s { background-image: url('Picture/cards/card-2s.png'); }
+body[data-theme="comic"] #cb-Ah { background-image: url('Picture/cards/card-Ah.png'); }
+body[data-theme="comic"] #cb-Kh { background-image: url('Picture/cards/card-Kh.png'); }
+body[data-theme="comic"] #cb-Qh { background-image: url('Picture/cards/card-Qh.png'); }
+body[data-theme="comic"] #cb-Jh { background-image: url('Picture/cards/card-Jh.png'); }
+body[data-theme="comic"] #cb-Th { background-image: url('Picture/cards/card-Th.png'); }
+body[data-theme="comic"] #cb-9h { background-image: url('Picture/cards/card-9h.png'); }
+body[data-theme="comic"] #cb-8h { background-image: url('Picture/cards/card-8h.png'); }
+body[data-theme="comic"] #cb-7h { background-image: url('Picture/cards/card-7h.png'); }
+body[data-theme="comic"] #cb-6h { background-image: url('Picture/cards/card-6h.png'); }
+body[data-theme="comic"] #cb-5h { background-image: url('Picture/cards/card-5h.png'); }
+body[data-theme="comic"] #cb-4h { background-image: url('Picture/cards/card-4h.png'); }
+body[data-theme="comic"] #cb-3h { background-image: url('Picture/cards/card-3h.png'); }
+body[data-theme="comic"] #cb-2h { background-image: url('Picture/cards/card-2h.png'); }
+body[data-theme="comic"] #cb-Ad { background-image: url('Picture/cards/card-Ad.png'); }
+body[data-theme="comic"] #cb-Kd { background-image: url('Picture/cards/card-Kd.png'); }
+body[data-theme="comic"] #cb-Qd { background-image: url('Picture/cards/card-Qd.png'); }
+body[data-theme="comic"] #cb-Jd { background-image: url('Picture/cards/card-Jd.png'); }
+body[data-theme="comic"] #cb-Td { background-image: url('Picture/cards/card-Td.png'); }
+body[data-theme="comic"] #cb-9d { background-image: url('Picture/cards/card-9d.png'); }
+body[data-theme="comic"] #cb-8d { background-image: url('Picture/cards/card-8d.png'); }
+body[data-theme="comic"] #cb-7d { background-image: url('Picture/cards/card-7d.png'); }
+body[data-theme="comic"] #cb-6d { background-image: url('Picture/cards/card-6d.png'); }
+body[data-theme="comic"] #cb-5d { background-image: url('Picture/cards/card-5d.png'); }
+body[data-theme="comic"] #cb-4d { background-image: url('Picture/cards/card-4d.png'); }
+body[data-theme="comic"] #cb-3d { background-image: url('Picture/cards/card-3d.png'); }
+body[data-theme="comic"] #cb-2d { background-image: url('Picture/cards/card-2d.png'); }
+body[data-theme="comic"] #cb-Ac { background-image: url('Picture/cards/card-Ac.png'); }
+body[data-theme="comic"] #cb-Kc { background-image: url('Picture/cards/card-Kc.png'); }
+body[data-theme="comic"] #cb-Qc { background-image: url('Picture/cards/card-Qc.png'); }
+body[data-theme="comic"] #cb-Jc { background-image: url('Picture/cards/card-Jc.png'); }
+body[data-theme="comic"] #cb-Tc { background-image: url('Picture/cards/card-Tc.png'); }
+body[data-theme="comic"] #cb-9c { background-image: url('Picture/cards/card-9c.png'); }
+body[data-theme="comic"] #cb-8c { background-image: url('Picture/cards/card-8c.png'); }
+body[data-theme="comic"] #cb-7c { background-image: url('Picture/cards/card-7c.png'); }
+body[data-theme="comic"] #cb-6c { background-image: url('Picture/cards/card-6c.png'); }
+body[data-theme="comic"] #cb-5c { background-image: url('Picture/cards/card-5c.png'); }
+body[data-theme="comic"] #cb-4c { background-image: url('Picture/cards/card-4c.png'); }
+body[data-theme="comic"] #cb-3c { background-image: url('Picture/cards/card-3c.png'); }
+body[data-theme="comic"] #cb-2c { background-image: url('Picture/cards/card-2c.png'); }
+body[data-theme="comic"] #cb-As.selected { background-image: url('Picture/cards/card-As-sel.png'); }
+body[data-theme="comic"] #cb-Ks.selected { background-image: url('Picture/cards/card-Ks-sel.png'); }
+body[data-theme="comic"] #cb-Qs.selected { background-image: url('Picture/cards/card-Qs-sel.png'); }
+body[data-theme="comic"] #cb-Js.selected { background-image: url('Picture/cards/card-Js-sel.png'); }
+body[data-theme="comic"] #cb-Ts.selected { background-image: url('Picture/cards/card-Ts-sel.png'); }
+body[data-theme="comic"] #cb-9s.selected { background-image: url('Picture/cards/card-9s-sel.png'); }
+body[data-theme="comic"] #cb-8s.selected { background-image: url('Picture/cards/card-8s-sel.png'); }
+body[data-theme="comic"] #cb-7s.selected { background-image: url('Picture/cards/card-7s-sel.png'); }
+body[data-theme="comic"] #cb-6s.selected { background-image: url('Picture/cards/card-6s-sel.png'); }
+body[data-theme="comic"] #cb-5s.selected { background-image: url('Picture/cards/card-5s-sel.png'); }
+body[data-theme="comic"] #cb-4s.selected { background-image: url('Picture/cards/card-4s-sel.png'); }
+body[data-theme="comic"] #cb-3s.selected { background-image: url('Picture/cards/card-3s-sel.png'); }
+body[data-theme="comic"] #cb-2s.selected { background-image: url('Picture/cards/card-2s-sel.png'); }
+body[data-theme="comic"] #cb-Ah.selected { background-image: url('Picture/cards/card-Ah-sel.png'); }
+body[data-theme="comic"] #cb-Kh.selected { background-image: url('Picture/cards/card-Kh-sel.png'); }
+body[data-theme="comic"] #cb-Qh.selected { background-image: url('Picture/cards/card-Qh-sel.png'); }
+body[data-theme="comic"] #cb-Jh.selected { background-image: url('Picture/cards/card-Jh-sel.png'); }
+body[data-theme="comic"] #cb-Th.selected { background-image: url('Picture/cards/card-Th-sel.png'); }
+body[data-theme="comic"] #cb-9h.selected { background-image: url('Picture/cards/card-9h-sel.png'); }
+body[data-theme="comic"] #cb-8h.selected { background-image: url('Picture/cards/card-8h-sel.png'); }
+body[data-theme="comic"] #cb-7h.selected { background-image: url('Picture/cards/card-7h-sel.png'); }
+body[data-theme="comic"] #cb-6h.selected { background-image: url('Picture/cards/card-6h-sel.png'); }
+body[data-theme="comic"] #cb-5h.selected { background-image: url('Picture/cards/card-5h-sel.png'); }
+body[data-theme="comic"] #cb-4h.selected { background-image: url('Picture/cards/card-4h-sel.png'); }
+body[data-theme="comic"] #cb-3h.selected { background-image: url('Picture/cards/card-3h-sel.png'); }
+body[data-theme="comic"] #cb-2h.selected { background-image: url('Picture/cards/card-2h-sel.png'); }
+body[data-theme="comic"] #cb-Ad.selected { background-image: url('Picture/cards/card-Ad-sel.png'); }
+body[data-theme="comic"] #cb-Kd.selected { background-image: url('Picture/cards/card-Kd-sel.png'); }
+body[data-theme="comic"] #cb-Qd.selected { background-image: url('Picture/cards/card-Qd-sel.png'); }
+body[data-theme="comic"] #cb-Jd.selected { background-image: url('Picture/cards/card-Jd-sel.png'); }
+body[data-theme="comic"] #cb-Td.selected { background-image: url('Picture/cards/card-Td-sel.png'); }
+body[data-theme="comic"] #cb-9d.selected { background-image: url('Picture/cards/card-9d-sel.png'); }
+body[data-theme="comic"] #cb-8d.selected { background-image: url('Picture/cards/card-8d-sel.png'); }
+body[data-theme="comic"] #cb-7d.selected { background-image: url('Picture/cards/card-7d-sel.png'); }
+body[data-theme="comic"] #cb-6d.selected { background-image: url('Picture/cards/card-6d-sel.png'); }
+body[data-theme="comic"] #cb-5d.selected { background-image: url('Picture/cards/card-5d-sel.png'); }
+body[data-theme="comic"] #cb-4d.selected { background-image: url('Picture/cards/card-4d-sel.png'); }
+body[data-theme="comic"] #cb-3d.selected { background-image: url('Picture/cards/card-3d-sel.png'); }
+body[data-theme="comic"] #cb-2d.selected { background-image: url('Picture/cards/card-2d-sel.png'); }
+body[data-theme="comic"] #cb-Ac.selected { background-image: url('Picture/cards/card-Ac-sel.png'); }
+body[data-theme="comic"] #cb-Kc.selected { background-image: url('Picture/cards/card-Kc-sel.png'); }
+body[data-theme="comic"] #cb-Qc.selected { background-image: url('Picture/cards/card-Qc-sel.png'); }
+body[data-theme="comic"] #cb-Jc.selected { background-image: url('Picture/cards/card-Jc-sel.png'); }
+body[data-theme="comic"] #cb-Tc.selected { background-image: url('Picture/cards/card-Tc-sel.png'); }
+body[data-theme="comic"] #cb-9c.selected { background-image: url('Picture/cards/card-9c-sel.png'); }
+body[data-theme="comic"] #cb-8c.selected { background-image: url('Picture/cards/card-8c-sel.png'); }
+body[data-theme="comic"] #cb-7c.selected { background-image: url('Picture/cards/card-7c-sel.png'); }
+body[data-theme="comic"] #cb-6c.selected { background-image: url('Picture/cards/card-6c-sel.png'); }
+body[data-theme="comic"] #cb-5c.selected { background-image: url('Picture/cards/card-5c-sel.png'); }
+body[data-theme="comic"] #cb-4c.selected { background-image: url('Picture/cards/card-4c-sel.png'); }
+body[data-theme="comic"] #cb-3c.selected { background-image: url('Picture/cards/card-3c-sel.png'); }
+body[data-theme="comic"] #cb-2c.selected { background-image: url('Picture/cards/card-2c-sel.png'); }
 
 /* ─── Suit labels ────────────────────────────────────────────────────────── */
 body[data-theme="comic"] .suit-red   { color: #cc2222; }
