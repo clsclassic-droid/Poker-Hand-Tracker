@@ -138,9 +138,12 @@ body[data-theme="comic"] .date-input { color-scheme: light; }
 body[data-theme="comic"] .date-lbl   { color: var(--text-dim); }
 
 /* ─── Position chips ─────────────────────────────────────────────────────── */
+body[data-theme="comic"] #position-chips {
+    gap: 2px;
+}
 body[data-theme="comic"] .pos-chip {
-    width: 42px;
-    height: 46px;
+    width: 58px;
+    height: 64px;
     padding: 0;
     border: none;
     background-color: transparent;
@@ -546,15 +549,42 @@ body[data-theme="comic"] .rec-player-table thead td { color: var(--ink); font-si
 body[data-theme="comic"] .rec-player-table tbody tr { border-top-color: rgba(20,14,40,.1); }
 body[data-theme="comic"] .rec-player-table tbody tr:hover { background: rgba(255,230,0,.15); }
 body[data-theme="comic"] .rec-pos-in {
-    background: #fff;
-    border: 2px solid var(--ink);
-    color: var(--ink);
-    border-radius: 6px 2px 5px 2px / 2px 5px 2px 6px;
-    box-shadow: 2px 2px 0 var(--ink);
-    font-weight: 700;
+    width: 44px;
+    height: 48px;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    color: transparent;
+    box-shadow: none;
+    filter: drop-shadow(1px 2px 0 rgba(20,14,40,.3));
 }
-body[data-theme="comic"] .rec-pos-in:focus         { border-color: var(--blue); }
-body[data-theme="comic"] .rec-pos-in.selected      { background: #e63030; border-color: var(--ink); color: #fff; font-weight: 800; }
+body[data-theme="comic"] .rec-pos-in:focus         { outline: none; filter: drop-shadow(2px 3px 0 rgba(20,14,40,.35)); }
+body[data-theme="comic"] .rec-pos-in.selected      { filter: drop-shadow(2px 3px 0 rgba(20,14,40,.35)); }
+
+body[data-theme="comic"] .rec-pos-in[value="SB"]     { background-image: url('Picture/positions/pos-SB.png'); }
+body[data-theme="comic"] .rec-pos-in[value="BB"]     { background-image: url('Picture/positions/pos-BB.png'); }
+body[data-theme="comic"] .rec-pos-in[value="UTG"]    { background-image: url('Picture/positions/pos-UTG.png'); }
+body[data-theme="comic"] .rec-pos-in[value="UTG+1"]  { background-image: url('Picture/positions/pos-UTGplus1.png'); }
+body[data-theme="comic"] .rec-pos-in[value="Mid"]    { background-image: url('Picture/positions/pos-Mid.png'); }
+body[data-theme="comic"] .rec-pos-in[value="Mid+1"]  { background-image: url('Picture/positions/pos-Midplus1.png'); }
+body[data-theme="comic"] .rec-pos-in[value="HJ"]     { background-image: url('Picture/positions/pos-HJ.png'); }
+body[data-theme="comic"] .rec-pos-in[value="LJ"]     { background-image: url('Picture/positions/pos-LJ.png'); }
+body[data-theme="comic"] .rec-pos-in[value="CO"]     { background-image: url('Picture/positions/pos-CO.png'); }
+body[data-theme="comic"] .rec-pos-in[value="BT"]     { background-image: url('Picture/positions/pos-BT.png'); }
+
+body[data-theme="comic"] .rec-pos-in.selected[value="SB"]     { background-image: url('Picture/positions/pos-SB-sel.png'); }
+body[data-theme="comic"] .rec-pos-in.selected[value="BB"]     { background-image: url('Picture/positions/pos-BB-sel.png'); }
+body[data-theme="comic"] .rec-pos-in.selected[value="UTG"]    { background-image: url('Picture/positions/pos-UTG-sel.png'); }
+body[data-theme="comic"] .rec-pos-in.selected[value="UTG+1"]  { background-image: url('Picture/positions/pos-UTGplus1-sel.png'); }
+body[data-theme="comic"] .rec-pos-in.selected[value="Mid"]    { background-image: url('Picture/positions/pos-Mid-sel.png'); }
+body[data-theme="comic"] .rec-pos-in.selected[value="Mid+1"]  { background-image: url('Picture/positions/pos-Midplus1-sel.png'); }
+body[data-theme="comic"] .rec-pos-in.selected[value="HJ"]     { background-image: url('Picture/positions/pos-HJ-sel.png'); }
+body[data-theme="comic"] .rec-pos-in.selected[value="LJ"]     { background-image: url('Picture/positions/pos-LJ-sel.png'); }
+body[data-theme="comic"] .rec-pos-in.selected[value="CO"]     { background-image: url('Picture/positions/pos-CO-sel.png'); }
+body[data-theme="comic"] .rec-pos-in.selected[value="BT"]     { background-image: url('Picture/positions/pos-BT-sel.png'); }
 body[data-theme="comic"] .rec-stack-in {
     background: #fff;
     border: 2px solid var(--ink);
