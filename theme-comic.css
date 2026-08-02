@@ -139,22 +139,38 @@ body[data-theme="comic"] .date-lbl   { color: var(--text-dim); }
 
 /* ─── Position chips ─────────────────────────────────────────────────────── */
 body[data-theme="comic"] .pos-chip {
-    border: 2px solid var(--ink);
-    border-radius: 20px 5px 18px 5px / 5px 18px 5px 20px;
-    box-shadow: 2px 2px 0 var(--ink);
-    background: #fff;
-    color: var(--ink);
-    font-weight: 700;
-    transition: transform .1s, box-shadow .1s;
+    width: 56px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    color: transparent;
+    box-shadow: none;
+    filter: drop-shadow(1px 2px 0 rgba(20,14,40,.35));
+    transition: transform .1s, filter .1s;
 }
 body[data-theme="comic"] .pos-chip:hover {
-    transform: translate(-1px,-1px);
-    box-shadow: 3px 3px 0 var(--ink);
+    transform: translateY(-2px);
+    filter: drop-shadow(2px 3px 0 rgba(20,14,40,.4));
 }
 body[data-theme="comic"] .pos-chip.selected {
-    background: #e63030;
-    color: #fff;
+    transform: translateY(-2px) scale(1.06);
+    filter: drop-shadow(0 0 0 3px gold) drop-shadow(2px 3px 0 rgba(20,14,40,.4));
 }
+
+body[data-theme="comic"] .pos-chip[data-pos="SB"]     { background-image: url('Picture/positions/pos-SB.png'); }
+body[data-theme="comic"] .pos-chip[data-pos="BB"]     { background-image: url('Picture/positions/pos-BB.png'); }
+body[data-theme="comic"] .pos-chip[data-pos="UTG"]    { background-image: url('Picture/positions/pos-UTG.png'); }
+body[data-theme="comic"] .pos-chip[data-pos="UTG+1"]  { background-image: url('Picture/positions/pos-UTGplus1.png'); }
+body[data-theme="comic"] .pos-chip[data-pos="Mid"]    { background-image: url('Picture/positions/pos-Mid.png'); }
+body[data-theme="comic"] .pos-chip[data-pos="Mid+1"]  { background-image: url('Picture/positions/pos-Midplus1.png'); }
+body[data-theme="comic"] .pos-chip[data-pos="HJ"]     { background-image: url('Picture/positions/pos-HJ.png'); }
+body[data-theme="comic"] .pos-chip[data-pos="LJ"]     { background-image: url('Picture/positions/pos-LJ.png'); }
+body[data-theme="comic"] .pos-chip[data-pos="CO"]     { background-image: url('Picture/positions/pos-CO.png'); }
+body[data-theme="comic"] .pos-chip[data-pos="BT"]     { background-image: url('Picture/positions/pos-BT.png'); }
 
 /* ─── Result preview ─────────────────────────────────────────────────────── */
 body[data-theme="comic"] .result-preview.rp-win  { color: #166534; }
