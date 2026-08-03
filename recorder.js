@@ -311,6 +311,17 @@ function sortByOrder(posArr, order) {
     });
 }
 
+// Base seating order for a street, adjusted for an active UTG straddle: the
+// straddler posted a live blind, so they act last preflop (same "closes the
+// round" spot BB normally has) instead of first.
+function streetOrder(street) {
+    const base = street === 'preflop' ? PF_ORDER : POST_ORDER;
+    if (street === 'preflop' && rec?.straddleActive) {
+        return [...base.filter(p => p !== 'UTG'), 'UTG'];
+    }
+    return base;
+}
+
 // ── Toggle ────────────────────────────────────────────────────────────────────
 function applyToggle() {
     const on = isOn();
@@ -342,6 +353,8 @@ function renderSetup() {
     const players = cfg?.players || buildDefaultPlayers(count);
     const sb      = cfg?.sb ?? 10;
     const bb      = cfg?.bb ?? 20;
+    const hasUTG      = players.some(p => p.pos === 'UTG');
+    const straddleAmt = cfg?.straddleAmt || bb * 2;
 
     const countOpts = Array.from({ length: 8 }, (_, i) => i + 3)
         .map(n => `<option value="${n}"${n === count ? ' selected' : ''}>${n} คน</option>`)
@@ -378,6 +391,10 @@ function renderSetup() {
                     <input class="rec-stack-in rec-blind-in" id="rec-sb" type="number" value="${sb}" min="1" step="1">
                     <span class="rec-small-lbl">BB</span>
                     <input class="rec-stack-in rec-blind-in" id="rec-bb" type="number" value="${bb}" min="1" step="1">
+                    ${hasUTG ? `
+                    <button class="rec-rotate-btn${cfg?.straddle ? ' active' : ''}" id="rec-straddle-btn" title="UTG straddle (บอดที่ 3, ปิดท้าย preflop)">Straddle</button>
+                    ${cfg?.straddle ? `<input class="rec-stack-in rec-blind-in" id="rec-straddle-amt" type="number" value="${straddleAmt}" min="1" step="1">` : ''}
+                    ` : ''}
                     <span class="rec-small-lbl rec-hdr-sep">ผู้เล่น</span>
                     <div class="rec-dd-wrap">
                         <select id="rec-count">${countOpts}</select>
@@ -404,9 +421,12 @@ function collectConfig() {
     const heroPos = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
     const sb      = parseFloat(document.getElementById('rec-sb')?.value) ?? 10;
     const bb      = parseFloat(document.getElementById('rec-bb')?.value) ?? 20;
+    const straddle    = cfg?.straddle || false;
+    const straddleAmt = parseFloat(document.getElementById('rec-straddle-amt')?.value) || cfg?.straddleAmt || (bb * 2);
     return {
         players: poses.map((pos, i) => ({ pos, name: names[i] || '', stack: stacks[i], isHero: pos === heroPos, cards: cfg?.players?.[i]?.cards || '' })),
         sb, bb,
+        straddle, straddleAmt,
         heroName:   cfg?.heroName   || 'Hero',
         autoRotate: cfg?.autoRotate || false,
     };
@@ -462,6 +482,18 @@ function bindSetupEvents() {
     document.getElementById('rec-rotate-btn')?.addEventListener('click', () => {
         if (cfg) { cfg.autoRotate = !cfg.autoRotate; saveConfig(cfg); }
         renderSetup();
+    });
+
+    document.getElementById('rec-straddle-btn')?.addEventListener('click', () => {
+        if (cfg) {
+            cfg.straddle = !cfg.straddle;
+            if (cfg.straddle && !cfg.straddleAmt) cfg.straddleAmt = (cfg.bb || 20) * 2;
+            saveConfig(cfg);
+        }
+        renderSetup();
+    });
+    document.getElementById('rec-straddle-amt')?.addEventListener('input', e => {
+        if (cfg) { cfg.straddleAmt = parseFloat(e.target.value) || (cfg.bb || 20) * 2; saveConfig(cfg); }
     });
 
     document.getElementById('rec-collapse-btn')?.addEventListener('click', () => {
@@ -528,16 +560,21 @@ function initStreet(street) {
     rec.potContrib    = {};
     rec.playersInHand.forEach(pos => { rec.potContrib[pos] = 0; });
 
-    const order     = street === 'preflop' ? PF_ORDER : POST_ORDER;
-    rec.actionOrder = sortByOrder(rec.playersInHand, order);
+    if (street === 'preflop') {
+        const utgPos = rec.playersInHand.find(p => p === 'UTG');
+        rec.straddleActive = !!cfg.straddle && !!utgPos;
+    }
+
+    rec.actionOrder = sortByOrder(rec.playersInHand, streetOrder(street));
     rec.needToAct   = rec.actionOrder.filter(p => (rec.stackByPos[p] || 0) > 0);
 
-    // Auto-post blinds preflop
+    // Auto-post blinds (+ straddle) preflop
     if (street === 'preflop') {
         const sb    = cfg.sb ?? 10;
         const bb    = cfg.bb ?? 20;
         const sbPos = rec.playersInHand.find(p => p === 'SB');
         const bbPos = rec.playersInHand.find(p => p === 'BB');
+        const utgPos = rec.playersInHand.find(p => p === 'UTG');
 
         if (sbPos) {
             rec.streets.preflop.push({ pos: sbPos, a: 'post', v: sb });
@@ -551,7 +588,16 @@ function initStreet(street) {
             rec.potContrib[bbPos]  = bb;
             rec.stackByPos[bbPos] -= bb;
         }
-        rec.currentBet = bb;
+        if (rec.straddleActive) {
+            const straddleAmt = cfg.straddleAmt || bb * 2;
+            rec.streets.preflop.push({ pos: utgPos, a: 'post', v: straddleAmt });
+            rec.pot                += straddleAmt;
+            rec.potContrib[utgPos]  = straddleAmt;
+            rec.stackByPos[utgPos] -= straddleAmt;
+            rec.currentBet = straddleAmt;
+        } else {
+            rec.currentBet = bb;
+        }
     }
 }
 
@@ -597,7 +643,7 @@ function recordAction(pos, action, amount) {
     } else if (isAggressive) {
         rec.currentBet   = rec.potContrib[pos]; // total commitment of raiser
         rec.raisingRound++;
-        const order     = rec.currentStreet === 'preflop' ? PF_ORDER : POST_ORDER;
+        const order     = streetOrder(rec.currentStreet);
         const remaining = rec.playersInHand.filter(p => p !== pos);
         const raiserIdx = order.indexOf(pos);
 
