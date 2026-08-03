@@ -479,6 +479,26 @@ function bindSetupEvents() {
         if (cfg) { cfg.heroName = e.target.value.trim() || 'Hero'; saveConfig(cfg); }
     });
 
+    document.querySelectorAll('.rec-name-in').forEach((input, idx) => {
+        input.addEventListener('input', () => {
+            if (!cfg?.players?.[idx]) return;
+            cfg.players[idx].name = input.value.trim();
+            saveConfig(cfg);
+            if (rec) {
+                renderPosChips();
+                updateStreetActorLabel();
+                refreshFeedNames(cfg.players[idx].pos);
+            }
+        });
+    });
+    document.querySelectorAll('.rec-player-stack').forEach((input, idx) => {
+        input.addEventListener('input', () => {
+            if (!cfg?.players?.[idx]) return;
+            cfg.players[idx].stack = parseFloat(input.value) || 1000;
+            saveConfig(cfg);
+        });
+    });
+
     document.getElementById('rec-rotate-btn')?.addEventListener('click', () => {
         if (cfg) { cfg.autoRotate = !cfg.autoRotate; saveConfig(cfg); }
         renderSetup();
@@ -813,6 +833,19 @@ function renderPosChips() {
             ${name ? `<span class="rec-pc-name">${name}</span>` : ''}
         </div>`;
     }).join('');
+}
+
+// Update already-logged feed rows in place so a mid-hand name edit doesn't
+// leave earlier streets showing the old (or blank) name.
+function refreshFeedNames(pos) {
+    const player  = cfg?.players?.find(p => p.pos === pos);
+    const display = player?.name || (player?.isHero ? '● Hero' : '');
+    document.querySelectorAll('.rec-sc-feed .rec-feed-row').forEach(row => {
+        const posEl = row.querySelector('.rec-fr-pos');
+        if (posEl?.textContent.trim() !== pos) return;
+        const nameEl = row.querySelector('.rec-fr-name');
+        if (nameEl) nameEl.textContent = display;
+    });
 }
 
 function updatePotBar() {
