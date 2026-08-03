@@ -1645,25 +1645,37 @@ function init() {
 }
 
 function _moveHero(dir) {
-    if (!cfg?.players) return;
+    if (!cfg?.players?.length) return;
     const heroIdx = cfg.players.findIndex(p => p.isHero);
     if (heroIdx < 0) return;
-    const newIdx = heroIdx + dir;
-    if (newIdx < 0 || newIdx >= cfg.players.length) return;
 
-    const a = cfg.players[heroIdx];
-    const b = cfg.players[newIdx];
-    // Swap name, stack, cards, isHero between the two rows (pos stays fixed)
-    [a.name, b.name]   = [b.name, a.name];
-    [a.stack, b.stack] = [b.stack, a.stack];
-    [a.cards, b.cards] = [b.cards, a.cards];
-    [a.isHero, b.isHero] = [b.isHero, a.isHero];
+    // Rotate every seat's name/stack/cards by one step (not just a 2-person
+    // swap) so the whole lineup shifts consistently — same identity, new seat.
+    const rotate = arr => {
+        const out = arr.slice();
+        if (dir < 0) out.push(out.shift());
+        else         out.unshift(out.pop());
+        return out;
+    };
+    const names  = rotate(cfg.players.map(p => p.name || ''));
+    const stacks = rotate(cfg.players.map(p => p.stack));
+    const cards  = rotate(cfg.players.map(p => p.cards || ''));
+
+    const heroName = cfg.heroName || 'Hero';
+    cfg.players.forEach((p, i) => {
+        p.name   = names[i];
+        p.stack  = stacks[i];
+        p.cards  = cards[i];
+        p.isHero = (p.name === heroName);
+    });
 
     // Sync pos-chip selection to the new Hero's position
-    const newHeroPos = cfg.players[newIdx].pos;
-    document.querySelectorAll('#position-chips .pos-chip').forEach(btn => {
-        btn.classList.toggle('selected', btn.dataset.pos === newHeroPos);
-    });
+    const newHeroPos = cfg.players.find(p => p.isHero)?.pos;
+    if (newHeroPos) {
+        document.querySelectorAll('#position-chips .pos-chip').forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.pos === newHeroPos);
+        });
+    }
 
     saveConfig(cfg);
     renderSetup();
