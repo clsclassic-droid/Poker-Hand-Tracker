@@ -599,7 +599,7 @@
     padding-top: 6px;
 }
 .rec-modal-log-title {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 1.5px;
     color: #4a6580;
@@ -610,7 +610,7 @@
     gap: 8px;
 }
 .rec-log-hero-tag {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 400;
     letter-spacing: 0;
     color: #4a6580;
@@ -622,7 +622,7 @@
     background: #1e2e44;
     border: 1px solid #2a3f5f;
     color: #94a3b8;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: 0;
     text-transform: none;
@@ -652,7 +652,7 @@
 
 /* Column headers — colored per street */
 .rec-log-col-hd {
-    font-size: 8.5px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-align: center;
@@ -687,14 +687,14 @@
 }
 .rec-log-row-hero .rec-log-pos { color: #c4b5fd; }
 .rec-log-pos {
-    font-size: 9px;
+    font-size: 10.5px;
     font-weight: 700;
     color: #4a6580;
     overflow: hidden;
     white-space: nowrap;
 }
 .rec-log-name {
-    font-size: 8px;
+    font-size: 9.5px;
     font-weight: 400;
     color: #3a5570;
     letter-spacing: 0;
@@ -703,12 +703,12 @@
 .rec-modal-log .w-badge {
     width: 12px;
     height: 12px;
-    font-size: 6px;
+    font-size: 7px;
     flex-shrink: 0;
 }
 .rec-log-act {
     min-width: 0;
-    font-size: 9.5px;
+    font-size: 11px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     overflow: hidden;
@@ -726,7 +726,7 @@
 
 /* Pot line at bottom of each column */
 .rec-log-col-pot {
-    font-size: 9px;
+    font-size: 10.5px;
     font-weight: 700;
     color: #22c55e;
     padding: 3px 5px;
@@ -826,7 +826,7 @@
     align-items: center;
     gap: 1px;
     overflow: hidden;
-    font-size: 8.5px;
+    font-size: 9.5px;
     font-variant-numeric: tabular-nums;
 }
 
