@@ -276,15 +276,15 @@
     min-width: 34px;
 }
 .rec-pc-pos {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 5px 12px;
+    border-radius: 6px;
     letter-spacing: .02em;
     white-space: nowrap;
 }
 .rec-pc-name {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -292,17 +292,17 @@
     max-width: 44px;
     text-align: center;
 }
-.rec-pc-neutral .rec-pc-pos  { background: #162032; color: #7a9ab8; border: 1px solid #2a3f5f; }
-.rec-pc-neutral .rec-pc-name { color: #7a9ab8; }
+.rec-pc-neutral .rec-pc-pos  { background: rgba(59,130,246,.14); color: #60a5fa; border: 1px solid rgba(59,130,246,.4); }
+.rec-pc-neutral .rec-pc-name { color: #60a5fa; }
 .rec-pc-active  .rec-pc-pos  { background: rgba(16,185,129,.18); color: #4ade80; border: 1px solid rgba(22,163,74,.5); }
 .rec-pc-active  .rec-pc-name { color: #4ade80; }
-.rec-pc-fold    .rec-pc-pos  { background: rgba(220,38,38,.12); color: #f87171; border: 1px solid rgba(239,68,68,.4); }
-.rec-pc-fold    .rec-pc-name { color: #f87171; opacity: .55; text-decoration: line-through; }
-.rec-pc-hero    .rec-pc-pos  { background: rgba(59,130,246,.18); color: #93c5fd; border: 1px solid rgba(37,99,235,.4); }
-.rec-pc-hero    .rec-pc-name { color: #93c5fd; }
+.rec-pc-fold    .rec-pc-pos  { font-size: 10px; padding: 3px 8px; background: rgba(148,163,184,.08); color: #94a3b8; border: 1px dashed rgba(148,163,184,.5); }
+.rec-pc-fold    .rec-pc-name { color: #94a3b8; opacity: .55; text-decoration: line-through; }
+.rec-pc-hero    .rec-pc-pos  { background: rgba(139,92,246,.18); color: #c4b5fd; border: 1px solid rgba(124,58,237,.5); }
+.rec-pc-hero    .rec-pc-name { color: #c4b5fd; }
 .rec-street-tabs { display: flex; gap: 4px; }
 .rec-st-tab {
-    font-size: 9.5px;
+    font-size: 10.5px;
     font-weight: 700;
     letter-spacing: .5px;
     padding: 3px 8px;
@@ -316,13 +316,13 @@
 .rec-st-active.river-tab   { background: rgba(185,28,28,.2);  color: #f87171; border-color: rgba(185,28,28,.4); }
 .rec-st-done { color: #344d6e; text-decoration: line-through; }
 .rec-panel-header-right { display: flex; align-items: center; gap: 8px; }
-.rec-pot-display { font-size: 11px; color: #4a6580; }
-.rec-pot-display b { color: #22c55e; font-size: 13px; font-variant-numeric: tabular-nums; }
+.rec-pot-display { font-size: 12px; color: #4a6580; }
+.rec-pot-display b { color: #22c55e; font-size: 14px; font-variant-numeric: tabular-nums; }
 .rec-undo-btn {
     background: transparent;
     border: 1px solid #2a3f5f;
     color: #7a9ab8;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     padding: 3px 9px;
     border-radius: 6px;
@@ -341,10 +341,10 @@
     background: rgba(245,158,11,.06);
     border-bottom: 1px solid rgba(245,158,11,.15);
 }
-.rec-bet-lbl { font-size: 10px; color: #4a6580; }
-.rec-bet-val { font-size: 12px; font-weight: 700; color: #fbbf24; font-variant-numeric: tabular-nums; }
+.rec-bet-lbl { font-size: 11px; color: #4a6580; }
+.rec-bet-val { font-size: 13px; font-weight: 700; color: #fbbf24; font-variant-numeric: tabular-nums; }
 .rec-raise-badge {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 10px;
@@ -444,7 +444,7 @@
     font-variant-numeric: tabular-nums;
 }
 .rec-to-call {
-    font-size: 10px;
+    font-size: 11px;
     background: rgba(59,130,246,.1);
     border: 1px solid rgba(59,130,246,.2);
     color: #93c5fd;
@@ -456,7 +456,7 @@
 .rec-act-row { display: flex; gap: 5px; margin-bottom: 7px; }
 .rec-ab {
     flex: 1;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     padding: 8px 0;
     border-radius: 7px;
@@ -477,12 +477,12 @@
     align-items: center;
     gap: 6px;
 }
-.rec-amt-lbl { font-size: 11px; color: #4a6580; }
+.rec-amt-lbl { font-size: 12px; color: #4a6580; }
 .rec-amt-in {
     background: #162032;
     border: 1px solid #2a3f5f;
     color: #e2e8f0;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     width: 120px;
     padding: 6px 24px 6px 8px;
@@ -495,7 +495,7 @@
 .rec-quick-btns { display: flex; gap: 4px; flex: 1; }
 .rec-qb {
     flex: 1;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     padding: 7px 3px;
     border-radius: 6px;
@@ -508,7 +508,7 @@
     min-width: 0;
 }
 .rec-qb:hover { border-color: #344d6e; color: #e2e8f0; }
-.rec-bb-btn { flex: none; width: 30px; font-size: 15px; padding: 5px 0; }
+.rec-bb-btn { flex: none; width: 30px; font-size: 16px; padding: 5px 0; }
 
 /* Street complete footer */
 .rec-street-footer { border-top: 1px solid #2a3f5f; }
@@ -519,13 +519,13 @@
     gap: 10px;
     padding: 9px 14px;
 }
-.rec-done-lbl { font-size: 11px; color: #4a6580; font-variant-numeric: tabular-nums; }
-.rec-done-hint { font-size: 10px; color: #2e4a62; margin-left: auto; }
+.rec-done-lbl { font-size: 12px; color: #4a6580; font-variant-numeric: tabular-nums; }
+.rec-done-hint { font-size: 11px; color: #2e4a62; margin-left: auto; }
 .rec-btn-next {
     background: rgba(59,130,246,.12);
     border: 1px solid #3b82f6;
     color: #60a5fa;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     padding: 6px 14px;
     border-radius: 7px;
@@ -550,7 +550,7 @@
     transition: border-color .2s, opacity .2s;
 }
 .rec-sc-label {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-align: center;
@@ -583,13 +583,13 @@
 
 /* Compact feed rows inside cards */
 .rec-sc-feed .rec-feed-row { grid-template-columns: 24px 34px 26px 1fr; padding: 2px 3px; column-gap: 1px; }
-.rec-sc-feed .rec-fr-pos { font-size: 10px; color: #7dd3fc; }
-.rec-sc-feed .rec-fr-name { font-size: 9px; color: #94a3b8; font-weight: 600; }
+.rec-sc-feed .rec-fr-pos { font-size: 11px; color: #7dd3fc; }
+.rec-sc-feed .rec-fr-name { font-size: 10px; color: #94a3b8; font-weight: 600; }
 .rec-sc-feed .rec-fr-cards { gap: 0; }
-.rec-sc-feed .mini-card { font-size: 7px; min-width: 11px; padding: 0 1px; line-height: 1.2; }
-.rec-sc-feed .rec-fr-act { font-size: 10px; }
+.rec-sc-feed .mini-card { font-size: 8px; min-width: 11px; padding: 0 1px; line-height: 1.2; }
+.rec-sc-feed .rec-fr-act { font-size: 11px; }
 .rec-sc-feed .rec-feed-divider { padding: 1px 3px; }
-.rec-sc-feed .rec-div-lbl { font-size: 8px; }
+.rec-sc-feed .rec-div-lbl { font-size: 9px; }
 
 /* ── Action Log in Hand Detail Modal ──────────────────────────────────────── */
 .rec-modal-log {
@@ -745,14 +745,14 @@
     background: rgba(16,185,129,.07);
 }
 .rec-sc-actor-pos {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 800;
     color: #4ade80;
     white-space: nowrap;
     overflow: hidden;
 }
 .rec-sc-actor-name {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
     color: #86efac;
     white-space: nowrap;
@@ -765,7 +765,7 @@
     align-items: center;
 }
 .rec-sc-acting-dot {
-    font-size: 8px;
+    font-size: 9px;
     color: #4ade80;
     text-align: right;
     padding-right: 2px;
@@ -790,7 +790,7 @@
 
 /* Pot footer in each street card (live recorder) */
 .rec-sc-pot {
-    font-size: 9.5px;
+    font-size: 10.5px;
     font-weight: 700;
     color: #22c55e;
     padding: 2px 5px;
