@@ -664,6 +664,20 @@ function cardHtml(str) {
     }).join(state.settings.textCards ? ' ' : '');
 }
 
+// Editing a hand's plain Flop/Turn/River fields doesn't regenerate its detailed
+// Action Log JSON (that only happens via the recorder's own re-record edit flow),
+// so the Hand Detail modal kept showing whichever board split was true when the
+// log was first saved. Patch the log's boards to match whatever was just edited,
+// even though the recorded bet/fold sequence itself can't be reconstructed.
+function _syncLogBoards(jsonStr, boards) {
+    if (!jsonStr) return jsonStr;
+    try {
+        const data = JSON.parse(jsonStr);
+        data.boards = { flop: [...boards.flop], turn: [...boards.turn], river: [...boards.river] };
+        return JSON.stringify(data);
+    } catch (_) { return jsonStr; }
+}
+
 // ─── Save ─────────────────────────────────────────────────────────────────────
 async function saveHand() {
     // When recorder is active: auto-fill SD1/SD2 for sheet compat, collect all showdown opponents
@@ -770,8 +784,9 @@ async function saveHand() {
         if (state.editing) {
             const { histIdx, handNum } = state.editing;
             const sheetRow = histIdx + 2;
-            row[23] = window.recorderModule?._getLogForHand?.(histIdx)
-                   || state.history[histIdx]?.[23]
+            const recLog = window.recorderModule?._getLogForHand?.(histIdx);
+            row[23] = recLog
+                   || _syncLogBoards(state.history[histIdx]?.[23], { flop, turn, river })
                    || '';
             row[24] = state.history[histIdx]?.[24] || sessionVal;
             await gapi.client.sheets.spreadsheets.values.update({
