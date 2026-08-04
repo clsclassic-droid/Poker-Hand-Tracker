@@ -644,6 +644,21 @@ body[data-theme="comic"] .rec-dd-wrap select {
     box-shadow: 2px 2px 0 var(--ink);
     font-weight: 700;
 }
+body[data-theme="comic"] .rec-gear-btn {
+    background: #fff;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    border-radius: 7px 2px 6px 2px / 2px 6px 2px 7px;
+    box-shadow: 2px 2px 0 var(--ink);
+    font-weight: 700;
+}
+body[data-theme="comic"] .rec-gear-btn:hover { border-color: var(--blue); color: var(--blue); }
+body[data-theme="comic"] .rec-blinds-pop {
+    background: #fff8d6;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 3px 3px 0 var(--ink);
+}
 body[data-theme="comic"] .rec-player-table { color: var(--text); }
 body[data-theme="comic"] .rec-player-table thead td { color: var(--ink); font-size: 12px; font-weight: 800; }
 body[data-theme="comic"] .rec-player-table tbody tr { border-top-color: rgba(20,14,40,.1); }

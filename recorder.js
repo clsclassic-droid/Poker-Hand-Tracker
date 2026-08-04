@@ -29,6 +29,9 @@ let _hideVillainCards = false;
 let _lastLogJson  = null;
 let _lastHeroCards = null;
 
+// Table setup: SB/BB popover open state (per-session, not persisted)
+let _blindsPopOpen = false;
+
 let cfg = null;
 let rec = null;
 let recActivePlayer = -1;
@@ -298,10 +301,17 @@ function buildDefaultPlayers(n) {
     return positions.map(pos => ({ pos, name: '', stack: 1000, isHero: false }));
 }
 
-// Hide the entire position-row when recorder is on (redundant with setup table); restore when off
+// Hide the entire position-row when recorder is on (redundant with setup table);
+// restore when off, and filter the individual chips to whichever positions the
+// table-setup player count actually uses (e.g. 6-max hides UTG+1/Mid/Mid+1/LJ).
 function syncPositionChips() {
     const row = document.getElementById('position-row');
     if (row) row.style.display = isOn() ? 'none' : '';
+
+    const validPos = new Set((cfg?.players || []).map(p => p.pos));
+    document.querySelectorAll('#position-chips .pos-chip').forEach(btn => {
+        btn.style.display = (validPos.size === 0 || validPos.has(btn.dataset.pos)) ? '' : 'none';
+    });
 }
 
 function sortByOrder(posArr, order) {
@@ -329,7 +339,10 @@ function applyToggle() {
     const panelEl = document.getElementById('recorder-panel');
     if (setupEl) setupEl.style.display = on ? '' : 'none';
     if (panelEl && !on) panelEl.style.display = 'none';
-    if (on) { cfg = loadConfig(); renderSetup(); }
+    // Load persisted table config even when the recorder is off, so the
+    // simple-mode position row can still filter to the configured seats.
+    cfg = loadConfig();
+    if (on) renderSetup();
     const startBtn = document.getElementById('rec-start-btn');
     if (startBtn) startBtn.style.display = on && !rec ? '' : 'none';
     syncPositionChips();
@@ -387,10 +400,15 @@ function renderSetup() {
                     <button class="rec-rotate-btn${cfg?.autoRotate ? ' active' : ''}" id="rec-rotate-btn" title="เลื่อนตำแหน่งอัตโนมัติหลังบันทึก Hand">เลื่อนอัตโนมัติ</button>
                 </div>
                 <div class="rec-header-right">
-                    <span class="rec-small-lbl">SB</span>
-                    <input class="rec-stack-in rec-blind-in" id="rec-sb" type="number" value="${sb}" min="1" step="1">
-                    <span class="rec-small-lbl">BB</span>
-                    <input class="rec-stack-in rec-blind-in" id="rec-bb" type="number" value="${bb}" min="1" step="1">
+                    <div class="rec-blinds-wrap">
+                        <button class="rec-gear-btn" id="rec-blinds-gear" title="ตั้งค่า Blind (SB/BB)">⚙ Blind</button>
+                        <div class="rec-blinds-pop${_blindsPopOpen ? ' open' : ''}" id="rec-blinds-pop">
+                            <label class="rec-small-lbl" for="rec-sb">SB</label>
+                            <input class="rec-stack-in rec-blind-in" id="rec-sb" type="number" value="${sb}" min="1" step="1">
+                            <label class="rec-small-lbl" for="rec-bb">BB</label>
+                            <input class="rec-stack-in rec-blind-in" id="rec-bb" type="number" value="${bb}" min="1" step="1">
+                        </div>
+                    </div>
                     ${hasUTG ? `
                     <button class="rec-rotate-btn${cfg?.straddle ? ' active' : ''}" id="rec-straddle-btn" title="UTG straddle (บอดที่ 3, ปิดท้าย preflop)">Straddle</button>
                     ${cfg?.straddle ? `<input class="rec-stack-in rec-blind-in" id="rec-straddle-amt" type="number" value="${straddleAmt}" min="1" step="1">` : ''}
@@ -477,6 +495,12 @@ function bindSetupEvents() {
 
     document.getElementById('rec-hero-name')?.addEventListener('input', e => {
         if (cfg) { cfg.heroName = e.target.value.trim() || 'Hero'; saveConfig(cfg); }
+    });
+
+    document.getElementById('rec-blinds-gear')?.addEventListener('click', e => {
+        e.stopPropagation();
+        _blindsPopOpen = !_blindsPopOpen;
+        document.getElementById('rec-blinds-pop')?.classList.toggle('open', _blindsPopOpen);
     });
 
     document.querySelectorAll('.rec-name-in').forEach((input, idx) => {
@@ -1639,6 +1663,13 @@ function init() {
         if (!cfg?.players || cfg.players.length < 2) { toast('กรุณาตั้งค่าผู้เล่นก่อน', 'error'); return; }
         if (!cfg.players.some(p => p.isHero)) { toast('กรุณากดเลือกตำแหน่ง Hero ก่อนเริ่มบันทึก', 'error'); return; }
         startRecording();
+    });
+
+    document.addEventListener('click', e => {
+        if (!_blindsPopOpen) return;
+        if (e.target.closest('.rec-blinds-wrap')) return;
+        _blindsPopOpen = false;
+        document.getElementById('rec-blinds-pop')?.classList.remove('open');
     });
 
     applyToggle();
