@@ -350,6 +350,16 @@ function applyToggle() {
         const el = document.getElementById(id);
         if (el) el.style.display = on ? 'none' : '';
     });
+    // The simple top-bar Fold button sets state.foldStreet, which doesn't talk to
+    // rec.playersInHand — hide it in detailed mode so fold only ever comes from the
+    // per-street actor button, and clear any stale state.foldStreet left over from
+    // before the toggle so it can't silently disagree with the recorder's own fold.
+    const foldBtn = document.getElementById('fold-btn');
+    if (foldBtn) foldBtn.style.display = on ? 'none' : '';
+    if (on && window.state) {
+        window.state.foldStreet = null;
+        window.refreshFoldBtn?.();
+    }
     if (on) {
         const af = document.querySelector('.field-item.active')?.dataset?.field;
         if (af === 'sd1' || af === 'sd2') document.getElementById('fi-river')?.click();
@@ -1731,7 +1741,22 @@ function _heroFolded() {
     return hero ? !rec.playersInHand.includes(hero.pos) : false;
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded, _moveHero, _toggleHideVillains };
+// Which field key (hand/flop/turn/river — app.js's vocabulary, not "preflop") Hero
+// actually folded on, per the detailed action log. Null if Hero hasn't folded.
+const REC_STREET_TO_FIELD = { preflop: 'hand', flop: 'flop', turn: 'turn', river: 'river' };
+function _heroFoldStreet() {
+    if (!rec || !cfg) return null;
+    const hero = cfg.players.find(p => p.isHero);
+    if (!hero) return null;
+    for (const street of STREET_SEQ) {
+        if (rec.streets[street]?.some(e => e.pos === hero.pos && e.a === 'fold')) {
+            return REC_STREET_TO_FIELD[street] || null;
+        }
+    }
+    return null;
+}
+
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded, _heroFoldStreet, _moveHero, _toggleHideVillains };
 document.addEventListener('DOMContentLoaded', init);
 
 })();

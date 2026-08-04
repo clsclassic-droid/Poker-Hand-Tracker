@@ -690,7 +690,10 @@ async function saveHand() {
     const board     = [...flop, ...turn, ...river];
     const hitResult = evaluatePokerHand(hand, board);
     const hitText   = hitResult ? hitResult.name : '';
-    const foldText  = state.foldStreet ? FOLD_LABEL[state.foldStreet] : '';
+    const recFoldField = window.recorderModule?._heroFoldStreet?.() ?? null;
+    const foldText  = state.foldStreet ? FOLD_LABEL[state.foldStreet]
+                     : recFoldField    ? FOLD_LABEL[recFoldField]
+                     : '';
 
     const betPF    = parseFloat(document.getElementById('bet-pf')?.value)   || 0;
     const betFLOP  = parseFloat(document.getElementById('bet-flop')?.value)  || 0;
