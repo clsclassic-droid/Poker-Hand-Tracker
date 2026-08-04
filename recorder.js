@@ -459,9 +459,8 @@ function bindSetupEvents() {
         fresh.forEach(p => {
             if (prev[p.pos]) { p.stack = prev[p.pos].stack; p.isHero = prev[p.pos].isHero; p.name = prev[p.pos].name || ''; p.cards = prev[p.pos].cards || ''; }
         });
-        cfg = { ...cfg, players: fresh };
+        saveConfig({ ...cfg, players: fresh });
         renderSetup();
-        syncPositionChips();
     });
 
     document.querySelector('.rec-player-table')?.addEventListener('click', e => {
