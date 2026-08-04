@@ -432,8 +432,17 @@ function renderSetup() {
     bindSetupEvents();
 }
 
+// Normalize a typed position to its canonical casing (e.g. "mid" -> "Mid") so it still
+// matches PF_ORDER/POST_ORDER/POS_PRESETS; unrecognized custom text is just uppercased.
+function normalizePos(v) {
+    const raw = (v || '').trim();
+    if (!raw) return '?';
+    const known = PF_ORDER.find(t => t.toLowerCase() === raw.toLowerCase());
+    return known || raw.toUpperCase();
+}
+
 function collectConfig() {
-    const poses   = [...document.querySelectorAll('.rec-pos-in')].map(el => el.value.trim().toUpperCase() || '?');
+    const poses   = [...document.querySelectorAll('.rec-pos-in')].map(el => normalizePos(el.value));
     const names   = [...document.querySelectorAll('.rec-name-in')].map(el => el.value.trim());
     const stacks  = [...document.querySelectorAll('.rec-player-stack')].map(el => parseFloat(el.value) || 1000);
     const heroPos = document.querySelector('#position-chips .pos-chip.selected')?.dataset.pos || '';
