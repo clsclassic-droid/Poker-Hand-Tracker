@@ -213,12 +213,20 @@ body[data-theme="comic"] .field-item.complete .field-label { color: var(--text-d
 
 /* Per-field flat backgrounds */
 
-/* HAND — violet/purple */
+/* HAND — violet/purple, torn-paper panel artwork */
 body[data-theme="comic"] .field-item[data-field="hand"] {
-    background: #822de2;
-    border-color: var(--ink);
-    box-shadow: 3px 3px 0 var(--ink);
+    background-image: url('Picture/panels/panel-hand.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+    padding-top: 34px;
 }
+body[data-theme="comic"] .field-item[data-field="hand"] .field-label { display: none; }
+body[data-theme="comic"] .field-item[data-field="hand"]:hover { box-shadow: none; }
 /* FLOP — sky blue */
 body[data-theme="comic"] .field-item[data-field="flop"] {
     background: #2e80fc;
