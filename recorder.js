@@ -425,7 +425,7 @@ function renderSetup() {
                     ` : ''}
                     <span class="rec-small-lbl rec-hdr-sep">ผู้เล่น</span>
                     <div class="rec-dd-wrap">
-                        <select id="rec-count">${countOpts}</select>
+                        <select id="rec-count"${rec ? ' disabled' : ''}>${countOpts}</select>
                         <span class="rec-dd-arr">▾</span>
                     </div>
                     <button class="rec-collapse-btn" id="rec-collapse-btn" title="ซ่อน/แสดง">▲</button>
@@ -613,6 +613,13 @@ function startRecording() {
 
 function _setPosLock(locked) {
     document.querySelectorAll('.rec-pos-in').forEach(el => { el.disabled = locked; });
+    // Reshaping the table mid-hand (e.g. 9-max -> 8-max) rebuilds cfg.players, but the
+    // in-progress rec.playersInHand/needToAct snapshot from hand start doesn't change —
+    // that desync is what let a position like "Mid" vanish from the header while still
+    // showing up in the action log. Lock the seat-count picker for the same duration as
+    // the position inputs so the table can't be reshaped while a hand is being recorded.
+    const countEl = document.getElementById('rec-count');
+    if (countEl) countEl.disabled = locked;
 }
 
 function initStreet(street) {
