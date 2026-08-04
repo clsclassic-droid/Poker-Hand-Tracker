@@ -817,6 +817,11 @@ async function saveHand() {
             state.handNumber++;
             document.getElementById('hand-num-display').textContent = state.handNumber;
             window.recorderModule?._saveLog();
+            // Detailed mode rotates internally after _saveLog(); in simple mode there's
+            // no recorder in progress to hook that into, so trigger it here instead.
+            if (window.recorderModule?._isAutoRotateOn?.() && !window.recorderModule?._isRecording?.()) {
+                setTimeout(() => window.recorderModule._rotatePositions(), 300);
+            }
             clearAll();
         }
     } catch (e) {

@@ -294,6 +294,15 @@ function saveConfig(c) {
     const persisted = { ...c, players: c.players?.map(p => ({ ...p, cards: '' })) || [] };
     localStorage.setItem(LS_CONFIG, JSON.stringify(persisted));
     syncPositionChips();
+    _syncRotateBtns();
+}
+
+// Keep the recorder-setup rotate toggle and the simple-mode one in sync — both
+// just reflect/flip the same cfg.autoRotate flag.
+function _syncRotateBtns() {
+    const active = !!cfg?.autoRotate;
+    document.getElementById('rec-rotate-btn')?.classList.toggle('active', active);
+    document.getElementById('pos-rotate-btn')?.classList.toggle('active', active);
 }
 
 function buildDefaultPlayers(n) {
@@ -342,6 +351,7 @@ function applyToggle() {
     // Load persisted table config even when the recorder is off, so the
     // simple-mode position row can still filter to the configured seats.
     cfg = loadConfig();
+    _syncRotateBtns();
     if (on) renderSetup();
     const startBtn = document.getElementById('rec-start-btn');
     if (startBtn) startBtn.style.display = on && !rec ? '' : 'none';
@@ -395,7 +405,7 @@ function renderSetup() {
                 <input class="rec-name-in" data-i="${i}" value="${p.name || ''}" placeholder="ชื่อเล่น" maxlength="12">
                 ${isHero ? `<button class="rec-mv-btn" onclick="window.recorderModule._moveHero(-1)" title="เลื่อนขึ้น">↑</button><button class="rec-mv-btn" onclick="window.recorderModule._moveHero(1)" title="เลื่อนลง">↓</button>` : ''}
             </div></td>
-            <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"></td>
+            <td><input class="rec-stack-in rec-player-stack" data-i="${i}" type="number" value="${p.stack || 1000}" min="0" step="10"${rec ? ' disabled' : ''}></td>
             <td><button class="rec-cards-slot${isHero ? ' rec-cards-hero-slot' : ''}" data-i="${i}"${isHero ? ' title="ไพ่ Hero = ช่อง HAND"' : ''}>${renderCardSlotHTML(cardStr, isHero)}</button></td>
         </tr>`;
     }).join('');
@@ -620,6 +630,11 @@ function _setPosLock(locked) {
     // the position inputs so the table can't be reshaped while a hand is being recorded.
     const countEl = document.getElementById('rec-count');
     if (countEl) countEl.disabled = locked;
+    // Same story for Stack: editing it only touched cfg.players[i].stack, never
+    // rec.stackByPos (the number actually driving the live actor panel/all-in caps),
+    // so a mid-hand edit silently didn't apply. Lock it instead of trying to re-derive
+    // "how much of the new stack is still behind" after bets already happened this hand.
+    document.querySelectorAll('.rec-player-stack').forEach(el => { el.disabled = locked; });
 }
 
 function initStreet(street) {
@@ -792,6 +807,23 @@ function _undo() {
     }
 }
 
+// Discard the in-progress hand without saving — the escape hatch for a mistyped
+// stack/position/count noticed only after "เริ่มบันทึก" was already clicked, since
+// those inputs lock for the duration of a hand. cfg (table setup) is untouched.
+function _cancelHand() {
+    if (!rec) return;
+    if (!confirm('ยกเลิกมือนี้? ข้อมูลที่บันทึกไปในมือนี้จะหายไปทั้งหมด (ยังไม่ได้บันทึกลงชีต)')) return;
+
+    rec = null;
+    _setPosLock(false);
+    const panelEl  = document.getElementById('recorder-panel');
+    const startBtn = document.getElementById('rec-start-btn');
+    if (panelEl)  panelEl.style.display = 'none';
+    if (startBtn) startBtn.style.display = '';
+    renderSetup();
+    toast('ยกเลิกมือนี้แล้ว');
+}
+
 // ── Panel render ──────────────────────────────────────────────────────────────
 function renderPanel() {
     const el = document.getElementById('recorder-panel');
@@ -823,6 +855,7 @@ function renderPanel() {
                 <div class="rec-panel-header-right">
                     <button class="rec-undo-btn" onclick="window.recorderModule._toggleSetup()" title="ตั้งค่าโต๊ะ">⚙</button>
                     <button class="rec-undo-btn" onclick="window.recorderModule._undo()">↩ ย้อน</button>
+                    <button class="rec-undo-btn" onclick="window.recorderModule._cancelHand()" title="ยกเลิกมือนี้ (ไม่บันทึก)">✕ ยกเลิก</button>
                 </div>
             </div>
             <div class="rec-streets-row">${cards}</div>
@@ -1690,6 +1723,14 @@ function init() {
         startRecording();
     });
 
+    document.getElementById('pos-rotate-btn')?.addEventListener('click', () => {
+        // Unlike the setup-panel button, this one is reachable before cfg exists at
+        // all (user never opened detailed setup) — seed a default table first.
+        if (!cfg) cfg = { players: buildDefaultPlayers(6), sb: 10, bb: 20, heroName: 'Hero', autoRotate: false };
+        cfg.autoRotate = !cfg.autoRotate;
+        saveConfig(cfg);
+    });
+
     document.addEventListener('click', e => {
         if (!_blindsPopOpen) return;
         if (e.target.closest('.rec-blinds-wrap')) return;
@@ -1763,7 +1804,9 @@ function _heroFoldStreet() {
     return null;
 }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded, _heroFoldStreet, _moveHero, _toggleHideVillains };
+function _isAutoRotateOn() { return !!cfg?.autoRotate; }
+
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _cancelHand, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded, _heroFoldStreet, _moveHero, _toggleHideVillains, _rotatePositions, _isAutoRotateOn };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
