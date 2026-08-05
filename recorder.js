@@ -37,10 +37,12 @@ let rec = null;
 let recActivePlayer = -1;
 
 // ── Card picker helpers ───────────────────────────────────────────────────────
-function parseCards(str) {
+// max defaults to 2 (hole cards) — board strings need up to 3 (flop), so callers
+// rendering a board pass a higher max explicitly.
+function parseCards(str, max = 2) {
     if (!str) return [];
     return (String(str).match(/[AKQJT2-9][hdcs]/gi) || [])
-        .map(c => c[0].toUpperCase() + c[1].toLowerCase()).slice(0, 2);
+        .map(c => c[0].toUpperCase() + c[1].toLowerCase()).slice(0, max);
 }
 
 const _SUIT_SYM = { h: '♥', d: '♦', c: '♣', s: '♠' };
@@ -1446,8 +1448,8 @@ function _rerecordLog() {
 function renderActionLog(jsonStr, heroCardsStr) {
     // Render a card string as mini-cards or coloured text per settings.
     // Pass hidden=true for Hero cards when hideHand is on.
-    function _actionLogCardHtml(cardsStr, hidden = false) {
-        const cards = parseCards(cardsStr);
+    function _actionLogCardHtml(cardsStr, hidden = false, maxCards = 2) {
+        const cards = parseCards(cardsStr, maxCards);
         if (!cards.length && !hidden) return '';
         if (hidden) return _hiddenCardsHTML(cards.length || 2);
         const useCards = !window.state?.settings?.textCards;
@@ -1547,7 +1549,7 @@ function renderActionLog(jsonStr, heroCardsStr) {
                 // Board cards in column header — always emit div for fixed height alignment
                 const streetBoard = boards[street] || [];
                 const boardHtml   = `<div class="rec-log-col-board">${
-                    streetBoard.length ? _actionLogCardHtml(streetBoard.join('')) : ''
+                    streetBoard.length ? _actionLogCardHtml(streetBoard.join(''), false, 5) : ''
                 }</div>`;
 
                 let rows = '';
@@ -1600,7 +1602,7 @@ function renderActionLog(jsonStr, heroCardsStr) {
                 if (isShowdown) {
                     hasAny = true;
                     const streetBoard = boards[street] || [];
-                    const boardHtml   = `<div class="rec-log-col-board">${_actionLogCardHtml(streetBoard.join(''))}</div>`;
+                    const boardHtml   = `<div class="rec-log-col-board">${_actionLogCardHtml(streetBoard.join(''), false, 5)}</div>`;
                     let rows = '';
                     showdownPositions.forEach(pos => {
                         const pd      = data.players?.find(p => p.pos === pos);
