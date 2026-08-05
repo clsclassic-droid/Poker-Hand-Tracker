@@ -796,11 +796,13 @@ async function saveHand() {
                 resource: { values: [row] },
             });
             state.history[histIdx] = row;
-            state.editing = null;
-            btn.textContent = '💾 บันทึก Hand';
             state.expandedDays.add(row[24]);
             showToast(`✓ อัปเดต Hand #${handNum} สำเร็จ!`, 'success');
             renderHistory();
+            // clearAll() only resets hand-num-display/save-btn text/state.editing
+            // when state.editing is still set — nulling it here first (as this used
+            // to do) made that check a no-op, leaving the header stuck on the
+            // just-edited hand number forever after.
             clearAll();
         } else {
             await gapi.client.sheets.spreadsheets.values.append({
