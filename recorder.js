@@ -1576,11 +1576,13 @@ function renderActionLog(jsonStr, heroCardsStr) {
                                       : e.v ? `${e.a} ${Number(e.v).toLocaleString()}` : e.a;
                     const heroRow      = heroPos && e.pos === heroPos ? ' rec-log-row-hero' : '';
                     const playerInData = data.players?.find(p => p.pos === e.pos);
-                    const wBadge       = (winners.has(e.pos) && lastActStreet[e.pos] === street)
-                                      ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                     // Always emit .rec-log-hc span to keep grid column occupied even when empty
                     const isHero       = heroPos && e.pos === heroPos;
                     const shouldHide   = isHero ? !!window.state?.hideHand : _hideVillainCards;
+                    // Hiding a player's cards should also hide whether they won — otherwise
+                    // the W badge alone gives away a hidden villain's result.
+                    const wBadge       = (!shouldHide && winners.has(e.pos) && lastActStreet[e.pos] === street)
+                                      ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                     const hcHtml       = `<span class="rec-log-hc">${
                         playerInData?.cards ? _actionLogCardHtml(playerInData.cards, shouldHide) : ''
                     }${wBadge}</span>`;
@@ -1620,10 +1622,11 @@ function renderActionLog(jsonStr, heroCardsStr) {
                         const pd      = data.players?.find(p => p.pos === pos);
                         const isHero  = pos === heroPos;
                         const heroRow = isHero ? ' rec-log-row-hero' : '';
-                        const wBadge  = winners.has(pos) ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                         const nameLbl = pd?.name ? `<span class="rec-log-name"> ${pd.name}</span>` : '';
                         const cards      = isHero ? (pd?.cards || heroCardsStr || '') : (pd?.cards || '');
                         const shouldHide = isHero ? !!window.state?.hideHand : _hideVillainCards;
+                        // Hiding a player's cards should also hide whether they won.
+                        const wBadge  = (!shouldHide && winners.has(pos)) ? '<span class="w-badge" title="ผู้ชนะ">W</span>' : '';
                         const hcHtml     = `<span class="rec-log-hc">${cards ? _actionLogCardHtml(cards, shouldHide) : ''}${wBadge}</span>`;
                         rows += `
                             <div class="rec-log-row${heroRow}">
