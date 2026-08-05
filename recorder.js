@@ -869,6 +869,7 @@ function renderPanel() {
                 <div class="rec-panel-header-right">
                     <button class="rec-undo-btn" onclick="window.recorderModule._toggleSetup()" title="ตั้งค่าโต๊ะ">⚙</button>
                     <button class="rec-undo-btn" onclick="window.recorderModule._undo()">↩ ย้อน</button>
+                    ${rec?.editMode ? `<button class="rec-undo-btn" onclick="window.recorderModule._rerecordLog()" title="ล้างแล้วบันทึก action ใหม่ทั้งหมดตั้งแต่ preflop">🔄 บันทึกใหม่</button>` : ''}
                     <button class="rec-undo-btn" onclick="window.recorderModule._cancelHand()" title="ยกเลิกมือนี้ (ไม่บันทึก)">✕ ยกเลิก</button>
                 </div>
             </div>
@@ -1355,14 +1356,25 @@ function _loadLogForEdit(jsonStr, histIdx) {
 
     const lastStreet = [...STREET_SEQ].reverse().find(s => (data.actions[s]?.length > 0)) || 'preflop';
 
+    // Detect whether a straddle was posted (3rd preflop 'post', after SB/BB) so
+    // initStreet('preflop') auto-posts the same way this hand actually started —
+    // buildJson() never saved a straddle flag, only the resulting post entries.
+    const preflopActs = data.actions.preflop || [];
+    const preflopPosts = preflopActs.filter(e => e.a === 'post');
+    if (preflopPosts.length >= 3) {
+        cfg.straddle    = true;
+        cfg.straddleAmt = preflopPosts[2].v;
+    } else {
+        cfg.straddle = false;
+    }
+
     rec = {
-        streets:       Object.assign({ preflop: [], flop: [], turn: [], river: [] },
-                                     JSON.parse(JSON.stringify(data.actions))),
-        playersInHand: Array.isArray(data.showdown) ? [...data.showdown] : cfg.players.map(p => p.pos),
+        streets:       { preflop: [], flop: [], turn: [], river: [] },
+        playersInHand: cfg.players.map(p => p.pos),
         stackByPos:    {},
         pot:           0,
         potContrib:    {},
-        currentStreet: lastStreet,
+        currentStreet: null,
         currentBet:    0,
         raisingRound:  0,
         needToAct:     [],
@@ -1373,63 +1385,29 @@ function _loadLogForEdit(jsonStr, histIdx) {
     };
     (data.players || []).forEach(p => { rec.stackByPos[p.pos] = p.stack || 0; });
 
-    // Calculate final pot by replaying per-street contributions
-    // v = total commitment of that player in the street (not incremental)
-    let computedPot = 0;
-    STREET_SEQ.forEach(s => {
-        const contrib = {};
-        (rec.streets[s] || []).forEach(e => {
-            if ((e.v || 0) > 0 && e.a !== 'fold' && e.a !== 'check') {
-                const prev = contrib[e.pos] || 0;
-                computedPot += e.v - prev;
-                contrib[e.pos] = e.v;
-            }
-        });
-    });
-    rec.pot = computedPot;
-
     const panelEl  = document.getElementById('recorder-panel');
     const startBtn = document.getElementById('rec-start-btn');
     if (panelEl)  panelEl.style.display = '';
     if (startBtn) startBtn.style.display = 'none';
 
-    renderPanel();  // builds DOM, renders lastStreet feed (will be cleared below)
+    // Replay the saved actions through the real recording engine (initStreet +
+    // recordAction), instead of just displaying the raw JSON, so the resulting
+    // rec state has a genuine undo history — letting "↩ ย้อน" step back through
+    // this hand one action at a time to fix whichever one was wrong, then
+    // continue recording forward normally from that point.
+    initStreet('preflop');   // auto-posts SB/BB/straddle, matching preflopPosts above
+    renderPanel();
 
-    // Re-render ALL street feeds with correct isAgg + divider logic
-    STREET_SEQ.forEach(s => {
-        const feed = document.getElementById(`rec-feed-${s}`);
-        if (!feed) return;
-        feed.innerHTML = '';
-        const actions = rec.streets[s] || [];
-        let rr = 0;
-        actions.forEach((entry, idx) => {
-            const isAgg = entry.a === 'raise' || entry.a === 'reraise' || entry.a === 'bet';
-            appendFeedRow(feed, entry, isAgg);
-            if (isAgg) { rr++; if (actions[idx + 1]) appendDividerRow(feed, rr); }
-        });
+    const streetsToReplay = STREET_SEQ.slice(0, STREET_SEQ.indexOf(lastStreet) + 1);
+    streetsToReplay.forEach((street, idx) => {
+        if (idx > 0) _nextStreet(street);
+        const toReplay = street === 'preflop'
+            ? preflopActs.filter(e => e.a !== 'post') // posts already applied by initStreet
+            : (data.actions[street] || []);
+        toReplay.forEach(e => recordAction(e.pos, e.a, e.v || 0));
     });
-
-    // Show read-only footer with re-record and update buttons
-    const actorEl = document.getElementById('rec-actor-block');
-    if (actorEl) actorEl.innerHTML = '';
-    const footer = document.getElementById('rec-street-footer');
-    if (footer) {
-        footer.innerHTML = `
-            <div class="rec-street-done">
-                <span class="rec-done-lbl">📋 Action Log ของ Hand นี้</span>
-                <div style="display:flex;gap:8px;margin-top:6px">
-                    <button class="rec-btn-next" onclick="window.recorderModule._rerecordLog()">🔄 บันทึกใหม่</button>
-                    <button class="rec-btn-save" id="rec-save-btn" onclick="window.recorderModule._saveLog()">💾 อัปเดต Action Log</button>
-                </div>
-            </div>`;
-    }
 
     _setPosLock(true);
-
-    // Hide undo in view mode — undoStack is empty; button reappears when _rerecordLog re-renders
-    document.querySelectorAll('.rec-undo-btn').forEach(b => {
-        if (b.textContent.includes('ย้อน')) b.style.display = 'none';
-    });
 
     if (panelEl) panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
