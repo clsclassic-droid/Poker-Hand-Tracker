@@ -932,6 +932,11 @@ function clearAll() {
         state.editing = null;
         document.getElementById('save-btn').textContent = '💾 บันทึก Hand';
         document.getElementById('hand-num-display').textContent = state.handNumber;
+        // Editing a past hand loads that hand's historical hole cards into the table
+        // setup (so the recorder can replay it) — clear them back out now that we're
+        // done, so an old showdown opponent's cards don't keep looking dealt-in on
+        // every hand recorded afterward.
+        window.recorderModule?._clearPlayerCards?.();
     }
     refreshFoldBtn(); // also calls refreshResultDisplay
     setActive('hand');

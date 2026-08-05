@@ -580,6 +580,18 @@ function bindSetupEvents() {
 
 }
 
+// Editing a past hand restores that hand's historical hole cards into cfg.players
+// (via _loadLogForEdit, so the recorder panel can replay it correctly) — nothing
+// cleared that back afterward, so e.g. an old showdown opponent's cards kept
+// showing as already-dealt on every hand recorded since. Call once the edit is
+// done and we're back to "ready for the next hand".
+function _clearPlayerCards() {
+    if (!cfg?.players?.length) return;
+    cfg.players.forEach(p => { p.cards = ''; });
+    saveConfig(cfg);
+    renderSetup();
+}
+
 // Rotate player names left by 1 seat after saving a hand (keeping positions fixed)
 function _rotatePositions() {
     if (!cfg?.players?.length) return;
@@ -1808,7 +1820,7 @@ function _heroFoldStreet() {
 
 function _isAutoRotateOn() { return !!cfg?.autoRotate; }
 
-window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _cancelHand, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded, _heroFoldStreet, _moveHero, _toggleHideVillains, _rotatePositions, _isAutoRotateOn };
+window.recorderModule = { init, renderActionLog, _act, _doRaise, _nextStreet, _saveLog, _undo, _cancelHand, _toggleSetup, _interceptCard, _deactivatePlayerPicker, _addRecorderUsedCards, _refreshAllCardSlots, _refreshAllFeedCards, _refreshBoardCards, _overrideCardGrid, _updateHeroSlot, _updateBoardCards, _getShowdownCards, _isRecording, _loadLogForEdit, _rerecordLog, _getLogForHand, _heroFolded, _heroFoldStreet, _moveHero, _toggleHideVillains, _rotatePositions, _isAutoRotateOn, _clearPlayerCards };
 document.addEventListener('DOMContentLoaded', init);
 
 })();
